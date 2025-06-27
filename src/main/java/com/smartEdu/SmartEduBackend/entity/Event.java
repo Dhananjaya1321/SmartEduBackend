@@ -3,6 +3,7 @@ package com.smartEdu.SmartEduBackend.entity;
 
 import com.smartEdu.SmartEduBackend.enums.ExamLevel;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
@@ -17,6 +18,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
+@Builder
 @Document(collection = "events")
 public class Event {
     @Id

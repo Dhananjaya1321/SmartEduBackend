@@ -8,21 +8,20 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
 @Builder
-@Document(collection = "zonalMinistryOfEducation")
-public class ZonalMinistryOfEducation {
+@Document(collection = "classes")
+public class ClassRoom {
     @Id
     private String id;
 
-    private String district;
-    private String zonal;
-    private String address;
+    private String className;
+    private String grade;
+    private String classTeacherId; // Link to a Teacher or User ID
 
-    private List<School> schools = new ArrayList<>();
+    private List<String> studentIds; // List of student _ids
 }
