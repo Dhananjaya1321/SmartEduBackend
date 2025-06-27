@@ -14,7 +14,17 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class User {
     @Id
     private String id;
+    private String contact;
+    private String nic;
     private String username;
     private String password;
-    private Role role;
+    private String address;
+
+    private Role role; // Enum: PRINCIPAL, TEACHER, PARENT, STUDENT
+    private String email;
+
+    private boolean active = true; // optional
+
+    // Links to role-specific profiles
+    private String profileId; // ID pointing to the relevant Principal/Teacher/Parent document
 }
