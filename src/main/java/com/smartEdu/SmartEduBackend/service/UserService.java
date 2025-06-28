@@ -1,18 +1,15 @@
 package com.smartEdu.SmartEduBackend.service;
 
 import com.smartEdu.SmartEduBackend.entity.CustomUserDetails;
-import com.smartEdu.SmartEduBackend.entity.Student;
 import com.smartEdu.SmartEduBackend.entity.User;
-import com.smartEdu.SmartEduBackend.enums.Role;
 import com.smartEdu.SmartEduBackend.repo.UserRepo;
-import com.smartEdu.SmartEduBackend.util.ExceptionHandler;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,7 +21,6 @@ public class UserService {
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
 
-
     public User save(User user) {
         // Check if username already exists
         Optional<User> existingUserByUsername = userRepo.findByUsername(user.getUsername());
@@ -35,7 +31,6 @@ public class UserService {
         Optional<User> existingUserByEmail = userRepo.findByEmail(user.getEmail());
         if (existingUserByEmail.isPresent())
             throw new RuntimeException("Email is already exists!");
-
 
         // Hash the password before saving
         if (user.getPassword() != null && !user.getPassword().isEmpty()) {
@@ -53,15 +48,12 @@ public class UserService {
         if (!isAuthorizedToManage(currentRole, targetRole))
             throw new RuntimeException("Unauthorized to update users");
 
-
         Optional<User> targetUserOpt = findById(id);
         targetUserOpt.orElseThrow(() -> new RuntimeException("User is not exists!"));
-
 
         user.setId(id);
         return userRepo.save(user);
     }
-
 
     public void delete(String id) {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -73,10 +65,8 @@ public class UserService {
         if (!isAuthorizedToManage(currentRole, targetUser.getRole().name()))
             throw new RuntimeException("Unauthorized to delete user");
 
-
         userRepo.deleteById(id);
     }
-
 
     public Optional<User> findById(String id) {
         return userRepo.findById(id);
@@ -89,11 +79,9 @@ public class UserService {
     }
 
     private String extractRoleFromUserDetails(UserDetails userDetails) {
-        // Adjust based on your CustomUserDetails implementation
         if (userDetails instanceof CustomUserDetails) {
             return ((CustomUserDetails) userDetails).getRole().name();
         }
-        // Fallback to authorities if role is not directly available
         return userDetails.getAuthorities().stream()
                 .findFirst()
                 .map(auth -> auth.getAuthority().replace("ROLE_", ""))
@@ -101,17 +89,30 @@ public class UserService {
     }
 
     private boolean isAuthorizedToManage(String currentRole, String targetRole) {
-        String prefix = getManagedRolePrefix(currentRole);
-        return targetRole.startsWith(prefix);
+        String[] manageableRoles = getManageableRoles(currentRole);
+        return Arrays.stream(manageableRoles).anyMatch(role -> role.equals(targetRole));
+    }
+
+    private String[] getManageableRoles(String currentRole) {
+        return switch (currentRole) {
+            case "MOE_ADMIN" -> new String[]{"MOE_ADMIN", "MOE_EMPLOYEE", "PMOE_ADMIN"};
+            case "PMOE_ADMIN" -> new String[]{"PMOE_ADMIN", "PMOE_EMPLOYEE", "ZMOE_ADMIN"};
+            case "ZMOE_ADMIN" -> new String[]{"ZMOE_ADMIN", "ZMOE_EMPLOYEE", "SCHOOL_ADMIN"};
+            case "SCHOOL_ADMIN" -> new String[]{"SCHOOL_ADMIN"};
+            case "ADMIN" -> new String[]{"MOE_ADMIN", "MOE_EMPLOYEE", "PMOE_ADMIN", "PMOE_EMPLOYEE",
+                    "ZMOE_ADMIN", "ZMOE_EMPLOYEE", "SCHOOL_ADMIN", "SCHOOL_EMPLOYEE"};
+            default -> new String[]{};
+        };
     }
 
     private String getManagedRolePrefix(String role) {
         return switch (role) {
-            case "MOE_ADMIN", "MOE_EMPLOYEE" -> "MOE_";
-            case "PMOE_ADMIN", "PMOE_EMPLOYEE" -> "PMOE_";
-            case "ZMOE_ADMIN", "ZMOE_EMPLOYEE" -> "ZMOE_";
-            case "SCHOOL_ADMIN", "SCHOOL_EMPLOYEE" -> "SCHOOL_";
-            default -> "";
+            case "MOE_ADMIN" -> "MOE_";
+            case "PMOE_ADMIN" -> "PMOE_";
+            case "ZMOE_ADMIN" -> "ZMOE_";
+            case "SCHOOL_ADMIN" -> "SCHOOL_";
+            case "ADMIN" -> ""; // ADMIN can manage all
+            default -> "";      // Employees or other roles have no prefix
         };
     }
 }
