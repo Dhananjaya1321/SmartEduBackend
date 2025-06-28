@@ -24,10 +24,8 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable) // Disable CSRF
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/teacher/**").hasAnyRole("TEACHER", "ADMIN")
-                        .requestMatchers("/api/parent/**").hasAnyRole("PARENT", "ADMIN")
-                        .requestMatchers("/api/student/**").hasAnyRole("STUDENT", "ADMIN")
+                        .requestMatchers("/api/user/**").permitAll()
+                        .requestMatchers("/api/students/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session

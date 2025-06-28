@@ -1,7 +1,7 @@
 package com.smartEdu.SmartEduBackend.service;
 
 import com.smartEdu.SmartEduBackend.entity.Student;
-import com.smartEdu.SmartEduBackend.repo.StudentRepository;
+import com.smartEdu.SmartEduBackend.repo.StudentRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,7 +12,7 @@ import java.util.Optional;
 public class StudentService {
 
     @Autowired
-    private StudentRepository repository;
+    private StudentRepo repository;
 
     public List<Student> getAllStudents() {
         return repository.findAll();
