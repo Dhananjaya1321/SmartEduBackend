@@ -4,6 +4,8 @@ import com.smartEdu.SmartEduBackend.entity.CustomUserDetails;
 import com.smartEdu.SmartEduBackend.entity.User;
 import com.smartEdu.SmartEduBackend.repo.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -12,6 +14,7 @@ import org.springframework.stereotype.Service;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 
 @Service
 public class UserService {
@@ -20,6 +23,9 @@ public class UserService {
 
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
+
+    @Autowired
+    private JavaMailSender mailSender;
 
     public User save(User user) {
         // Check if username already exists
@@ -32,10 +38,17 @@ public class UserService {
         if (existingUserByEmail.isPresent())
             throw new RuntimeException("Email is already exists!");
 
-        // Hash the password before saving
-        if (user.getPassword() != null && !user.getPassword().isEmpty()) {
-            user.setPassword(passwordEncoder.encode(user.getPassword()));
+        // Generate a random password if not provided or empty
+        String generatedPassword = user.getPassword();
+        if (generatedPassword == null || generatedPassword.isEmpty()) {
+            generatedPassword = generateRandomPassword();
         }
+
+        // Hash the password
+        user.setPassword(passwordEncoder.encode(generatedPassword));
+
+        // Send the generated password to the user's email
+        sendPasswordEmail(user.getEmail(), generatedPassword);
 
         return userRepo.save(user);
     }
@@ -114,5 +127,25 @@ public class UserService {
             case "ADMIN" -> ""; // ADMIN can manage all
             default -> "";      // Employees or other roles have no prefix
         };
+    }
+
+    private String generateRandomPassword() {
+        String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
+        Random random = new Random();
+        StringBuilder password = new StringBuilder();
+        for (int i = 0; i < 12; i++) {
+            password.append(characters.charAt(random.nextInt(characters.length())));
+        }
+        return password.toString();
+    }
+
+    private void sendPasswordEmail(String email, String password) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(email);
+        message.setSubject("Your SmartEdu Account Password");
+        message.setText("Hello,\n\nYour account has been created. Your temporary password is: " + password +
+                "\nPlease change it after your first login.\n\nRegards,\nSmartEdu Team");
+        message.setFrom("noreply@smartedu.com"); // Configure this in application.properties
+        mailSender.send(message);
     }
 }
