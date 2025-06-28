@@ -1,12 +1,20 @@
 package com.smartEdu.SmartEduBackend.service;
 
+import com.smartEdu.SmartEduBackend.entity.CustomUserDetails;
 import com.smartEdu.SmartEduBackend.entity.Student;
 import com.smartEdu.SmartEduBackend.entity.User;
 import com.smartEdu.SmartEduBackend.enums.Role;
 import com.smartEdu.SmartEduBackend.repo.UserRepo;
+import com.smartEdu.SmartEduBackend.util.ExceptionHandler;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserService {
@@ -18,9 +26,92 @@ public class UserService {
 
 
     public User save(User user) {
-        User save = userRepo.save(user);
-        System.out.println(save);
-        return user;
+        // Check if username already exists
+        Optional<User> existingUserByUsername = userRepo.findByUsername(user.getUsername());
+        if (existingUserByUsername.isPresent())
+            throw new RuntimeException("Username is already exists!");
+
+        // Check if email already exists
+        Optional<User> existingUserByEmail = userRepo.findByEmail(user.getEmail());
+        if (existingUserByEmail.isPresent())
+            throw new RuntimeException("Email is already exists!");
+
+
+        // Hash the password before saving
+        if (user.getPassword() != null && !user.getPassword().isEmpty()) {
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
+        }
+
+        return userRepo.save(user);
     }
 
+    public User update(String id, User user) {
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String currentRole = extractRoleFromUserDetails(userDetails);
+        String targetRole = user.getRole().name();
+
+        if (!isAuthorizedToManage(currentRole, targetRole))
+            throw new RuntimeException("Unauthorized to update users");
+
+
+        Optional<User> targetUserOpt = findById(id);
+        targetUserOpt.orElseThrow(() -> new RuntimeException("User is not exists!"));
+
+
+        user.setId(id);
+        return userRepo.save(user);
+    }
+
+
+    public void delete(String id) {
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String currentRole = extractRoleFromUserDetails(userDetails);
+        Optional<User> targetUserOpt = findById(id);
+
+        User targetUser = targetUserOpt.orElseThrow(() -> new RuntimeException("User is not exists!"));
+
+        if (!isAuthorizedToManage(currentRole, targetUser.getRole().name()))
+            throw new RuntimeException("Unauthorized to delete user");
+
+
+        userRepo.deleteById(id);
+    }
+
+
+    public Optional<User> findById(String id) {
+        return userRepo.findById(id);
+    }
+
+    public List<User> findAllByRole() {
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String currentRole = extractRoleFromUserDetails(userDetails);
+        return userRepo.findAllByRoleStartingWith(getManagedRolePrefix(currentRole));
+    }
+
+    private String extractRoleFromUserDetails(UserDetails userDetails) {
+        // Adjust based on your CustomUserDetails implementation
+        if (userDetails instanceof CustomUserDetails) {
+            return ((CustomUserDetails) userDetails).getRole().name();
+        }
+        // Fallback to authorities if role is not directly available
+        return userDetails.getAuthorities().stream()
+                .findFirst()
+                .map(auth -> auth.getAuthority().replace("ROLE_", ""))
+                .orElse("UNKNOWN");
+    }
+
+    private boolean isAuthorizedToManage(String currentRole, String targetRole) {
+        String prefix = getManagedRolePrefix(currentRole);
+        return targetRole.startsWith(prefix);
+    }
+
+    private String getManagedRolePrefix(String role) {
+        return switch (role) {
+            case "MOE_ADMIN", "MOE_EMPLOYEE" -> "MOE_";
+            case "PMOE_ADMIN", "PMOE_EMPLOYEE" -> "PMOE_";
+            case "ZMOE_ADMIN", "ZMOE_EMPLOYEE" -> "ZMOE_";
+            case "SCHOOL_ADMIN", "SCHOOL_EMPLOYEE" -> "SCHOOL_";
+            default -> "";
+        };
+    }
 }
