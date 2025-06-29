@@ -29,6 +29,7 @@ public class SchoolService {
         Principal savedPrincipal = principalRepo.save(principal);
 
         School school = request.getSchool();
+        school.setSchoolNumber(generateSchoolNumber());
         school.setPrincipal(savedPrincipal);
 
         return schoolRepo.save(school);
@@ -58,4 +59,11 @@ public class SchoolService {
         Pageable pageable = PageRequest.of(page, size);
         return schoolRepo.findAll(pageable);
     }
+
+    public String generateSchoolNumber() {
+        long count = schoolRepo.count(); // total registered schools
+        long nextNumber = count + 1;
+        return String.format("SCH-%05d", nextNumber);
+    }
+
 }
