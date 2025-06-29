@@ -18,6 +18,7 @@ import java.time.LocalDate;
 public class Student {
     @Id
     private String id;
+    private String schoolId;
 
     // Basic Info
     private LocalDate entryDate;
@@ -36,4 +37,6 @@ public class Student {
     private String registrationNumber;
     private String grade;
     private String className;
+
+
 }

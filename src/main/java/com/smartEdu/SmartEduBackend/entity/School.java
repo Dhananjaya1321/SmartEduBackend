@@ -17,6 +17,7 @@ public class School {
     @Id
     private String id;
 
+    private String schoolNumber;
     private String schoolName;
     private String logoUrl;
 
