@@ -2,42 +2,126 @@ package com.smartEdu.SmartEduBackend.controller;
 
 import com.smartEdu.SmartEduBackend.entity.Student;
 import com.smartEdu.SmartEduBackend.service.StudentService;
+import com.smartEdu.SmartEduBackend.util.ExceptionHandler;
+import com.smartEdu.SmartEduBackend.util.ResponseUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/students")
 @CrossOrigin
 public class StudentController {
+    private static final Logger LOGGER = LoggerFactory.getLogger(StudentController.class);
 
     @Autowired
     private StudentService service;
 
-    @GetMapping
-    public List<Student> getAll() {
-        return service.getAllStudents();
-    }
-
-    @GetMapping("/{id}")
-    public Optional<Student> getOne(@PathVariable String id) {
-        return service.getStudentById(id);
-    }
-
     @PostMapping
-    public Student create(@RequestBody Student student) {
-        return service.createStudent(student);
+    private ResponseEntity<ResponseUtil> save(@RequestBody Student student) {
+        try {
+            return ResponseEntity.ok(
+                    new ResponseUtil(
+                            HttpStatus.OK,
+                            "Student saved successfully.",
+                            service.save(student)
+                    )
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            if (e.getMessage().equals("Registration number already exists!") ||
+                    e.getMessage().equals("Unauthorized to manage this student"))
+                return ExceptionHandler.handleCustomException(HttpStatus.NOT_FOUND, e);
+            return ExceptionHandler.handleException(e);
+        }
     }
 
     @PutMapping("/{id}")
-    public Student update(@PathVariable String id, @RequestBody Student student) {
-        return service.updateStudent(id, student);
+    private ResponseEntity<ResponseUtil> update(@PathVariable String id, @RequestBody Student student) {
+        try {
+            return ResponseEntity.ok(
+                    new ResponseUtil(
+                            HttpStatus.OK,
+                            "Student updated successfully.",
+                            service.update(id, student)
+                    )
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            if (e.getMessage().equals("Student not found!") ||
+                    e.getMessage().equals("Unauthorized to manage this student"))
+                return ExceptionHandler.handleCustomException(HttpStatus.NOT_FOUND, e);
+            return ExceptionHandler.handleException(e);
+        }
     }
 
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable String id) {
-        service.deleteStudent(id);
+    private ResponseEntity<ResponseUtil> delete(@PathVariable String id) {
+        try {
+            service.delete(id);
+            return ResponseEntity.ok(
+                    new ResponseUtil(
+                            HttpStatus.OK,
+                            "Student deleted successfully.",
+                            null
+                    )
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            if (e.getMessage().equals("Student not found!") ||
+                    e.getMessage().equals("Unauthorized to manage this student"))
+                return ExceptionHandler.handleCustomException(HttpStatus.NOT_FOUND, e);
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
+    @GetMapping("/{id}")
+    private ResponseEntity<ResponseUtil> findById(@PathVariable String id) {
+        try {
+            return ResponseEntity.ok(
+                    new ResponseUtil(
+                            HttpStatus.OK,
+                            "Student retrieved successfully.",
+                            service.findById(id).orElse(null)
+                    )
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
+    @GetMapping
+    private ResponseEntity<ResponseUtil> findAll() {
+        try {
+            return ResponseEntity.ok(
+                    new ResponseUtil(
+                            HttpStatus.OK,
+                            "Students retrieved successfully.",
+                            service.findAll()
+                    )
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
+    @GetMapping("/registration-number")
+    private ResponseEntity<ResponseUtil> generateRegistrationNumber(@RequestParam String schoolId) {
+        try {
+            String regNumber = service.generateRegistrationNumber(schoolId);
+            return ResponseEntity.ok(
+                    new ResponseUtil(HttpStatus.OK, "Loaded successfully.", regNumber)
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            if (e.getMessage().equals("School not found"))
+                return ExceptionHandler.handleCustomException(HttpStatus.NOT_FOUND, e);
+            return ExceptionHandler.handleException(e);
+        }
     }
 }
