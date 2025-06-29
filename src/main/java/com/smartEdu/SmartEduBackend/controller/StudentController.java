@@ -32,8 +32,7 @@ public class StudentController {
             );
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
-            if (e.getMessage().equals("Registration number already exists!") ||
-                    e.getMessage().equals("Unauthorized to manage this student"))
+            if (e.getMessage().equals("Registration number already exists!"))
                 return ExceptionHandler.handleCustomException(HttpStatus.NOT_FOUND, e);
             return ExceptionHandler.handleException(e);
         }
@@ -43,16 +42,12 @@ public class StudentController {
     private ResponseEntity<ResponseUtil> update(@PathVariable String id, @RequestBody Student student) {
         try {
             return ResponseEntity.ok(
-                    new ResponseUtil(
-                            HttpStatus.OK,
-                            "Student updated successfully.",
-                            service.update(id, student)
+                    new ResponseUtil(HttpStatus.OK, "Student updated successfully.", service.update(id, student)
                     )
             );
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
-            if (e.getMessage().equals("Student not found!") ||
-                    e.getMessage().equals("Unauthorized to manage this student"))
+            if (e.getMessage().equals("Student not found!"))
                 return ExceptionHandler.handleCustomException(HttpStatus.NOT_FOUND, e);
             return ExceptionHandler.handleException(e);
         }
@@ -63,16 +58,12 @@ public class StudentController {
         try {
             service.delete(id);
             return ResponseEntity.ok(
-                    new ResponseUtil(
-                            HttpStatus.OK,
-                            "Student deleted successfully.",
-                            null
+                    new ResponseUtil(HttpStatus.OK, "Student deleted successfully.", null
                     )
             );
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
-            if (e.getMessage().equals("Student not found!") ||
-                    e.getMessage().equals("Unauthorized to manage this student"))
+            if (e.getMessage().equals("Student not found!"))
                 return ExceptionHandler.handleCustomException(HttpStatus.NOT_FOUND, e);
             return ExceptionHandler.handleException(e);
         }
@@ -82,10 +73,7 @@ public class StudentController {
     private ResponseEntity<ResponseUtil> findById(@PathVariable String id) {
         try {
             return ResponseEntity.ok(
-                    new ResponseUtil(
-                            HttpStatus.OK,
-                            "Student retrieved successfully.",
-                            service.findById(id).orElse(null)
+                    new ResponseUtil(HttpStatus.OK, "Student retrieved successfully.", service.findById(id).orElse(null)
                     )
             );
         } catch (Exception e) {
@@ -95,13 +83,13 @@ public class StudentController {
     }
 
     @GetMapping
-    private ResponseEntity<ResponseUtil> findAll() {
+    private ResponseEntity<ResponseUtil> findAll(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
         try {
             return ResponseEntity.ok(
-                    new ResponseUtil(
-                            HttpStatus.OK,
-                            "Students retrieved successfully.",
-                            service.findAll()
+                    new ResponseUtil(HttpStatus.OK, "Students retrieved successfully.", service.findAll(page, size)
                     )
             );
         } catch (Exception e) {

@@ -5,11 +5,13 @@ import com.smartEdu.SmartEduBackend.entity.Student;
 import com.smartEdu.SmartEduBackend.repo.SchoolRepo;
 import com.smartEdu.SmartEduBackend.repo.StudentRepo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.Year;
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -31,8 +33,7 @@ public class StudentService {
     }
 
     public Student update(String id, Student student) {
-        Optional<Student> existingStudent = studentRepo.findById(id);
-        existingStudent.orElseThrow(() -> new RuntimeException("Student not found!"));
+        studentRepo.findById(id).orElseThrow(() -> new RuntimeException("Student not found!"));
 
         student.setId(id);
         return studentRepo.save(student);
@@ -48,9 +49,11 @@ public class StudentService {
         return studentRepo.findById(id);
     }
 
-    public List<Student> findAll() {
-        return studentRepo.findAll();
+    public Page<Student> findAll(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return studentRepo.findAll(pageable);
     }
+
 
     public String generateRegistrationNumber(String schoolId) {
         School school = schoolRepo.findById(schoolId)
