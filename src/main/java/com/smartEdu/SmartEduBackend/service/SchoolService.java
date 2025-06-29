@@ -32,13 +32,17 @@ public class SchoolService {
         school.setSchoolNumber(generateSchoolNumber());
         school.setPrincipal(savedPrincipal);
 
-        return schoolRepo.save(school);
+        School savedSchool = schoolRepo.save(school);
+        savedPrincipal.setSchoolId(savedSchool.getId());
+        principalRepo.save(savedPrincipal);
+
+        return savedSchool;
     }
 
     // Update existing school (and optionally principal)
     public School update(String id, School updatedSchool) {
         schoolRepo.findById(id).orElseThrow(() -> new RuntimeException("School not found!"));
-
+        updatedSchool.setPrincipal(principalRepo.findBySchoolId(id).get());
         updatedSchool.setId(id);
         return schoolRepo.save(updatedSchool);
     }
