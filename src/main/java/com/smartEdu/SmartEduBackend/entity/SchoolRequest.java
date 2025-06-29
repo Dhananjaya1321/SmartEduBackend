@@ -10,4 +10,12 @@ import lombok.NoArgsConstructor;
 public class SchoolRequest {
     private School school;
     private Principal principal;
+
+    // User info for principal
+    private String nic;
+    private String contact;
+    private String username;
+    private String password;
+    private String address;
+    private String email;
 }

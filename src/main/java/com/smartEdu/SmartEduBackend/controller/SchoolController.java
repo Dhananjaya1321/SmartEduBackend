@@ -26,20 +26,6 @@ public class SchoolController {
 
     @PostMapping
     private ResponseEntity<ResponseUtil> save(@RequestBody SchoolRequest request) {
-        /*
-        This allows your frontend to send data like:
-        {
-            "school": {
-            "schoolName": "Royal College",
-                    "schoolNumber": "RC123",
-                        ...
-        },
-            "principal": {
-            "fullName": "Mr. Senanayake",
-                    "nic": "993452215V",
-                        ...
-             }
-        }*/
         try {
             return ResponseEntity.ok(
                     new ResponseUtil(HttpStatus.OK, "School and Principal saved successfully.",
@@ -47,6 +33,9 @@ public class SchoolController {
             );
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
+            if (e.getMessage().equals("Username is already exists!") ||
+                    e.getMessage().equals("Email is already exists!"))
+                return ExceptionHandler.handleCustomException(HttpStatus.NOT_FOUND, e);
             return ExceptionHandler.handleException(e);
         }
     }

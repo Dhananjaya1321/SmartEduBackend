@@ -1,6 +1,7 @@
 package com.smartEdu.SmartEduBackend.controller;
 
 import com.smartEdu.SmartEduBackend.entity.Principal;
+import com.smartEdu.SmartEduBackend.entity.PrincipalRegisterRequest;
 import com.smartEdu.SmartEduBackend.service.PrincipalService;
 import com.smartEdu.SmartEduBackend.util.ExceptionHandler;
 import com.smartEdu.SmartEduBackend.util.ResponseUtil;
@@ -21,17 +22,22 @@ public class PrincipalController {
     @Autowired
     private PrincipalService service;
 
-    @PostMapping
-    private ResponseEntity<ResponseUtil> save(@RequestBody Principal principal) {
+    @PostMapping("/register")
+    private ResponseEntity<ResponseUtil> registerPrincipalWithUser(@RequestBody PrincipalRegisterRequest request) {
         try {
+            Principal savedPrincipal = service.registerPrincipalWithUser(request);
             return ResponseEntity.ok(
-                    new ResponseUtil(HttpStatus.OK, "Principal saved successfully.", service.save(principal))
+                    new ResponseUtil(HttpStatus.OK, "Principal and User saved successfully.", savedPrincipal)
             );
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
+            if (e.getMessage().equals("Username is already exists!") ||
+                    e.getMessage().equals("Email is already exists!"))
+                return ExceptionHandler.handleCustomException(HttpStatus.NOT_FOUND, e);
             return ExceptionHandler.handleException(e);
         }
     }
+
 
     @PutMapping("/{id}")
     private ResponseEntity<ResponseUtil> update(@PathVariable String id, @RequestBody Principal principal) {
