@@ -1,0 +1,61 @@
+package com.smartEdu.SmartEduBackend.service;
+
+import com.smartEdu.SmartEduBackend.entity.Principal;
+import com.smartEdu.SmartEduBackend.entity.School;
+import com.smartEdu.SmartEduBackend.entity.SchoolRequest;
+
+import com.smartEdu.SmartEduBackend.repo.PrincipalRepo;
+import com.smartEdu.SmartEduBackend.repo.SchoolRepo;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
+import java.util.Optional;
+
+@Service
+public class SchoolService {
+
+    @Autowired
+    private SchoolRepo schoolRepo;
+
+    @Autowired
+    private PrincipalRepo principalRepo;
+
+    // Save a new school with principal
+    public School saveWithPrincipal(SchoolRequest request) {
+        Principal principal = request.getPrincipal();
+        Principal savedPrincipal = principalRepo.save(principal);
+
+        School school = request.getSchool();
+        school.setPrincipal(savedPrincipal);
+
+        return schoolRepo.save(school);
+    }
+
+    // Update existing school (and optionally principal)
+    public School update(String id, School updatedSchool) {
+        schoolRepo.findById(id).orElseThrow(() -> new RuntimeException("School not found!"));
+
+        updatedSchool.setId(id);
+        return schoolRepo.save(updatedSchool);
+    }
+
+    // Delete school by ID
+    public void delete(String id) {
+        schoolRepo.findById(id).orElseThrow(() -> new RuntimeException("School not found!"));
+        schoolRepo.deleteById(id);
+    }
+
+    // Find by ID
+    public Optional<School> findById(String id) {
+        return schoolRepo.findById(id);
+    }
+
+    // Find all
+    public Page<School> findAll(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return schoolRepo.findAll(pageable);
+    }
+}
