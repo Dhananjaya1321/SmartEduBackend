@@ -19,6 +19,7 @@ public class Student {
     @Id
     private String id;
     private String schoolId;
+    private String classId;
 
     // Basic Info
     private LocalDate entryDate;
@@ -36,7 +37,4 @@ public class Student {
     // Other Info
     private String registrationNumber;
     private String grade;
-    private String className;
-
-
 }

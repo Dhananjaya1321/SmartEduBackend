@@ -19,11 +19,6 @@ public class Attendance {
 
     private String studentId;
     private String classId;
-    private String grade;
-
     private LocalDate date;
-
-    private AttendanceStatus status;
-
-    private String remarks;
+    private boolean present;
 }
