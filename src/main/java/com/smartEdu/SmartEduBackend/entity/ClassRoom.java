@@ -23,5 +23,6 @@ public class ClassRoom {
     private String grade;
     private String classTeacherId; // Link to a Teacher or User ID
 
-    private List<String> studentIds; // List of student _ids
+    /*student entity have the class id */
+//    private List<String> studentIds; // List of student _ids
 }
