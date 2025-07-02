@@ -25,11 +25,8 @@ public class Event {
     private String id;
 
     private String eventName;
-    private String grade;
+    private String[] grades;
     private LocalDate startDate;
     private LocalDate endDate;
     private String description;
-
-    private String createdBy; // schoolId
-    private LocalDateTime createdAt = LocalDateTime.now();
 }
