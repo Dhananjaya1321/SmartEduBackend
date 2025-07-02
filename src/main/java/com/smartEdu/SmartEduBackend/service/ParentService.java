@@ -59,10 +59,6 @@ public class ParentService {
         // Step 2: Create Parent profile
         Parent parent = Parent.builder()
                 .fullName(request.getFullName())
-                .nic(request.getNic())
-                .address(request.getAddress())
-                .contact(request.getContact())
-                .email(request.getEmail())
                 .studentIds(List.of())
                 .build();
 

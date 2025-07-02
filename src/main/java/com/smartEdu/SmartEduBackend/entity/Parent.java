@@ -20,10 +20,6 @@ public class Parent {
     private String id;
 
     private String fullName;
-    private String nic;
-    private String address;
-    private String contact;
-    private String email;
 
     private List<String> studentIds; // Links to their children
 }
