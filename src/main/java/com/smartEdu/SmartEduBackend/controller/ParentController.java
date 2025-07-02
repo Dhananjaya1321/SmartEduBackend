@@ -2,6 +2,7 @@ package com.smartEdu.SmartEduBackend.controller;
 
 import com.smartEdu.SmartEduBackend.entity.Parent;
 import com.smartEdu.SmartEduBackend.entity.ParentRegisterRequest;
+import com.smartEdu.SmartEduBackend.entity.Student;
 import com.smartEdu.SmartEduBackend.service.ParentService;
 import com.smartEdu.SmartEduBackend.util.ExceptionHandler;
 import com.smartEdu.SmartEduBackend.util.ResponseUtil;
@@ -48,6 +49,27 @@ public class ParentController {
             return ExceptionHandler.handleException(e);
         }
     }
+
+    @PostMapping("/link-student")
+    public ResponseEntity<ResponseUtil> linkStudentToParent(
+            @RequestParam String registrationNumber,
+            @RequestParam String parentName,
+            @RequestParam String contact,
+            @RequestParam String parentId
+    ) {
+        try {
+            Student student = parentService.verifyAndLinkStudent(registrationNumber, parentName, contact, parentId);
+            return ResponseEntity.ok(new ResponseUtil(HttpStatus.OK, "Student verified and linked.", student));
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            if (e.getMessage().equals("Invalid registration number.") ||
+                    e.getMessage().equals("Parent details do not match.") ||
+                    e.getMessage().equals("Parent not found."))
+                return ExceptionHandler.handleCustomException(HttpStatus.NOT_FOUND, e);
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<ResponseUtil> delete(@PathVariable String id) {

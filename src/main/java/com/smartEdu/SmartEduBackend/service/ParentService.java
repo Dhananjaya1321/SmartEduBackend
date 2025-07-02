@@ -2,9 +2,11 @@ package com.smartEdu.SmartEduBackend.service;
 
 import com.smartEdu.SmartEduBackend.entity.Parent;
 import com.smartEdu.SmartEduBackend.entity.ParentRegisterRequest;
+import com.smartEdu.SmartEduBackend.entity.Student;
 import com.smartEdu.SmartEduBackend.entity.User;
 import com.smartEdu.SmartEduBackend.enums.Role;
 import com.smartEdu.SmartEduBackend.repo.ParentRepo;
+import com.smartEdu.SmartEduBackend.repo.StudentRepo;
 import com.smartEdu.SmartEduBackend.repo.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -19,6 +21,9 @@ public class ParentService {
 
     @Autowired
     private ParentRepo parentRepo;
+
+    @Autowired
+    private StudentRepo studentRepo;
 
     @Autowired
     private UserRepo userRepo;
@@ -74,6 +79,34 @@ public class ParentService {
         parentRepo.findById(id).orElseThrow(() -> new RuntimeException("Parent not found!"));
         updatedParent.setId(id);
         return parentRepo.save(updatedParent);
+    }
+
+    public Student verifyAndLinkStudent(String registrationNumber, String parentName, String contact, String parentId) {
+        Optional<Student> studentOpt = studentRepo.findByRegistrationNumber(registrationNumber);
+        if (studentOpt.isEmpty()) {
+            throw new RuntimeException("Invalid registration number.");
+        }
+
+        Student student = studentOpt.get();
+
+        boolean isMotherMatch = student.getMotherName().equalsIgnoreCase(parentName)
+                && student.getMotherContact().equals(contact);
+        boolean isFatherMatch = student.getFatherName().equalsIgnoreCase(parentName)
+                && student.getFatherContact().equals(contact);
+
+        if (!isMotherMatch && !isFatherMatch) {
+            throw new RuntimeException("Parent details do not match.");
+        }
+
+        Parent parent = parentRepo.findById(parentId)
+                .orElseThrow(() -> new RuntimeException("Parent not found."));
+
+        if (!parent.getStudentIds().contains(student.getId())) {
+            parent.getStudentIds().add(student.getId());
+            parentRepo.save(parent);
+        }
+
+        return student;
     }
 
     public void delete(String id) {
