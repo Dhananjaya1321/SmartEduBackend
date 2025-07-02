@@ -11,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/events")
 @CrossOrigin
@@ -79,4 +81,16 @@ public class EventController {
             return ExceptionHandler.handleException(e);
         }
     }
+
+    @GetMapping("/by-grade")
+    public ResponseEntity<ResponseUtil> getEventsByGrade(@RequestParam String grade) {
+        try {
+            List<Event> events = eventService.getEventsByGrade(grade);
+            return ResponseEntity.ok(new ResponseUtil(HttpStatus.OK, "Events fetched successfully.", events));
+        } catch (Exception e) {
+            LOGGER.error("Error fetching events by grade", e);
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
 }

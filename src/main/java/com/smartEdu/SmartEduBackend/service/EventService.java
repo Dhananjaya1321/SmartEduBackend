@@ -38,4 +38,8 @@ public class EventService {
     public List<Event> findAll(int page, int size) {
         return eventRepo.findAll(PageRequest.of(page, size)).getContent();
     }
+
+    public List<Event> getEventsByGrade(String grade) {
+        return eventRepo.findByGrades(grade);
+    }
 }
