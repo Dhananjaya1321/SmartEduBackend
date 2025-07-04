@@ -45,6 +45,7 @@ public class ZMOEService {
             throw new RuntimeException("Email is already exists!");
 
         ZonalEducationOffice zmoe = ZonalEducationOffice.builder()
+                .province(request.getProvince())
                 .district(request.getDistrict())
                 .zonal(request.getZonal())
                 .officeAddress(request.getOfficeAddress())

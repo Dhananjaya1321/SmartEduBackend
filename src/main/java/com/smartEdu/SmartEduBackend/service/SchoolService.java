@@ -53,7 +53,11 @@ public class SchoolService {
         school.setPrincipal(savedPrincipal);
         School savedSchool = schoolRepo.save(school);
 
-        ZonalEducationOffice zonal = zonalEducationOfficeRepo.findByZonal(savedSchool.getZonal());
+        ZonalEducationOffice zonal = zonalEducationOfficeRepo.findByZonalAndDistrictAndProvince(
+                savedSchool.getZonal(),
+                savedSchool.getDistrict(),
+                savedSchool.getProvince()
+        );
         zonal.getSchools().add(savedSchool);
         zonalEducationOfficeRepo.save(zonal);
 

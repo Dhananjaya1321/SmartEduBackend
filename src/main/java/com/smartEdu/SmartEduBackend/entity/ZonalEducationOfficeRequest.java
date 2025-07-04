@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ZonalEducationOfficeRequest {
     // Office details
+    private String province;
     private String district;
     private String zonal;
     private String officeAddress;
