@@ -12,5 +12,4 @@ public interface StudentRepo extends MongoRepository<Student, String> {
 
     // Counts students whose entryDate is between start and end
     long countBySchoolIdAndEntryDateBetween(String schoolId, LocalDate start, LocalDate end);
-
 }
