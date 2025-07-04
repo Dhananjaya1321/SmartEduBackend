@@ -26,10 +26,7 @@ public class Exam {
     private String grade;
     private int year;
 
-    private ExamLevel level;
-    private String createdById;     // userId
-    private String organizationId;  // MoE / PMoE / ZMoE / School ID
+    private ExamLevel level; //school level, zonal level, province level or national level
 
     private List<ExamTimetableEntry> timetable = new ArrayList<>();
-    private Date createdAt = new Date();
 }
