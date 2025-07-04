@@ -1,13 +1,11 @@
 package com.smartEdu.SmartEduBackend.service;
 
 import com.smartEdu.SmartEduBackend.entity.Principal;
+import com.smartEdu.SmartEduBackend.entity.PrincipalRegisterRequest;
 import com.smartEdu.SmartEduBackend.entity.School;
-import com.smartEdu.SmartEduBackend.entity.SchoolRequest;
-
 import com.smartEdu.SmartEduBackend.entity.User;
 import com.smartEdu.SmartEduBackend.enums.Role;
 import com.smartEdu.SmartEduBackend.repo.PrincipalRepo;
-import com.smartEdu.SmartEduBackend.repo.SchoolRepo;
 import com.smartEdu.SmartEduBackend.repo.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -16,24 +14,23 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
-public class SchoolService {
-
-    @Autowired
-    private SchoolRepo schoolRepo;
-
-    @Autowired
-    private UserRepo userRepo;
+public class PrincipalService {
 
     @Autowired
     private PrincipalRepo principalRepo;
 
     @Autowired
+    private UserRepo userRepo;
+
+    @Autowired
     private BCryptPasswordEncoder passwordEncoder;
 
-    public School saveWithPrincipal(SchoolRequest request) {
+
+    public Principal registerPrincipalWithUser(PrincipalRegisterRequest request) {
         // Check if username already exists
         Optional<User> existingUserByUsername = userRepo.findByUsername(request.getUsername());
         if (existingUserByUsername.isPresent())
@@ -44,21 +41,21 @@ public class SchoolService {
         if (existingUserByEmail.isPresent())
             throw new RuntimeException("Email is already exists!");
 
-        // Step 1: Save principal first
-        Principal principal = request.getPrincipal();
+        // Save principal
+        Principal principal = Principal.builder()
+                .schoolId(request.getSchoolId())
+                .fullName(request.getFullName())
+                .moeId(request.getMoeId())
+                .nicFrontImageUrl(request.getNicFrontImageUrl())
+                .nicBackImageUrl(request.getNicBackImageUrl())
+                .moeIdFrontImageUrl(request.getMoeIdFrontImageUrl())
+                .moeIdBackImageUrl(request.getMoeIdBackImageUrl())
+                .appointmentLetterUrl(request.getAppointmentLetterUrl())
+                .build();
+
         Principal savedPrincipal = principalRepo.save(principal);
 
-        // Step 2: Save school with principal
-        School school = request.getSchool();
-        school.setSchoolNumber(generateSchoolNumber());
-        school.setPrincipal(savedPrincipal);
-        School savedSchool = schoolRepo.save(school);
-
-        // Step 3: Update principal with schoolId
-        savedPrincipal.setSchoolId(savedSchool.getId());
-        principalRepo.save(savedPrincipal);
-
-        // Step 4: Create user for principal
+        // Create user and link profileId
         User user = User.builder()
                 .nic(request.getNic())
                 .contact(request.getContact())
@@ -73,38 +70,28 @@ public class SchoolService {
 
         userRepo.save(user);
 
-        return savedSchool;
+        return savedPrincipal;
     }
 
-    // Update existing school (and optionally principal)
-    public School update(String id, School updatedSchool) {
-        schoolRepo.findById(id).orElseThrow(() -> new RuntimeException("School not found!"));
-        updatedSchool.setPrincipal(principalRepo.findBySchoolId(id).get());
-        updatedSchool.setId(id);
-        return schoolRepo.save(updatedSchool);
+    public Principal update(String id, Principal updatedPrincipal) {
+        principalRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Principal not found!"));
+
+        updatedPrincipal.setId(id);
+        return principalRepo.save(updatedPrincipal);
     }
 
-    // Delete school by ID
     public void delete(String id) {
-        schoolRepo.findById(id).orElseThrow(() -> new RuntimeException("School not found!"));
-        schoolRepo.deleteById(id);
+        principalRepo.findById(id).orElseThrow(() -> new RuntimeException("Principal not found!"));
+        principalRepo.deleteById(id);
     }
 
-    // Find by ID
-    public Optional<School> findById(String id) {
-        return schoolRepo.findById(id);
+    public Optional<Principal> findById(String id) {
+        return principalRepo.findById(id);
     }
 
-    // Find all
-    public Page<School> findAll(int page, int size) {
+    public Page<Principal> findAll(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        return schoolRepo.findAll(pageable);
+        return principalRepo.findAll(pageable);
     }
-
-    public String generateSchoolNumber() {
-        long count = schoolRepo.count(); // total registered schools
-        long nextNumber = count + 1;
-        return String.format("SCH-%05d", nextNumber);
-    }
-
 }

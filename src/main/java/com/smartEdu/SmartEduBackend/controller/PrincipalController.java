@@ -1,8 +1,8 @@
 package com.smartEdu.SmartEduBackend.controller;
 
-import com.smartEdu.SmartEduBackend.entity.School;
-import com.smartEdu.SmartEduBackend.entity.SchoolRequest;
-import com.smartEdu.SmartEduBackend.service.SchoolService;
+import com.smartEdu.SmartEduBackend.entity.Principal;
+import com.smartEdu.SmartEduBackend.entity.PrincipalRegisterRequest;
+import com.smartEdu.SmartEduBackend.service.PrincipalService;
 import com.smartEdu.SmartEduBackend.util.ExceptionHandler;
 import com.smartEdu.SmartEduBackend.util.ResponseUtil;
 import org.slf4j.Logger;
@@ -12,24 +12,22 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Optional;
-
 @RestController
-@RequestMapping("/api/schools")
+@RequestMapping("/api/principals")
 @CrossOrigin
-public class SchoolController {
+public class PrincipalController {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SchoolController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PrincipalController.class);
 
     @Autowired
-    private SchoolService service;
+    private PrincipalService service;
 
-    @PostMapping
-    private ResponseEntity<ResponseUtil> save(@RequestBody SchoolRequest request) {
+    @PostMapping("/register")
+    private ResponseEntity<ResponseUtil> registerPrincipalWithUser(@RequestBody PrincipalRegisterRequest request) {
         try {
+            Principal savedPrincipal = service.registerPrincipalWithUser(request);
             return ResponseEntity.ok(
-                    new ResponseUtil(HttpStatus.OK, "School and Principal saved successfully.",
-                            service.saveWithPrincipal(request))
+                    new ResponseUtil(HttpStatus.OK, "Principal and User saved successfully.", savedPrincipal)
             );
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
@@ -42,14 +40,14 @@ public class SchoolController {
 
 
     @PutMapping("/{id}")
-    private ResponseEntity<ResponseUtil> update(@PathVariable String id, @RequestBody School school) {
+    private ResponseEntity<ResponseUtil> update(@PathVariable String id, @RequestBody Principal principal) {
         try {
             return ResponseEntity.ok(
-                    new ResponseUtil(HttpStatus.OK, "School updated successfully.", service.update(id, school))
+                    new ResponseUtil(HttpStatus.OK, "Principal updated successfully.", service.update(id, principal))
             );
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
-            if (e.getMessage().equals("School not found!"))
+            if (e.getMessage().equals("Principal not found!"))
                 return ExceptionHandler.handleCustomException(HttpStatus.NOT_FOUND, e);
             return ExceptionHandler.handleException(e);
         }
@@ -60,11 +58,11 @@ public class SchoolController {
         try {
             service.delete(id);
             return ResponseEntity.ok(
-                    new ResponseUtil(HttpStatus.OK, "School deleted successfully.", null)
+                    new ResponseUtil(HttpStatus.OK, "Principal deleted successfully.", null)
             );
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
-            if (e.getMessage().equals("School not found!"))
+            if (e.getMessage().equals("Principal not found!"))
                 return ExceptionHandler.handleCustomException(HttpStatus.NOT_FOUND, e);
             return ExceptionHandler.handleException(e);
         }
@@ -73,9 +71,8 @@ public class SchoolController {
     @GetMapping("/{id}")
     private ResponseEntity<ResponseUtil> findById(@PathVariable String id) {
         try {
-            Optional<School> school = service.findById(id);
             return ResponseEntity.ok(
-                    new ResponseUtil(HttpStatus.OK, "School retrieved successfully.", school.orElse(null))
+                    new ResponseUtil(HttpStatus.OK, "Principal retrieved successfully.", service.findById(id).orElse(null))
             );
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
@@ -90,7 +87,7 @@ public class SchoolController {
     ) {
         try {
             return ResponseEntity.ok(
-                    new ResponseUtil(HttpStatus.OK, "Schools retrieved successfully.", service.findAll(page, size))
+                    new ResponseUtil(HttpStatus.OK, "Principals retrieved successfully.", service.findAll(page, size))
             );
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
