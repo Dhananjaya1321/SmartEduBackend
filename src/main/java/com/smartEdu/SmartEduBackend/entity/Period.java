@@ -7,6 +7,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class Period {
+    private int periodNumber;
     private String subject;
     private String teacherId;
 }
