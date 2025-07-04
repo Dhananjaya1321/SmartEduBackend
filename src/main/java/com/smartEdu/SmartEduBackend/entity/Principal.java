@@ -16,6 +16,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class Principal {
     @Id
     private String id;
+    private String schoolId;
 
     private String fullName;
     private String nic;
@@ -28,6 +29,4 @@ public class Principal {
     private String moeIdFrontImageUrl;
     private String moeIdBackImageUrl;
     private String appointmentLetterUrl;
-
-    private String schoolId;
 }

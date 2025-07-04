@@ -16,6 +16,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class School {
     @Id
     private String id;
+    private Principal principal;
 
     private String schoolNumber;
     private String schoolName;
@@ -35,6 +36,4 @@ public class School {
     private int studentPopulation;
     private int teacherPopulation;
     private int classCount;
-
-    private Principal principal;
 }
