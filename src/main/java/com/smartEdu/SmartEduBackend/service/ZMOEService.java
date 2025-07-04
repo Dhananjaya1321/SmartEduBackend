@@ -1,9 +1,6 @@
 package com.smartEdu.SmartEduBackend.service;
 
-import com.smartEdu.SmartEduBackend.entity.ProvincialEducationOffice;
-import com.smartEdu.SmartEduBackend.entity.User;
-import com.smartEdu.SmartEduBackend.entity.ZonalEducationOffice;
-import com.smartEdu.SmartEduBackend.entity.ZonalEducationOfficeRequest;
+import com.smartEdu.SmartEduBackend.entity.*;
 import com.smartEdu.SmartEduBackend.enums.Role;
 import com.smartEdu.SmartEduBackend.repo.ProvincialEducationOfficeRepo;
 import com.smartEdu.SmartEduBackend.repo.UserRepo;
@@ -12,6 +9,9 @@ import com.smartEdu.SmartEduBackend.util.EmailUtil;
 import com.smartEdu.SmartEduBackend.util.PasswordGeneratorUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -82,5 +82,10 @@ public class ZMOEService {
         emailUtil.sendEmail(user.getEmail(), subject, message);
 
         return savedOffice;
+    }
+
+    public Page<ZonalEducationOffice> findAll(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return zmoeRepo.findAll(pageable);
     }
 }

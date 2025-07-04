@@ -38,4 +38,19 @@ public class ZMOEController {
             return ExceptionHandler.handleException(e);
         }
     }
+
+    @GetMapping
+    private ResponseEntity<ResponseUtil> findAll(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        try {
+            return ResponseEntity.ok(
+                    new ResponseUtil(HttpStatus.OK, "Schools retrieved successfully.", zmoeService.findAll(page, size))
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return ExceptionHandler.handleException(e);
+        }
+    }
 }
