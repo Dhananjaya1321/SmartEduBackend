@@ -30,9 +30,6 @@ public class MOEService {
     private final BCryptPasswordEncoder passwordEncoder;
 
     @Autowired
-    private final JavaMailSender mailSender;
-
-    @Autowired
     private EmailUtil emailUtil;
 
     public ProvincialEducationOffice createWithUser(ProvincialEducationOfficeRequest request) throws Exception {
