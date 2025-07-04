@@ -12,6 +12,7 @@ public class ZonalEducationOfficeRequest {
     private String district;
     private String zonal;
     private String officeAddress;
+    private String fullName;
 
     // Admin details
     private String name;

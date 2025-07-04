@@ -7,8 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProvincialEducationOfficeRequest {
-    private String province;
+public class MinistryOfEducationOfficeRequest {
     private String officeAddress;
     private String name;
 

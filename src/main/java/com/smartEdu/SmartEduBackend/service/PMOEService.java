@@ -12,24 +12,27 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class MOEService {
+public class PMOEService {
     @Autowired
-    private final UserRepo userRepo;
+    private final ProvincialEducationOfficeRepo provincialEducationOfficeRepo;
 
     @Autowired
     private final MinistryEducationOfficeRepo ministryEducationOfficeRepo;
 
     @Autowired
-    private BCryptPasswordEncoder passwordEncoder;
+    private final UserRepo userRepo;
+
+    @Autowired
+    private final BCryptPasswordEncoder passwordEncoder;
 
     @Autowired
     private final EmailUtil emailUtil;
 
-    public MinistryOfEducationOffice createMinistryOfEducationOfficeWithUser(MinistryOfEducationOfficeRequest request) throws Exception {
+    public ProvincialEducationOffice createProvincialEducationOfficeWithUser(ProvincialEducationOfficeRequest request) throws Exception {
         // Check if username already exists
         Optional<User> existingUserByUsername = userRepo.findByUsername(request.getUsername());
         if (existingUserByUsername.isPresent())
@@ -41,12 +44,17 @@ public class MOEService {
             throw new RuntimeException("Email is already exists!");
 
         // Save Office
-        MinistryOfEducationOffice office = MinistryOfEducationOffice.builder()
+        ProvincialEducationOffice office = ProvincialEducationOffice.builder()
+                .province(request.getProvince())
                 .officeAddress(request.getOfficeAddress())
                 .name(request.getName())
                 .build();
 
-        MinistryOfEducationOffice savedOffice = ministryEducationOfficeRepo.save(office);
+        ProvincialEducationOffice savedOffice = provincialEducationOfficeRepo.save(office);
+
+        MinistryOfEducationOffice ministry = ministryEducationOfficeRepo.findAll().get(0);
+        ministry.getProvincialOffices().add(savedOffice);
+        ministryEducationOfficeRepo.save(ministry);
 
         // Generate random password
         String rawPassword = PasswordGeneratorUtil.generate();
@@ -55,7 +63,7 @@ public class MOEService {
         User user = User.builder()
                 .username(request.getUsername())
                 .password(passwordEncoder.encode(rawPassword))
-                .role(Role.MOE_ADMIN)
+                .role(Role.PMOE_ADMIN)
                 .email(request.getEmail())
                 .nic(request.getNic())
                 .contact(request.getContact())
@@ -67,8 +75,8 @@ public class MOEService {
         user = userRepo.save(user);
 
         // Send email with login details
-        String subject = "SmartEdu - MOE Admin Account Created";
-        String message = "Welcome to SmartEdu.\n\nYour MOE Admin account has been created.\n" +
+        String subject = "SmartEdu - PMOE Admin Account Created";
+        String message = "Welcome to SmartEdu.\n\nYour PMOE Admin account has been created.\n" +
                 "Username: " + user.getUsername() + "\n" +
                 "Temporary Password: " + rawPassword + "\n\n" +
                 "Please change your password upon first login.";

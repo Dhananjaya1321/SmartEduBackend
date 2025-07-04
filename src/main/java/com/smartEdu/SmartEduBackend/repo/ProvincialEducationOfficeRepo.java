@@ -6,4 +6,5 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import java.util.Optional;
 
 public interface ProvincialEducationOfficeRepo extends MongoRepository<ProvincialEducationOffice, String> {
+    ProvincialEducationOffice findByProvince(String province);
 }

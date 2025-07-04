@@ -1,10 +1,7 @@
 package com.smartEdu.SmartEduBackend.controller;
 
-import com.smartEdu.SmartEduBackend.entity.ProvincialEducationOffice;
-import com.smartEdu.SmartEduBackend.entity.ProvincialEducationOfficeRequest;
-import com.smartEdu.SmartEduBackend.entity.User;
+import com.smartEdu.SmartEduBackend.entity.MinistryOfEducationOfficeRequest;
 import com.smartEdu.SmartEduBackend.service.MOEService;
-import com.smartEdu.SmartEduBackend.service.UserService;
 import com.smartEdu.SmartEduBackend.util.ExceptionHandler;
 import com.smartEdu.SmartEduBackend.util.ResponseUtil;
 import org.slf4j.Logger;
@@ -12,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -26,11 +22,11 @@ public class MOEController {
 
     @PostMapping
     private ResponseEntity<ResponseUtil> save(
-            @RequestBody ProvincialEducationOfficeRequest office
+            @RequestBody MinistryOfEducationOfficeRequest office
     ) {
         try {
             return ResponseEntity.ok(
-                    new ResponseUtil(HttpStatus.OK, "User saved successfully.", service.createWithUser(office))
+                    new ResponseUtil(HttpStatus.OK, "MOE saved successfully.", service.createMinistryOfEducationOfficeWithUser(office))
             );
         } catch (Exception e) {
             LOGGER.error(e.getMessage());

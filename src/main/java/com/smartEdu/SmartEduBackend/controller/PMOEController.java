@@ -2,10 +2,7 @@ package com.smartEdu.SmartEduBackend.controller;
 
 import com.smartEdu.SmartEduBackend.entity.ProvincialEducationOffice;
 import com.smartEdu.SmartEduBackend.entity.ProvincialEducationOfficeRequest;
-import com.smartEdu.SmartEduBackend.entity.ZonalEducationOffice;
-import com.smartEdu.SmartEduBackend.entity.ZonalEducationOfficeRequest;
 import com.smartEdu.SmartEduBackend.service.PMOEService;
-import com.smartEdu.SmartEduBackend.service.ZMOEService;
 import com.smartEdu.SmartEduBackend.util.ExceptionHandler;
 import com.smartEdu.SmartEduBackend.util.ResponseUtil;
 import lombok.RequiredArgsConstructor;
@@ -16,24 +13,24 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/zmoe")
+@RequestMapping("/api/pmoe")
 @RequiredArgsConstructor
 @CrossOrigin
-public class ZMOEController {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ZMOEController.class);
+public class PMOEController {
+    private static final Logger LOGGER = LoggerFactory.getLogger(PMOEController.class);
 
-    private final ZMOEService zmoeService;
+    private final PMOEService PMOEService;
 
     @PostMapping
-    public ResponseEntity<ResponseUtil> createZMOE(@RequestBody ZonalEducationOfficeRequest request) {
+    public ResponseEntity<ResponseUtil> createZMOE(@RequestBody ProvincialEducationOfficeRequest request) {
         try {
-            ZonalEducationOffice office = zmoeService.createZonalEducationOfficeWithUser(request);
-            return ResponseEntity.ok(new ResponseUtil(HttpStatus.OK, "ZMOE created successfully", office));
+            ProvincialEducationOffice office = PMOEService.createProvincialEducationOfficeWithUser(request);
+            return ResponseEntity.ok(new ResponseUtil(HttpStatus.OK, "PMOE created successfully", office));
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
             if (e.getMessage().equals("Username is already exists!") ||
                     e.getMessage().equals("Email is already exists!"))
-                return ExceptionHandler.handleCustomException(HttpStatus.NOT_FOUND, e);
+                return com.smartEdu.SmartEduBackend.util.ExceptionHandler.handleCustomException(HttpStatus.NOT_FOUND, e);
 
             return ExceptionHandler.handleException(e);
         }
