@@ -1,6 +1,8 @@
 package com.smartEdu.SmartEduBackend.entity;
 
 
+import com.smartEdu.SmartEduBackend.enums.LetterStatus;
+import com.smartEdu.SmartEduBackend.enums.LetterType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,14 +23,14 @@ public class LetterRequest {
 
     private String studentId;
     private String studentName;
-    private String letterType; // Enum: LEAVING_CERTIFICATE, CHARACTER_CERTIFICATE, etc.
+    private LetterType letterType; // Enum: LEAVING_CERTIFICATE, CHARACTER_CERTIFICATE, etc.
     private String lastGrade;
 
     private String description;
     private LocalDate requestedDate;
     private LocalDate issuedDate;
 
-    private String status; // PENDING, APPROVED, REJECTED
+    private LetterStatus status; // PENDING, APPROVED, REJECTED
     private String principalRemarks;
 
     private String principalSignatureUrl;
