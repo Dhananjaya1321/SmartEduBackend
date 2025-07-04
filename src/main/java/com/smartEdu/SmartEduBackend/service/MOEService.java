@@ -6,6 +6,8 @@ import com.smartEdu.SmartEduBackend.entity.User;
 import com.smartEdu.SmartEduBackend.enums.Role;
 import com.smartEdu.SmartEduBackend.repo.ProvincialEducationOfficeRepo;
 import com.smartEdu.SmartEduBackend.repo.UserRepo;
+import com.smartEdu.SmartEduBackend.util.EmailUtil;
+import com.smartEdu.SmartEduBackend.util.PasswordGeneratorUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
@@ -30,6 +32,9 @@ public class MOEService {
     @Autowired
     private final JavaMailSender mailSender;
 
+    @Autowired
+    private EmailUtil emailUtil;
+
     public ProvincialEducationOffice createWithUser(ProvincialEducationOfficeRequest request) throws Exception {
         // Check if username already exists
         Optional<User> existingUserByUsername = userRepo.findByUsername(request.getUsername());
@@ -51,12 +56,12 @@ public class MOEService {
         ProvincialEducationOffice savedOffice = pmoeRepo.save(office);
 
         // Generate random password
-        String generatedPassword = generatePassword();
+        String rawPassword = PasswordGeneratorUtil.generate();
 
         // Save User
         User user = User.builder()
                 .username(request.getUsername())
-                .password(passwordEncoder.encode(generatedPassword))
+                .password(passwordEncoder.encode(rawPassword))
                 .role(Role.PMOE_ADMIN)
                 .email(request.getEmail())
                 .nic(request.getNic())
@@ -68,28 +73,15 @@ public class MOEService {
 
         user = userRepo.save(user);
 
-        // Send email
-        sendEmail(user.getEmail(), generatedPassword);
+        // Send email with login details
+        String subject = "SmartEdu - PMOE Admin Account Created";
+        String message = "Welcome to SmartEdu.\n\nYour PMOE Admin account has been created.\n" +
+                "Username: " + user.getUsername() + "\n" +
+                "Temporary Password: " + rawPassword + "\n\n" +
+                "Please change your password upon first login.";
+
+        emailUtil.sendEmail(user.getEmail(), subject, message);
 
         return savedOffice;
-    }
-
-    private String generatePassword() {
-        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#&!";
-        Random r = new Random();
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < 10; i++) {
-            sb.append(chars.charAt(r.nextInt(chars.length())));
-        }
-        return sb.toString();
-    }
-
-    private void sendEmail(String email, String password) {
-        SimpleMailMessage msg = new SimpleMailMessage();
-        msg.setTo(email);
-        msg.setSubject("SmartEdu - PMOE Account Details");
-        msg.setText("Welcome to SmartEdu.\n\nYour PMOE Admin account has been created.\nUsername: " + email +
-                "\nTemporary Password: " + password + "\n\nPlease change your password upon first login.");
-        mailSender.send(msg);
     }
 }
