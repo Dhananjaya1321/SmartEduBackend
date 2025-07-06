@@ -111,4 +111,24 @@ public class UserController {
         }
     }
 
+    @GetMapping("/check-email-and-send-otp")
+    public ResponseEntity<ResponseUtil> checkEmailAndSendOTP(@RequestParam String email) {
+        try {
+            String otp = service.checkEmailAndSendOTP(email);
+
+            return ResponseEntity.ok(
+                    new ResponseUtil(
+                            HttpStatus.OK,
+                            "OTP sent successfully.",
+                            otp
+                    )
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            if (e.getMessage().equals("Incorrect email"))
+                return ExceptionHandler.handleCustomException(HttpStatus.NOT_FOUND, e);
+
+            return ExceptionHandler.handleException(e);        }
+    }
+
 }

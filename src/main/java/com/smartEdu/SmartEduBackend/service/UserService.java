@@ -100,6 +100,30 @@ public class UserService {
         return userRepo.findAllByRoleStartingWith(getManagedRolePrefix(currentRole));
     }
 
+
+    public String checkEmailAndSendOTP(String email) {
+        // Try finding user by email or username
+        User user = userRepo.findByEmail(email).orElseThrow(() -> new RuntimeException("Incorrect email"));
+
+        // Generate a 6-digit OTP
+        String otp = String.valueOf((int) (Math.random() * 900000) + 100000);
+
+        // Send password email
+        String subject = "SmartEdu Password Reset OTP";
+        String message = "Hello " + user.getUsername() + ",\n\n" +
+                "You have requested to reset your password. Use the following OTP to proceed:\n\n" +
+                "🔐 OTP: " + otp + "\n\n" +
+                "Please do not share this code with anyone. It will expire soon for security reasons.\n\n" +
+                "If you did not request this, please ignore this email.\n\n" +
+                "Regards,\nSmartEdu Team";
+
+        // Send the email
+        emailUtil.sendEmail(user.getEmail(), subject, message);
+
+        return otp;
+    }
+
+
     private String extractRoleFromUserDetails(UserDetails userDetails) {
         if (userDetails instanceof CustomUserDetails) {
             return ((CustomUserDetails) userDetails).getRole().name();
@@ -137,4 +161,5 @@ public class UserService {
             default -> "";      // Employees or other roles have no prefix
         };
     }
+
 }
