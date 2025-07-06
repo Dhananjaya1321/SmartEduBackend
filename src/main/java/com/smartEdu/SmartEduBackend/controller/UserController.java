@@ -131,4 +131,28 @@ public class UserController {
             return ExceptionHandler.handleException(e);        }
     }
 
+    @PutMapping("/update-password")
+    public ResponseEntity<ResponseUtil> updatePassword(
+            @RequestParam String email,
+            @RequestParam String newPassword
+    ) {
+        try {
+            Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            System.out.println(principal.toString());
+            return ResponseEntity.ok(
+                    new ResponseUtil(
+                            HttpStatus.OK,
+                            "Password updated successfully",
+                            service.updatePassword(email, newPassword)
+                    )
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            if (e.getMessage().equals("User not found with given email"))
+                return ExceptionHandler.handleCustomException(HttpStatus.NOT_FOUND, e);
+
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
 }

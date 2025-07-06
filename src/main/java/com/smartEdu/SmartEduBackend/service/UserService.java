@@ -162,4 +162,18 @@ public class UserService {
         };
     }
 
+    public String updatePassword(String email, String newPassword) {
+        Optional<User> userOptional = userRepo.findByEmail(email);
+        if (userOptional.isEmpty()) {
+            throw new RuntimeException("User not found with given email");
+        }
+
+        User user = userOptional.get();
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepo.save(user);
+
+        return "Password updated for " + email;
+    }
+
+
 }
