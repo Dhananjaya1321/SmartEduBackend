@@ -4,10 +4,12 @@ import com.smartEdu.SmartEduBackend.entity.ClassRoom;
 import com.smartEdu.SmartEduBackend.repo.ClassRoomRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
+@Transactional
 public class ClassRoomService {
 
     @Autowired
