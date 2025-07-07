@@ -25,14 +25,15 @@ public class UserController {
 
     @PostMapping
     private ResponseEntity<ResponseUtil> save(
-            @RequestBody User user
+            @RequestBody User user, @RequestHeader("Authorization") String authHeader
     ) {
         try {
+            String token = authHeader.replace("Bearer ", "");
             return ResponseEntity.ok(
                     new ResponseUtil(
                             HttpStatus.OK,
                             "User saved successfully.",
-                            service.save(user)
+                            service.save(user,token)
                     )
             );
         } catch (Exception e) {
@@ -96,13 +97,14 @@ public class UserController {
 
     @GetMapping
     @PreAuthorize("hasAnyRole('MOE_ADMIN', 'PMOE_ADMIN', 'ZMOE_ADMIN', 'SCHOOL_ADMIN')")
-    private ResponseEntity<ResponseUtil> getAll() {
+    private ResponseEntity<ResponseUtil> getAll(@RequestHeader("Authorization") String authHeader) {
         try {
+            String token = authHeader.replace("Bearer ", "");
             return ResponseEntity.ok(
                     new ResponseUtil(
                             HttpStatus.OK,
                             "Users retrieved successfully.",
-                            service.findAllByRole()
+                            service.findAllByRole(token)
                     )
             );
         } catch (Exception e) {

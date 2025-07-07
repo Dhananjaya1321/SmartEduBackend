@@ -42,6 +42,15 @@ public class JwtUtil {
                 .getSubject();
     }
 
+    public String extractInstitutionId(String token) {
+        return Jwts.parser()
+                .verifyWith(Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8)))
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .get("institutionId", String.class);
+    }
+
     public boolean validateToken(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
         return username.equals(userDetails.getUsername());
