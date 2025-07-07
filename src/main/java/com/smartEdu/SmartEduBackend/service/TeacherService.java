@@ -56,6 +56,7 @@ public class TeacherService {
                 .role(Role.TEACHER)
                 .active(true)
                 .profileId(savedTeacher.getId())
+                .institutionID(request.getSchoolId())
                 .build();
 
         userRepo.save(user);

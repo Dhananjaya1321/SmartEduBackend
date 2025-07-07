@@ -26,6 +26,11 @@ public class CustomUserDetails implements UserDetails {
         return user.getId();
     }
 
+    public String getInstitutionId() {
+        return user.getInstitutionID(); // exact field name from your entity
+    }
+
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + this.getRole().name()));

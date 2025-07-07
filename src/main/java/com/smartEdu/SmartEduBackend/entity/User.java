@@ -22,11 +22,12 @@ public class User {
     private String password;
     private String address;
 
-    private Role role; // Enum: PRINCIPAL, TEACHER, PARENT, STUDENT
+    private Role role;
     private String email;
 
-    private boolean active = true; // optional
+    private boolean active = true;
 
     // Links to role-specific profiles
     private String profileId; // ID pointing to the relevant Principal/Teacher/Parent document
+    private String institutionID; // MOE, PMOE and ZMOE users only
 }

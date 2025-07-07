@@ -69,7 +69,7 @@ public class ZMOEService {
                 .contact(request.getContact())
                 .address(request.getAddress())
                 .active(true)
-                .profileId(savedOffice.getId())
+                .institutionID(savedOffice.getId())
                 .build();
 
         userRepo.save(user);

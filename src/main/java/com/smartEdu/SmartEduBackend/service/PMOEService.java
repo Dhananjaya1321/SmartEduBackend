@@ -72,7 +72,7 @@ public class PMOEService {
                 .contact(request.getContact())
                 .address(request.getAddress())
                 .active(true)
-                .profileId(savedOffice.getId())
+                .institutionID(savedOffice.getId())
                 .build();
 
         user = userRepo.save(user);

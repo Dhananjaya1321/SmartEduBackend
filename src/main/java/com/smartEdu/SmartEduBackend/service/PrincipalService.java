@@ -66,6 +66,7 @@ public class PrincipalService {
                 .role(Role.SCHOOL_ADMIN)
                 .active(true)
                 .profileId(savedPrincipal.getId())
+                .institutionID(request.getSchoolId())
                 .build();
 
         userRepo.save(user);

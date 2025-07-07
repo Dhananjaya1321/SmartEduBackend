@@ -51,6 +51,7 @@ public class ParentService {
                 .address(request.getAddress())
                 .email(request.getEmail())
                 .role(Role.PARENT)
+                .institutionID("PARENT") // paren dont want this
                 .active(true)
                 .build();
 
