@@ -56,6 +56,7 @@ public class TeacherService {
                 .address(request.getAddress())
                 .email(request.getEmail())
                 .role(Role.TEACHER)
+                .name(request.getFullName())
                 .active(true)
                 .profileId(savedTeacher.getId())
                 .institutionID(request.getSchoolId())

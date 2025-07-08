@@ -22,7 +22,7 @@ public class PMOEController {
     private final PMOEService PMOEService;
 
     @PostMapping
-    public ResponseEntity<ResponseUtil> createZMOE(@RequestBody ProvincialEducationOfficeRequest request) {
+    public ResponseEntity<ResponseUtil> createPMOE(@RequestBody ProvincialEducationOfficeRequest request) {
         try {
             ProvincialEducationOffice office = PMOEService.createProvincialEducationOfficeWithUser(request);
             return ResponseEntity.ok(new ResponseUtil(HttpStatus.OK, "PMOE created successfully", office));

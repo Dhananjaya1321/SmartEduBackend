@@ -66,6 +66,7 @@ public class ZMOEService {
                 .username(request.getUsername())
                 .password(passwordEncoder.encode(rawPassword))
                 .role(Role.ZMOE_ADMIN)
+                .name(request.getName())
                 .email(request.getEmail())
                 .nic(request.getNic())
                 .contact(request.getContact())

@@ -74,6 +74,7 @@ public class SchoolService {
                 .address(request.getAddress())
                 .email(request.getEmail())
                 .role(Role.SCHOOL_ADMIN)
+                .name(request.getPrincipal().getFullName())
                 .active(true)
                 .profileId(savedPrincipal.getId())
                 .build();

@@ -66,6 +66,7 @@ public class PrincipalService {
                 .address(request.getAddress())
                 .email(request.getEmail())
                 .role(Role.SCHOOL_ADMIN)
+                .name(request.getFullName())
                 .active(true)
                 .profileId(savedPrincipal.getId())
                 .institutionID(request.getSchoolId())

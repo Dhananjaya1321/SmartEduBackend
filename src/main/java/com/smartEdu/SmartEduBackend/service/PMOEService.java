@@ -69,6 +69,7 @@ public class PMOEService {
                 .username(request.getUsername())
                 .password(passwordEncoder.encode(rawPassword))
                 .role(Role.PMOE_ADMIN)
+                .name(request.getName())
                 .email(request.getEmail())
                 .nic(request.getNic())
                 .contact(request.getContact())
