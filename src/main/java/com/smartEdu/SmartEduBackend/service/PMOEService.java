@@ -100,6 +100,13 @@ public class PMOEService {
         return savedOffice;
     }
 
+
+    public ProvincialEducationOffice updatePMOE(String id, ProvincialEducationOffice office) {
+        ProvincialEducationOffice existing = provincialEducationOfficeRepo.findById(id).orElseThrow(() -> new RuntimeException("Office not found!"));
+        existing.setOfficeAddress(office.getOfficeAddress());
+        return provincialEducationOfficeRepo.save(existing);
+    }
+
     public Page<ProvincialEducationOfficeAdminResponse> findAll(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
 
@@ -118,6 +125,7 @@ public class PMOEService {
             if (office != null) {
                 ProvincialEducationOfficeAdminResponse admin = ProvincialEducationOfficeAdminResponse.builder()
                         .id(u.getId())
+                        .institutionID(u.getInstitutionID())
                         .contact(u.getContact())
                         .nic(u.getNic())
                         .username(u.getUsername())
@@ -143,4 +151,5 @@ public class PMOEService {
         ProvincialEducationOffice provincialEducationOffice = provincialEducationOfficeRepo.findById(institutionId).get();
         return provincialEducationOffice.getProvince();
     }
+
 }

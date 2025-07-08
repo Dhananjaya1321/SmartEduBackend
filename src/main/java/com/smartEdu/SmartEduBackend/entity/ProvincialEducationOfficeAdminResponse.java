@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class ProvincialEducationOfficeAdminResponse {
     private String id;
+    private String institutionID;
     private String contact;
     private String nic;
     private String username;

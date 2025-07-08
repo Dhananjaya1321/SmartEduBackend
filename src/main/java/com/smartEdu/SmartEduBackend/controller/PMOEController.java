@@ -2,6 +2,7 @@ package com.smartEdu.SmartEduBackend.controller;
 
 import com.smartEdu.SmartEduBackend.entity.ProvincialEducationOffice;
 import com.smartEdu.SmartEduBackend.entity.ProvincialEducationOfficeRequest;
+import com.smartEdu.SmartEduBackend.entity.Teacher;
 import com.smartEdu.SmartEduBackend.service.PMOEService;
 import com.smartEdu.SmartEduBackend.util.ExceptionHandler;
 import com.smartEdu.SmartEduBackend.util.ResponseUtil;
@@ -32,6 +33,20 @@ public class PMOEController {
                     e.getMessage().equals("Email is already exists!"))
                 return com.smartEdu.SmartEduBackend.util.ExceptionHandler.handleCustomException(HttpStatus.NOT_FOUND, e);
 
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
+    @PutMapping("/{id}")
+    private ResponseEntity<ResponseUtil> updatePMOE(@PathVariable String id, @RequestBody ProvincialEducationOffice office) {
+        try {
+            return ResponseEntity.ok(
+                    new ResponseUtil(HttpStatus.OK, "Office updated successfully.", PMOEService.updatePMOE(id, office))
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            if (e.getMessage().equals("Office not found!"))
+                return ExceptionHandler.handleCustomException(HttpStatus.NOT_FOUND, e);
             return ExceptionHandler.handleException(e);
         }
     }
