@@ -1,6 +1,8 @@
 package com.smartEdu.SmartEduBackend.repo;
 
 import com.smartEdu.SmartEduBackend.entity.User;
+import com.smartEdu.SmartEduBackend.enums.Role;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
@@ -14,4 +16,8 @@ public interface UserRepo extends MongoRepository<User, String> {
     Optional<User> findByEmail(String email);
 
     List<User> findAllByRoleStartingWithAndInstitutionID(String managedRolePrefix,String institutionID);
+
+    List<User> findAllByRole(Pageable pageable, Role role);
+
+    long countByRole(Role role);
 }

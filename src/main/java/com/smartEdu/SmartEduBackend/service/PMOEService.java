@@ -10,12 +10,16 @@ import com.smartEdu.SmartEduBackend.util.PasswordGeneratorUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -92,8 +96,40 @@ public class PMOEService {
         return savedOffice;
     }
 
-    public Page<ProvincialEducationOffice> findAll(int page, int size) {
+    public Page<ProvincialEducationOfficeAdminResponse> findAll(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        return provincialEducationOfficeRepo.findAll(pageable);
+
+        // Get paginated users with role PMOE_ADMIN
+        List<User> pagedUsers = userRepo.findAllByRole(pageable, Role.PMOE_ADMIN);
+
+        // Total count of PMOE_ADMIN users (needed for PageImpl)
+        long total = userRepo.countByRole(Role.PMOE_ADMIN);
+
+        List<ProvincialEducationOfficeAdminResponse> adminResponses = new ArrayList<>();
+
+        for (User u : pagedUsers) {
+            ProvincialEducationOffice office = provincialEducationOfficeRepo.findById(u.getInstitutionID())
+                    .orElse(null);
+
+            if (office != null) {
+                ProvincialEducationOfficeAdminResponse admin = ProvincialEducationOfficeAdminResponse.builder()
+                        .id(u.getId())
+                        .contact(u.getContact())
+                        .nic(u.getNic())
+                        .username(u.getUsername())
+                        .address(u.getAddress())
+                        .name(u.getName())
+                        .role(u.getRole())
+                        .email(u.getEmail())
+                        .province(office.getProvince())
+                        .officeAddress(office.getOfficeAddress())
+                        .build();
+
+                adminResponses.add(admin);
+            }
+        }
+
+        return new PageImpl<>(adminResponses, pageable, total);
     }
+
 }
