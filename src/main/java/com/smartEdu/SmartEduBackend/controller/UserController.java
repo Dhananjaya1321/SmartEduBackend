@@ -48,7 +48,6 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('MOE_ADMIN', 'PMOE_ADMIN', 'ZMOE_ADMIN', 'SCHOOL_ADMIN')")
     private ResponseEntity<ResponseUtil> update(
             @PathVariable String id,
             @RequestBody User user
@@ -72,7 +71,6 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('MOE_ADMIN', 'PMOE_ADMIN', 'ZMOE_ADMIN', 'SCHOOL_ADMIN')")
     private ResponseEntity<ResponseUtil> delete(
             @PathVariable String id
     ) {
@@ -96,7 +94,6 @@ public class UserController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('MOE_ADMIN', 'PMOE_ADMIN', 'ZMOE_ADMIN', 'SCHOOL_ADMIN')")
     private ResponseEntity<ResponseUtil> getAll(@RequestHeader("Authorization") String authHeader) {
         try {
             String token = authHeader.replace("Bearer ", "");
