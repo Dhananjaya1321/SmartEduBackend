@@ -10,12 +10,15 @@ import com.smartEdu.SmartEduBackend.util.PasswordGeneratorUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -87,8 +90,42 @@ public class ZMOEService {
         return savedOffice;
     }
 
-    public Page<ZonalEducationOffice> findAll(int page, int size) {
+    public Page<ZonalEducationOfficeAdminResponse> findAll(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        return zmoeRepo.findAll(pageable);
+
+        // Get paginated users with role ZMOE_ADMIN
+        List<User> pagedUsers = userRepo.findAllByRole(pageable, Role.ZMOE_ADMIN);
+
+        // Total count of ZMOE_ADMIN users (needed for PageImpl)
+        long total = userRepo.countByRole(Role.ZMOE_ADMIN);
+
+        List<ZonalEducationOfficeAdminResponse> adminResponses = new ArrayList<>();
+
+        for (User u : pagedUsers) {
+            ZonalEducationOffice office = zmoeRepo.findById(u.getInstitutionID())
+                    .orElse(null);
+
+            if (office != null) {
+                ZonalEducationOfficeAdminResponse admin = ZonalEducationOfficeAdminResponse.builder()
+                        .id(u.getId())
+                        .contact(u.getContact())
+                        .nic(u.getNic())
+                        .username(u.getUsername())
+                        .address(u.getAddress())
+                        .name(u.getName())
+                        .role(u.getRole())
+                        .email(u.getEmail())
+                        .province(office.getProvince())
+                        .district(office.getDistrict())
+                        .zonal(office.getZonal())
+                        .officeAddress(office.getOfficeAddress())
+                        .build();
+
+                adminResponses.add(admin);
+            }
+        }
+
+        return new PageImpl<>(adminResponses, pageable, total);
     }
+
 }

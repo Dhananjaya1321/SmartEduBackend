@@ -6,6 +6,7 @@ import com.smartEdu.SmartEduBackend.repo.MinistryEducationOfficeRepo;
 import com.smartEdu.SmartEduBackend.repo.ProvincialEducationOfficeRepo;
 import com.smartEdu.SmartEduBackend.repo.UserRepo;
 import com.smartEdu.SmartEduBackend.util.EmailUtil;
+import com.smartEdu.SmartEduBackend.util.JwtUtil;
 import com.smartEdu.SmartEduBackend.util.PasswordGeneratorUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,9 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Transactional
 public class PMOEService {
+    @Autowired
+    private JwtUtil jwtUtil;
+
     @Autowired
     private final ProvincialEducationOfficeRepo provincialEducationOfficeRepo;
 
@@ -132,4 +136,11 @@ public class PMOEService {
         return new PageImpl<>(adminResponses, pageable, total);
     }
 
+    public String getLoggedInProvince(String token) {
+        // Extract institution ID from token
+        String institutionId = jwtUtil.extractInstitutionId(token);
+
+        ProvincialEducationOffice provincialEducationOffice = provincialEducationOfficeRepo.findById(institutionId).get();
+        return provincialEducationOffice.getProvince();
+    }
 }

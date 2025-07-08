@@ -50,4 +50,17 @@ public class PMOEController {
             return ExceptionHandler.handleException(e);
         }
     }
+
+    @GetMapping("/province")
+    private ResponseEntity<ResponseUtil> getLoggedInProvince(@RequestHeader("Authorization") String authHeader) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            return ResponseEntity.ok(
+                    new ResponseUtil(HttpStatus.OK, "Schools retrieved successfully.",PMOEService.getLoggedInProvince(token))
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return ExceptionHandler.handleException(e);
+        }
+    }
 }

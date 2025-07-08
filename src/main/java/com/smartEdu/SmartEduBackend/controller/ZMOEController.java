@@ -39,7 +39,7 @@ public class ZMOEController {
         }
     }
 
-    @GetMapping
+    @GetMapping("/admins")
     private ResponseEntity<ResponseUtil> findAll(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
