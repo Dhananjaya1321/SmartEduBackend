@@ -39,6 +39,20 @@ public class ZMOEController {
         }
     }
 
+    @PutMapping("/{id}")
+    private ResponseEntity<ResponseUtil> updateZMOE(@PathVariable String id, @RequestBody ZonalEducationOffice office) {
+        try {
+            return ResponseEntity.ok(
+                    new ResponseUtil(HttpStatus.OK, "Office updated successfully.", zmoeService.updateZMOE(id, office))
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            if (e.getMessage().equals("Office not found!"))
+                return ExceptionHandler.handleCustomException(HttpStatus.NOT_FOUND, e);
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
     @GetMapping("/admins")
     private ResponseEntity<ResponseUtil> findAll(
             @RequestParam(defaultValue = "0") int page,

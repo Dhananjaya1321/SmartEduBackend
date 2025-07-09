@@ -128,4 +128,9 @@ public class ZMOEService {
         return new PageImpl<>(adminResponses, pageable, total);
     }
 
+    public ZonalEducationOffice updateZMOE(String id, ZonalEducationOffice office) {
+        ZonalEducationOffice existing = zmoeRepo.findById(id).orElseThrow(() -> new RuntimeException("Office not found!"));
+        existing.setOfficeAddress(office.getOfficeAddress());
+        return zmoeRepo.save(existing);
+    }
 }
