@@ -100,6 +100,48 @@ public class PMOEService {
         return savedOffice;
     }
 
+    public User createNewAdminForProvincialEducationOffice(String institutionID, ProvincialEducationOfficeRequest request) {
+        Optional<User> existingUsername = userRepo.findByUsername(request.getUsername());
+        if (existingUsername.isPresent())
+            throw new RuntimeException("Username is already exists!");
+
+        Optional<User> existingEmail = userRepo.findByEmail(request.getEmail());
+        if (existingEmail.isPresent())
+            throw new RuntimeException("Email is already exists!");
+
+        userRepo.deleteByInstitutionIDAndRole(institutionID, Role.PMOE_ADMIN);
+
+        String rawPassword = PasswordGeneratorUtil.generate();
+        User user = User.builder()
+                .username(request.getUsername())
+                .password(passwordEncoder.encode(rawPassword))
+                .role(Role.PMOE_ADMIN)
+                .name(request.getName())
+                .email(request.getEmail())
+                .nic(request.getNic())
+                .contact(request.getContact())
+                .address(request.getAddress())
+                .active(true)
+                .institutionID(institutionID)
+                .build();
+
+        User saved = userRepo.save(user);
+
+        ProvincialEducationOffice pmoe = provincialEducationOfficeRepo.findById(institutionID).get();
+        pmoe.setName(user.getName());
+        provincialEducationOfficeRepo.save(pmoe);
+
+        String subject = "SmartEdu - PMOE Admin Account Created";
+        String message = "Welcome to SmartEdu.\n\nYour PMOE Admin account has been created.\n" +
+                "Username: " + user.getUsername() + "\n" +
+                "Temporary Password: " + rawPassword + "\n\nPlease change your password upon first login.";
+
+        emailUtil.sendEmail(user.getEmail(), subject, message);
+
+        return saved;
+    }
+
+
     public ProvincialEducationOffice updatePMOE(String id, ProvincialEducationOffice office) {
         ProvincialEducationOffice existing = provincialEducationOfficeRepo.findById(id).orElseThrow(() -> new RuntimeException("Office not found!"));
         existing.setOfficeAddress(office.getOfficeAddress());

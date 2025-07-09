@@ -1,8 +1,6 @@
 package com.smartEdu.SmartEduBackend.controller;
 
-import com.smartEdu.SmartEduBackend.entity.ProvincialEducationOffice;
-import com.smartEdu.SmartEduBackend.entity.ProvincialEducationOfficeRequest;
-import com.smartEdu.SmartEduBackend.entity.Teacher;
+import com.smartEdu.SmartEduBackend.entity.*;
 import com.smartEdu.SmartEduBackend.service.PMOEService;
 import com.smartEdu.SmartEduBackend.util.ExceptionHandler;
 import com.smartEdu.SmartEduBackend.util.ResponseUtil;
@@ -11,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -32,6 +31,21 @@ public class PMOEController {
             if (e.getMessage().equals("Username is already exists!") ||
                     e.getMessage().equals("Email is already exists!"))
                 return com.smartEdu.SmartEduBackend.util.ExceptionHandler.handleCustomException(HttpStatus.NOT_FOUND, e);
+
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
+    @PostMapping("/create-new-admin/{id}")
+    public ResponseEntity<ResponseUtil> createNewAdminForProvincialEducationOffice(@PathVariable String id, @RequestBody ProvincialEducationOfficeRequest request) {
+        try {
+            User user = PMOEService.createNewAdminForProvincialEducationOffice(id,request);
+            return ResponseEntity.ok(new ResponseUtil(HttpStatus.OK, "Admin created successfully", user));
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            if (e.getMessage().equals("Username is already exists!") ||
+                    e.getMessage().equals("Email is already exists!"))
+                return ExceptionHandler.handleCustomException(HttpStatus.NOT_FOUND, e);
 
             return ExceptionHandler.handleException(e);
         }
