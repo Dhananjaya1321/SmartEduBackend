@@ -2,12 +2,14 @@ package com.smartEdu.SmartEduBackend.controller;
 
 import com.smartEdu.SmartEduBackend.entity.School;
 import com.smartEdu.SmartEduBackend.entity.SchoolRequest;
+import com.smartEdu.SmartEduBackend.enums.SchoolStatus;
 import com.smartEdu.SmartEduBackend.service.SchoolService;
 import com.smartEdu.SmartEduBackend.util.ExceptionHandler;
 import com.smartEdu.SmartEduBackend.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -46,6 +48,20 @@ public class SchoolController {
         try {
             return ResponseEntity.ok(
                     new ResponseUtil(HttpStatus.OK, "School updated successfully.", service.update(id, school))
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            if (e.getMessage().equals("School not found!"))
+                return ExceptionHandler.handleCustomException(HttpStatus.NOT_FOUND, e);
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
+    @PutMapping("/update-school-status/{id}")
+    private ResponseEntity<ResponseUtil> updateSchoolStatus(@PathVariable String id, @Param("status") SchoolStatus status) {
+        try {
+            return ResponseEntity.ok(
+                    new ResponseUtil(HttpStatus.OK, "School updated successfully.", service.updateSchoolStatus(id, status))
             );
         } catch (Exception e) {
             LOGGER.error(e.getMessage());

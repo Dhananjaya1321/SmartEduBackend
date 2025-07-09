@@ -3,6 +3,7 @@ package com.smartEdu.SmartEduBackend.service;
 import com.smartEdu.SmartEduBackend.entity.*;
 
 import com.smartEdu.SmartEduBackend.enums.Role;
+import com.smartEdu.SmartEduBackend.enums.SchoolStatus;
 import com.smartEdu.SmartEduBackend.repo.PrincipalRepo;
 import com.smartEdu.SmartEduBackend.repo.SchoolRepo;
 import com.smartEdu.SmartEduBackend.repo.UserRepo;
@@ -47,24 +48,38 @@ public class SchoolService {
         if (existingUserByEmail.isPresent())
             throw new RuntimeException("Email is already exists!");
 
-        Principal principal = request.getPrincipal();
-        Principal savedPrincipal = principalRepo.save(principal);
-
-        School school = request.getSchool();
-        school.setSchoolNumber(generateSchoolNumber());
-        school.setPrincipal(savedPrincipal);
+        School school = School.builder()
+                .schoolNumber(generateSchoolNumber())
+                .schoolName(request.getSchoolName())
+                .logoUrl(request.getLogoUrl())
+                .province(request.getProvince())
+                .district(request.getDistrict())
+                .zonal(request.getZonal())
+                .levelOfSchool(request.getSchoolLevel())
+                .typeOfSchool(request.getSchoolType())
+                .gradeSpan(request.getGradeSpan())
+                .gender(request.getGender())
+                .ethnicity(request.getEthnicity())
+                .languageMedium(request.getLanguageMedium())
+                .studentPopulation(request.getStudentPopulation())
+                .teacherPopulation(request.getTeacherPopulation())
+                .classCount(request.getClassCount())
+                .status(SchoolStatus.PENDING)
+                .build();
         School savedSchool = schoolRepo.save(school);
 
-        ZonalEducationOffice zonal = zonalEducationOfficeRepo.findByZonalAndDistrictAndProvince(
-                savedSchool.getZonal(),
-                savedSchool.getDistrict(),
-                savedSchool.getProvince()
-        );
-        zonal.getSchools().add(savedSchool);
-        zonalEducationOfficeRepo.save(zonal);
-
-        savedPrincipal.setSchoolId(savedSchool.getId());
-        principalRepo.save(savedPrincipal);
+        Principal principal = Principal.builder()
+                .schoolId(savedSchool.getId())
+                .fullName(request.getFullName())
+                .nicFrontImageUrl(request.getNicFront())
+                .nicBackImageUrl(request.getNicBack())
+                .moeIdFrontImageUrl(request.getMoeFront())
+                .moeIdBackImageUrl(request.getMoeBack())
+                .appointmentLetterUrl(request.getAppointment())
+                .build();
+        Principal savedPrincipal = principalRepo.save(principal);
+        savedSchool.setPrincipal(savedPrincipal);
+        savedSchool =schoolRepo.save(school);
 
         User user = User.builder()
                 .nic(request.getNic())
@@ -74,22 +89,36 @@ public class SchoolService {
                 .address(request.getAddress())
                 .email(request.getEmail())
                 .role(Role.SCHOOL_ADMIN)
-                .name(request.getPrincipal().getFullName())
+                .name(request.getFullName())
                 .active(true)
                 .profileId(savedPrincipal.getId())
+                .institutionID(savedSchool.getId())
                 .build();
-
         userRepo.save(user);
+
+
+        ZonalEducationOffice zonal = zonalEducationOfficeRepo.findByZonalAndDistrictAndProvince(
+                request.getZonal(),
+                request.getDistrict(),
+                request.getProvince()
+        );
+        zonal.getSchools().add(savedSchool);
+        zonalEducationOfficeRepo.save(zonal);
 
         return savedSchool;
     }
 
-    // Update existing school (and optionally principal)
     public School update(String id, School updatedSchool) {
         schoolRepo.findById(id).orElseThrow(() -> new RuntimeException("School not found!"));
         updatedSchool.setPrincipal(principalRepo.findBySchoolId(id).get());
         updatedSchool.setId(id);
         return schoolRepo.save(updatedSchool);
+    }
+
+    public School updateSchoolStatus(String id, SchoolStatus status) {
+        School school = schoolRepo.findById(id).orElseThrow(() -> new RuntimeException("School not found!"));
+        school.setStatus(status);
+        return schoolRepo.save(school);
     }
 
     // Delete school by ID

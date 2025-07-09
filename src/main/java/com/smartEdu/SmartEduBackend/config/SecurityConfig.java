@@ -28,6 +28,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/user/**").permitAll()
                         .requestMatchers("/api/exams/**").permitAll()
+                        .requestMatchers("/api/schools/**").permitAll()
                         .requestMatchers("/api/pmoe/**").hasAnyRole("MOE_ADMIN","MOE_EMPLOYEE","PMOE_ADMIN","PMOE_EMPLOYEE")
                         .requestMatchers("/api/parents/**").hasAnyRole("PARENT")
                         .requestMatchers("/api/letters/**").hasAnyRole("PARENT","SCHOOL_ADMIN")
@@ -38,7 +39,6 @@ public class SecurityConfig {
                         .requestMatchers("/api/events/**").hasAnyRole("PARENT","TEACHER","SCHOOL_ADMIN","SCHOOL_EMPLOYEE")
                         .requestMatchers("/api/students/**").hasAnyRole("PARENT","TEACHER","SCHOOL_ADMIN","SCHOOL_EMPLOYEE")
                         .requestMatchers("/api/teachers/**").hasAnyRole("PARENT","TEACHER","SCHOOL_ADMIN","SCHOOL_EMPLOYEE","ZMOE_ADMIN","ZMOE_EMPLOYEE")
-                        .requestMatchers("/api/schools/**").hasAnyRole("PARENT","TEACHER","SCHOOL_ADMIN","SCHOOL_EMPLOYEE","ZMOE_ADMIN","ZMOE_EMPLOYEE")
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
