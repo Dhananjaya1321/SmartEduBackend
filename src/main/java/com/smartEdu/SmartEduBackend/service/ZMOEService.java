@@ -90,6 +90,47 @@ public class ZMOEService {
         return savedOffice;
     }
 
+    public User createNewAdminForZonalEducationOffice(String institutionID, ZonalEducationOfficeRequest request) {
+        Optional<User> existingUsername = userRepo.findByUsername(request.getUsername());
+        if (existingUsername.isPresent())
+            throw new RuntimeException("Username is already exists!");
+
+        Optional<User> existingEmail = userRepo.findByEmail(request.getEmail());
+        if (existingEmail.isPresent())
+            throw new RuntimeException("Email is already exists!");
+
+        userRepo.deleteByInstitutionIDAndRole(institutionID, Role.ZMOE_ADMIN);
+
+        String rawPassword = PasswordGeneratorUtil.generate();
+        User user = User.builder()
+                .username(request.getUsername())
+                .password(passwordEncoder.encode(rawPassword))
+                .role(Role.ZMOE_ADMIN)
+                .name(request.getName())
+                .email(request.getEmail())
+                .nic(request.getNic())
+                .contact(request.getContact())
+                .address(request.getAddress())
+                .active(true)
+                .institutionID(institutionID)
+                .build();
+
+        User saved = userRepo.save(user);
+
+        ZonalEducationOffice zmoe = zmoeRepo.findById(institutionID).get();
+        zmoe.setFullName(user.getName());
+        zmoeRepo.save(zmoe);
+
+        String subject = "SmartEdu - ZMOE Admin Account Created";
+        String message = "Welcome to SmartEdu.\n\nYour ZMOE Admin account has been created.\n" +
+                "Username: " + user.getUsername() + "\n" +
+                "Temporary Password: " + rawPassword + "\n\nPlease change your password upon first login.";
+
+        emailUtil.sendEmail(user.getEmail(), subject, message);
+
+        return saved;
+    }
+
     public Page<ZonalEducationOfficeAdminResponse> findAll(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
 
@@ -108,6 +149,7 @@ public class ZMOEService {
             if (office != null) {
                 ZonalEducationOfficeAdminResponse admin = ZonalEducationOfficeAdminResponse.builder()
                         .id(u.getId())
+                        .institutionID(u.getInstitutionID())
                         .contact(u.getContact())
                         .nic(u.getNic())
                         .username(u.getUsername())

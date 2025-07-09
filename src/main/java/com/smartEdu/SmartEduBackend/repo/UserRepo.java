@@ -20,4 +20,6 @@ public interface UserRepo extends MongoRepository<User, String> {
     List<User> findAllByRole(Pageable pageable, Role role);
 
     long countByRole(Role role);
+
+    int deleteByInstitutionIDAndRole(String institutionID,Role role);
 }
