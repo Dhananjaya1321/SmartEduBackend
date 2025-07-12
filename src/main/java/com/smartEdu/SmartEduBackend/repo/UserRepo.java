@@ -22,4 +22,7 @@ public interface UserRepo extends MongoRepository<User, String> {
     long countByRole(Role role);
 
     int deleteByInstitutionIDAndRole(String institutionID,Role role);
+
+    User findByProfileId(String id);
+
 }

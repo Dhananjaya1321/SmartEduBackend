@@ -22,5 +22,5 @@ public class ZonalEducationOffice {
     private String officeAddress;
     private String fullName;
 
-    private List<School> schools = new ArrayList<>();
+    private List<String> schoolsIds = new ArrayList<>();
 }

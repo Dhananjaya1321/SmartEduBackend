@@ -98,4 +98,8 @@ public class PrincipalService {
         Pageable pageable = PageRequest.of(page, size);
         return principalRepo.findAll(pageable);
     }
+
+    public User getPrincipalUserAccountDetailsByProfileId(String id) {
+        return userRepo.findByProfileId(id);
+    }
 }

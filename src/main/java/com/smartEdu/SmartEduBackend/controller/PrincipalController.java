@@ -80,6 +80,18 @@ public class PrincipalController {
         }
     }
 
+    @GetMapping("/principal-user-account-details/{id}")
+    private ResponseEntity<ResponseUtil> getPrincipalUserAccountDetailsByProfileId(@PathVariable String id) {
+        try {
+            return ResponseEntity.ok(
+                    new ResponseUtil(HttpStatus.OK, "Principal retrieved successfully.", service.getPrincipalUserAccountDetailsByProfileId(id))
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
     @GetMapping
     private ResponseEntity<ResponseUtil> findAll(
             @RequestParam(defaultValue = "0") int page,

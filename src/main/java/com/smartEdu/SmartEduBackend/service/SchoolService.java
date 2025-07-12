@@ -107,7 +107,7 @@ public class SchoolService {
                 request.getDistrict(),
                 request.getProvince()
         );
-        zonal.getSchools().add(savedSchool);
+        zonal.getSchoolsIds().add(savedSchool.getId());
         zonalEducationOfficeRepo.save(zonal);
 
         return savedSchool;
@@ -142,7 +142,8 @@ public class SchoolService {
         String institutionId = jwtUtil.extractInstitutionId(token);
         ZonalEducationOffice zonalEducationOffice = zonalEducationOfficeRepo.findById(institutionId).get();
         List<School> pendingSchools = new ArrayList<>();
-        for (School school : zonalEducationOffice.getSchools()) {
+        for (String schoolIds : zonalEducationOffice.getSchoolsIds()) {
+            School school = schoolRepo.findById(schoolIds).get();
             if (SchoolStatus.PENDING.equals(school.getStatus())) {
                 pendingSchools.add(school);
             }
@@ -154,13 +155,12 @@ public class SchoolService {
         String institutionId = jwtUtil.extractInstitutionId(token);
         ZonalEducationOffice zonalEducationOffice = zonalEducationOfficeRepo.findById(institutionId).get();
         List<School> approvedSchools = new ArrayList<>();
-
-        for (School school : zonalEducationOffice.getSchools()) {
+        for (String schoolIds : zonalEducationOffice.getSchoolsIds()) {
+            School school = schoolRepo.findById(schoolIds).get();
             if (SchoolStatus.APPROVED.equals(school.getStatus())) {
                 approvedSchools.add(school);
             }
         }
-
         return approvedSchools;
     }
 
