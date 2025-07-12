@@ -127,8 +127,14 @@ public class SchoolService {
     }
 
     // Delete school by ID
-    public void delete(String id) {
+    public void delete(String id,String token) {
         schoolRepo.findById(id).orElseThrow(() -> new RuntimeException("School not found!"));
+        String institutionId = jwtUtil.extractInstitutionId(token);
+
+        ZonalEducationOffice zonalEducationOffice = zonalEducationOfficeRepo.findById(institutionId).get();
+        zonalEducationOffice.getSchoolsIds().remove(id);
+        zonalEducationOfficeRepo.save(zonalEducationOffice);
+
         schoolRepo.deleteById(id);
     }
 

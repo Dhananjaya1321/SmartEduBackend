@@ -72,9 +72,13 @@ public class SchoolController {
     }
 
     @DeleteMapping("/{id}")
-    private ResponseEntity<ResponseUtil> delete(@PathVariable String id) {
+    private ResponseEntity<ResponseUtil> delete(
+            @PathVariable String id ,
+            @RequestHeader("Authorization") String authHeader
+    ) {
         try {
-            service.delete(id);
+            String token = authHeader.replace("Bearer ", "");
+            service.delete(id,token);
             return ResponseEntity.ok(
                     new ResponseUtil(HttpStatus.OK, "School deleted successfully.", null)
             );
