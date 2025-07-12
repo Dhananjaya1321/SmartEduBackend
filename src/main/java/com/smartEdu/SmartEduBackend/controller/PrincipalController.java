@@ -40,7 +40,7 @@ public class PrincipalController {
 
 
     @PutMapping("/{id}")
-    private ResponseEntity<ResponseUtil> update(@PathVariable String id, @RequestBody Principal principal) {
+    private ResponseEntity<ResponseUtil> update(@PathVariable String id, @RequestBody PrincipalRegisterRequest principal) {
         try {
             return ResponseEntity.ok(
                     new ResponseUtil(HttpStatus.OK, "Principal updated successfully.", service.update(id, principal))
@@ -95,11 +95,13 @@ public class PrincipalController {
     @GetMapping
     private ResponseEntity<ResponseUtil> findAll(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(defaultValue = "10") int size,
+            @RequestHeader("Authorization") String authHeader
     ) {
         try {
+            String token = authHeader.replace("Bearer ", "");
             return ResponseEntity.ok(
-                    new ResponseUtil(HttpStatus.OK, "Principals retrieved successfully.", service.findAll(page, size))
+                    new ResponseUtil(HttpStatus.OK, "Principals retrieved successfully.", service.findAll(page, size,token))
             );
         } catch (Exception e) {
             LOGGER.error(e.getMessage());

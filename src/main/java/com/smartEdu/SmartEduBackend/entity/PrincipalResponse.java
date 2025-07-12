@@ -1,6 +1,5 @@
 package com.smartEdu.SmartEduBackend.entity;
 
-import com.smartEdu.SmartEduBackend.enums.Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,8 +9,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class PrincipalRegisterRequest {
+public class PrincipalResponse {
     // Principal fields
+    private String id;
     private String schoolId;
     private String fullName;
     private String moeId;
@@ -20,6 +20,7 @@ public class PrincipalRegisterRequest {
     private String moeIdFrontImageUrl;
     private String moeIdBackImageUrl;
     private String appointmentLetterUrl;
+    private String schoolName;
 
     // User fields
     private String nic;
