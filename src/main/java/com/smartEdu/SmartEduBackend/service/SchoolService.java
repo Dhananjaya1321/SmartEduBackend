@@ -8,6 +8,7 @@ import com.smartEdu.SmartEduBackend.repo.PrincipalRepo;
 import com.smartEdu.SmartEduBackend.repo.SchoolRepo;
 import com.smartEdu.SmartEduBackend.repo.UserRepo;
 import com.smartEdu.SmartEduBackend.repo.ZonalEducationOfficeRepo;
+import com.smartEdu.SmartEduBackend.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -16,11 +17,15 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
 @Transactional
 public class SchoolService {
+    @Autowired
+    private JwtUtil jwtUtil;
 
     @Autowired
     private SchoolRepo schoolRepo;
@@ -79,7 +84,7 @@ public class SchoolService {
                 .build();
         Principal savedPrincipal = principalRepo.save(principal);
         savedSchool.setPrincipal(savedPrincipal);
-        savedSchool =schoolRepo.save(school);
+        savedSchool = schoolRepo.save(school);
 
         User user = User.builder()
                 .nic(request.getNic())
@@ -132,10 +137,31 @@ public class SchoolService {
         return schoolRepo.findById(id);
     }
 
-    // Find all
-    public Page<School> findAll(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        return schoolRepo.findAll(pageable);
+
+    public List<School> findAllPendingSchools(String token) {
+        String institutionId = jwtUtil.extractInstitutionId(token);
+        ZonalEducationOffice zonalEducationOffice = zonalEducationOfficeRepo.findById(institutionId).get();
+        List<School> pendingSchools = new ArrayList<>();
+        for (School school : zonalEducationOffice.getSchools()) {
+            if (SchoolStatus.PENDING.equals(school.getStatus())) {
+                pendingSchools.add(school);
+            }
+        }
+        return pendingSchools;
+    }
+
+    public List<School> findAllApprovedSchools(String token) {
+        String institutionId = jwtUtil.extractInstitutionId(token);
+        ZonalEducationOffice zonalEducationOffice = zonalEducationOfficeRepo.findById(institutionId).get();
+        List<School> approvedSchools = new ArrayList<>();
+
+        for (School school : zonalEducationOffice.getSchools()) {
+            if (SchoolStatus.APPROVED.equals(school.getStatus())) {
+                approvedSchools.add(school);
+            }
+        }
+
+        return approvedSchools;
     }
 
     public String generateSchoolNumber() {
