@@ -1,30 +1,41 @@
 package com.smartEdu.SmartEduBackend.service;
 
-import com.smartEdu.SmartEduBackend.entity.Teacher;
-import com.smartEdu.SmartEduBackend.entity.TeacherRegisterRequest;
-import com.smartEdu.SmartEduBackend.entity.User;
+import com.smartEdu.SmartEduBackend.entity.*;
 import com.smartEdu.SmartEduBackend.enums.Role;
+import com.smartEdu.SmartEduBackend.repo.SchoolRepo;
 import com.smartEdu.SmartEduBackend.repo.TeacherRepo;
 import com.smartEdu.SmartEduBackend.repo.UserRepo;
+import com.smartEdu.SmartEduBackend.repo.ZonalEducationOfficeRepo;
+import com.smartEdu.SmartEduBackend.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
 @Transactional
 public class TeacherService {
+    @Autowired
+    private JwtUtil jwtUtil;
 
     @Autowired
     private TeacherRepo teacherRepo;
 
     @Autowired
+    private SchoolRepo schoolRepo;
+
+    @Autowired
     private UserRepo userRepo;
+
+    @Autowired
+    private ZonalEducationOfficeRepo zonalEducationOfficeRepo;
 
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
@@ -82,8 +93,89 @@ public class TeacherService {
         return teacherRepo.findById(id);
     }
 
-    public Page<Teacher> findAll(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        return teacherRepo.findAll(pageable);
+    public Page<TeacherResponse> findAllForZonalOffice(int page, int size, String token) {
+        String institutionId = jwtUtil.extractInstitutionId(token);
+        ZonalEducationOffice zonalEducationOffice = zonalEducationOfficeRepo.findById(institutionId).orElse(null);
+
+        if (zonalEducationOffice == null)
+            return Page.empty(); // or throw an exception
+
+
+        List<TeacherResponse> allTeachers = new ArrayList<>();
+        for (String schoolId : zonalEducationOffice.getSchoolsIds()) {
+            List<Teacher> teachers = teacherRepo.findAllBySchoolId(schoolId);
+            School school = schoolRepo.findById(schoolId).orElse(null);
+
+            if (school == null) return Page.empty(); // or throw an exception
+
+            for (Teacher teacher : teachers) {
+                User user = userRepo.findByProfileId(teacher.getId());
+
+                TeacherResponse teacherResponse = TeacherResponse.builder()
+                        .id(teacher.getId())
+                        .schoolId(teacher.getSchoolId())
+                        .schoolName(school.getSchoolName())
+                        .fullName(teacher.getFullName())
+                        .nic(user.getNic())
+                        .contact(user.getContact())
+                        .username(user.getUsername())
+                        .address(user.getAddress())
+                        .email(user.getEmail())
+                        .build();
+
+                allTeachers.add(teacherResponse);
+            }
+        }
+
+        // Manual Pagination Logic
+        int start = page * size;
+        int end = Math.min(start + size, allTeachers.size());
+
+        if (start > end) {
+            return Page.empty(); // no content for this page
+        }
+
+        List<TeacherResponse> pagedList = allTeachers.subList(start, end);
+        return new PageImpl<>(pagedList, PageRequest.of(page, size), allTeachers.size());
+    }
+
+    public Page<TeacherResponse> findAllForSchool(int page, int size, String token) {
+        String institutionId = jwtUtil.extractInstitutionId(token);
+        School school = schoolRepo.findById(institutionId).orElse(null);
+
+        if (school == null)
+            return Page.empty(); // or throw an exception
+
+
+        List<TeacherResponse> allTeachers = new ArrayList<>();
+        List<Teacher> teachers = teacherRepo.findAllBySchoolId(institutionId);
+
+        for (Teacher teacher : teachers) {
+            User user = userRepo.findByProfileId(teacher.getId());
+            TeacherResponse teacherResponse = TeacherResponse.builder()
+                    .id(teacher.getId())
+                    .schoolId(teacher.getSchoolId())
+                    .schoolName(school.getSchoolName())
+                    .fullName(teacher.getFullName())
+                    .nic(user.getNic())
+                    .contact(user.getContact())
+                    .username(user.getUsername())
+                    .address(user.getAddress())
+                    .email(user.getEmail())
+                    .build();
+
+            allTeachers.add(teacherResponse);
+        }
+
+        // Manual Pagination Logic
+        int start = page * size;
+        int end = Math.min(start + size, allTeachers.size());
+
+        if (start > end) {
+            return Page.empty(); // no content for this page
+        }
+
+        List<TeacherResponse> pagedList = allTeachers.subList(start, end);
+        return new PageImpl<>(pagedList, PageRequest.of(page, size), allTeachers.size());
     }
 }

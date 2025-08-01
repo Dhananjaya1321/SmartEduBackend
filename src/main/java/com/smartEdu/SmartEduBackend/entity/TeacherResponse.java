@@ -9,9 +9,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class TeacherRegisterRequest {
+public class TeacherResponse {
     // Teacher fields
+    private String id;
     private String fullName;
+    private String schoolName;
     private String schoolId;
 
     // User fields
