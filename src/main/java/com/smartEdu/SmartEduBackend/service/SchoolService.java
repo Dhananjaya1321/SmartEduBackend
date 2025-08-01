@@ -4,10 +4,7 @@ import com.smartEdu.SmartEduBackend.entity.*;
 
 import com.smartEdu.SmartEduBackend.enums.Role;
 import com.smartEdu.SmartEduBackend.enums.SchoolStatus;
-import com.smartEdu.SmartEduBackend.repo.PrincipalRepo;
-import com.smartEdu.SmartEduBackend.repo.SchoolRepo;
-import com.smartEdu.SmartEduBackend.repo.UserRepo;
-import com.smartEdu.SmartEduBackend.repo.ZonalEducationOfficeRepo;
+import com.smartEdu.SmartEduBackend.repo.*;
 import com.smartEdu.SmartEduBackend.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -29,6 +26,9 @@ public class SchoolService {
 
     @Autowired
     private SchoolRepo schoolRepo;
+
+    @Autowired
+    private GradesRepo gradesRepo;
 
     @Autowired
     private UserRepo userRepo;
@@ -109,6 +109,18 @@ public class SchoolService {
         );
         zonal.getSchoolsIds().add(savedSchool.getId());
         zonalEducationOfficeRepo.save(zonal);
+
+        /*create grades in school*/
+        String[] parts = school.getGradeSpan().split("-");
+        int start = Integer.parseInt(parts[0]);
+        int end = Integer.parseInt(parts[1]);
+        for (int i = 0; i < end; i++) {
+            Grades grades = Grades.builder()
+                    .gradeName(start++)
+                    .schoolId(savedSchool.getId())
+                    .build();
+            gradesRepo.save(grades);
+        }
 
         return savedSchool;
     }
