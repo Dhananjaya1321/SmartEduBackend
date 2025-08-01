@@ -38,20 +38,6 @@ public class TeacherController {
         }
     }
 
-    @PutMapping("/{id}")
-    private ResponseEntity<ResponseUtil> update(@PathVariable String id, @RequestBody Teacher teacher) {
-        try {
-            return ResponseEntity.ok(
-                    new ResponseUtil(HttpStatus.OK, "Teacher updated successfully.", service.update(id, teacher))
-            );
-        } catch (Exception e) {
-            LOGGER.error(e.getMessage());
-            if (e.getMessage().equals("Teacher not found!"))
-                return ExceptionHandler.handleCustomException(HttpStatus.NOT_FOUND, e);
-            return ExceptionHandler.handleException(e);
-        }
-    }
-
     @DeleteMapping("/{id}")
     private ResponseEntity<ResponseUtil> delete(@PathVariable String id) {
         try {

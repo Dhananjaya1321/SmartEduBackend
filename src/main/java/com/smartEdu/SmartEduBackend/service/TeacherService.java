@@ -78,10 +78,36 @@ public class TeacherService {
         return savedTeacher;
     }
 
-    public Teacher update(String id, Teacher updated) {
-        teacherRepo.findById(id).orElseThrow(() -> new RuntimeException("Teacher not found!"));
-        updated.setId(id);
-        return teacherRepo.save(updated);
+    public TeacherRegisterRequest update(String id, TeacherRegisterRequest updated) {
+        Teacher oldTeacher = teacherRepo.findById(id).orElseThrow(() -> new RuntimeException("Teacher not found!"));
+        User oldUser = userRepo.findByProfileId(id);
+
+        Teacher teacher = Teacher.builder()
+                .id(id)
+                .fullName(updated.getFullName())
+                .schoolId(oldTeacher.getSchoolId())
+                .build();
+
+        teacherRepo.save(teacher);
+
+        User user = User.builder()
+                .id(oldUser.getId())
+                .nic(updated.getNic())
+                .contact(updated.getContact())
+                .username(updated.getUsername())
+                .password(oldUser.getPassword())
+                .address(updated.getAddress())
+                .email(updated.getEmail())
+                .role(Role.TEACHER)
+                .name(updated.getFullName())
+                .active(true)
+                .profileId(oldUser.getProfileId())
+                .institutionID(oldUser.getInstitutionID())
+                .build();
+
+        userRepo.save(user);
+
+        return updated;
     }
 
     public void delete(String id) {
