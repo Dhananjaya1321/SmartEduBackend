@@ -24,9 +24,11 @@ public class EventController {
     private EventService eventService;
 
     @PostMapping
-    public ResponseEntity<ResponseUtil> save(@RequestBody Event event) {
+    public ResponseEntity<ResponseUtil> save(@RequestBody Event event,@RequestHeader("Authorization") String authHeader
+    ) {
         try {
-            return ResponseEntity.ok(new ResponseUtil(HttpStatus.OK, "Event created successfully", eventService.save(event)));
+            String token = authHeader.replace("Bearer ", "");
+            return ResponseEntity.ok(new ResponseUtil(HttpStatus.OK, "Event created successfully", eventService.save(event,token)));
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
             return ExceptionHandler.handleException(e);
@@ -73,9 +75,12 @@ public class EventController {
     @GetMapping
     public ResponseEntity<ResponseUtil> findAll(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(defaultValue = "10") int size,
+            @RequestHeader("Authorization") String authHeader
+    ) {
         try {
-            return ResponseEntity.ok(new ResponseUtil(HttpStatus.OK, "Events retrieved successfully", eventService.findAll(page, size)));
+            String token = authHeader.replace("Bearer ", "");
+            return ResponseEntity.ok(new ResponseUtil(HttpStatus.OK, "Events retrieved successfully", eventService.findAll(page, size,token)));
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
             return ExceptionHandler.handleException(e);
