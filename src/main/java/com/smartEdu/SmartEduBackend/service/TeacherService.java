@@ -113,6 +113,8 @@ public class TeacherService {
     public void delete(String id) {
         teacherRepo.findById(id).orElseThrow(() -> new RuntimeException("Teacher not found!"));
         teacherRepo.deleteById(id);
+        User user = userRepo.findByProfileId(id);
+        userRepo.deleteById(user.getId());
     }
 
     public Optional<Teacher> findById(String id) {
