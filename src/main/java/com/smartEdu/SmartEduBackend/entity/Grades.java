@@ -19,8 +19,8 @@ public class Grades {
     @Id
     private String id;
     private String schoolId;
-    private List<String> streamsOfALs;
-    private int gradeName;
+    private String stream;
+    private String gradeName;
 
     private List<String> classIds;
 }

@@ -18,8 +18,8 @@ public class GradesResponse {
     @Id
     private String id;
     private String schoolId;
-    private int gradeName;
-    private List<String> streamsOfALs;
+    private String gradeName;
+    private String stream;
 
 
     private List<ClassRoomResponse> classRooms;

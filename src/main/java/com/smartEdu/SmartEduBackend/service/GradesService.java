@@ -36,16 +36,25 @@ public class GradesService {
         int end = Integer.parseInt(parts[1]);
 
         for (int i = 0; i < end; i++) {
-            Grades grades = Grades.builder()
-                    .gradeName(start)
-                    .schoolId(schoolId)
-                    .build();
-
             if (start==12 || start==13) {
-                grades.setStreamsOfALs(request.getStreamsOfALs());
+                for (int j = 0; j < request.getStreamsOfALs().size(); j++) {
+                    Grades gradesForALs = Grades.builder()
+                            .gradeName(start+"("+ request.getStreamsOfALs().get(j) +")")
+                            .schoolId(schoolId)
+                            .build();
+
+                    gradesRepo.save(gradesForALs);
+                }
+                start++;
+            }else {
+                Grades grades = Grades.builder()
+                        .gradeName(String.valueOf(start))
+                        .schoolId(schoolId)
+                        .build();
+
+                start++;
+                gradesRepo.save(grades);
             }
-            start++;
-            gradesRepo.save(grades);
         }
 
         return request;
@@ -84,7 +93,7 @@ public class GradesService {
                     .id(grade.getId())
                     .gradeName(grade.getGradeName())
                     .classRooms(classRooms)
-                    .streamsOfALs(grade.getStreamsOfALs())
+                    .stream(grade.getStream())
                     .build();
 
             gradesResponses.add(gradesResponse);
