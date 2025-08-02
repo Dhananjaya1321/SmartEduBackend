@@ -110,18 +110,6 @@ public class SchoolService {
         zonal.getSchoolsIds().add(savedSchool.getId());
         zonalEducationOfficeRepo.save(zonal);
 
-        /*create grades in school*/
-        String[] parts = school.getGradeSpan().split("-");
-        int start = Integer.parseInt(parts[0]);
-        int end = Integer.parseInt(parts[1]);
-        for (int i = 0; i < end; i++) {
-            Grades grades = Grades.builder()
-                    .gradeName(start++)
-                    .schoolId(savedSchool.getId())
-                    .build();
-            gradesRepo.save(grades);
-        }
-
         return savedSchool;
     }
 

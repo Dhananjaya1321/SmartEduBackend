@@ -14,13 +14,11 @@ import java.util.List;
 @NoArgsConstructor
 @Data
 @Builder
-@Document(collection = "grades")
-public class Grades {
+public class GradesResponse {
     @Id
     private String id;
     private String schoolId;
-    private List<String> streamsOfALs;
     private int gradeName;
 
-    private List<String> classIds;
+    private List<ClassRoom> classRooms;
 }
