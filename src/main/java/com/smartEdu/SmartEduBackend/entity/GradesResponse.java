@@ -19,6 +19,8 @@ public class GradesResponse {
     private String id;
     private String schoolId;
     private int gradeName;
+    private List<String> streamsOfALs;
+
 
     private List<ClassRoom> classRooms;
 }

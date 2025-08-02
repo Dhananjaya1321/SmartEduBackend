@@ -47,7 +47,6 @@ public class GradesService {
 
         return request;
     }
-
     public List<GradesResponse> getAllGrades(String token) {
         String institutionId = jwtUtil.extractInstitutionId(token);
         List<Grades> allBySchoolId = gradesRepo.findAllBySchoolId(institutionId);
@@ -56,20 +55,29 @@ public class GradesService {
 
         for (Grades grade : allBySchoolId) {
             List<ClassRoom> classRooms = new ArrayList<>();
-            for (String classId : grade.getClassIds()) {
-                ClassRoom classRoom = classRoomRepo.findById(classId).get();
-                classRooms.add(classRoom);
+
+            if (grade.getClassIds() != null && !grade.getClassIds().isEmpty()) {
+                for (String classId : grade.getClassIds()) {
+                    ClassRoom classRoom = classRoomRepo.findById(classId).orElse(null);
+                    if (classRoom != null) {
+                        classRooms.add(classRoom);
+                    }
+                }
             }
+
+
             GradesResponse gradesResponse = GradesResponse.builder()
                     .id(grade.getId())
                     .gradeName(grade.getGradeName())
                     .classRooms(classRooms)
+                    .streamsOfALs(grade.getStreamsOfALs())
                     .build();
 
             gradesResponses.add(gradesResponse);
         }
         return gradesResponses;
     }
+
 }
 
 
