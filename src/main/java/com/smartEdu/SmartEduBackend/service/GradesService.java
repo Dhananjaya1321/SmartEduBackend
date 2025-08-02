@@ -75,7 +75,7 @@ public class GradesService {
                         Teacher teacher = teacherRepo.findById(classRoom.getClassTeacherId()).get();
 
                         ClassRoomResponse classRoomResponse=ClassRoomResponse.builder()
-                                 .id(classRoom.getGradeId())
+                                 .id(classRoom.getId())
                                  .className(classRoom.getClassName())
                                  .gradeId(classRoom.getGradeId())
                                  .classTeacherId(classRoom.getClassTeacherId())

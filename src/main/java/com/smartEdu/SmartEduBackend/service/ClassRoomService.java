@@ -58,9 +58,10 @@ public class ClassRoomService {
     }
 
     public ClassRoom updateClass(String id, ClassRoom updated) {
-        classRoomRepo.findById(id).orElseThrow(() -> new RuntimeException("Class not found!"));
-        updated.setId(id);
-        return classRoomRepo.save(updated);
+        ClassRoom classRoom = classRoomRepo.findById(id).orElseThrow(() -> new RuntimeException("Class not found!"));
+        classRoom.setClassName(updated.getClassName());
+        classRoom.setClassTeacherId(updated.getClassTeacherId());
+        return classRoomRepo.save(classRoom);
     }
 
     public void deleteClass(String id) {
