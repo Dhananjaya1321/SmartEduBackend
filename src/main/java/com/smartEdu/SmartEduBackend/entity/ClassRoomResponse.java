@@ -6,7 +6,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.List;
 
@@ -14,13 +13,15 @@ import java.util.List;
 @NoArgsConstructor
 @Data
 @Builder
-public class GradesResponse {
+public class ClassRoomResponse {
     @Id
     private String id;
-    private String schoolId;
-    private int gradeName;
-    private List<String> streamsOfALs;
 
+    private String className;
+    private String gradeId;
+    private String classTeacherId;
+    private String classTeacherName;
+    private String classTeacherSubject;
 
-    private List<ClassRoomResponse> classRooms;
+    private List<String> studentIds;
 }

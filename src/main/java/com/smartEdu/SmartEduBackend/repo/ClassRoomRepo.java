@@ -5,5 +5,5 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import java.util.List;
 
 public interface ClassRoomRepo extends MongoRepository<ClassRoom, String> {
-    List<ClassRoom> findByGrade(String grade);
+    List<ClassRoom> findByGradeId(String grade);
 }

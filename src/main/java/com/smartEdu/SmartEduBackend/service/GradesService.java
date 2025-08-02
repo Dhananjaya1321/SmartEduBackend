@@ -1,9 +1,9 @@
 package com.smartEdu.SmartEduBackend.service;
 
 import com.smartEdu.SmartEduBackend.entity.*;
-import com.smartEdu.SmartEduBackend.enums.SchoolStatus;
 import com.smartEdu.SmartEduBackend.repo.ClassRoomRepo;
 import com.smartEdu.SmartEduBackend.repo.GradesRepo;
+import com.smartEdu.SmartEduBackend.repo.TeacherRepo;
 import com.smartEdu.SmartEduBackend.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,6 +20,9 @@ public class GradesService {
 
     @Autowired
     private GradesRepo gradesRepo;
+
+    @Autowired
+    private TeacherRepo teacherRepo;
 
     @Autowired
     private ClassRoomRepo classRoomRepo;
@@ -54,13 +57,24 @@ public class GradesService {
         List<GradesResponse> gradesResponses = new ArrayList<>();
 
         for (Grades grade : allBySchoolId) {
-            List<ClassRoom> classRooms = new ArrayList<>();
+            List<ClassRoomResponse> classRooms = new ArrayList<>();
 
             if (grade.getClassIds() != null && !grade.getClassIds().isEmpty()) {
                 for (String classId : grade.getClassIds()) {
                     ClassRoom classRoom = classRoomRepo.findById(classId).orElse(null);
                     if (classRoom != null) {
-                        classRooms.add(classRoom);
+                        Teacher teacher = teacherRepo.findById(classRoom.getClassTeacherId()).get();
+
+                        ClassRoomResponse classRoomResponse=ClassRoomResponse.builder()
+                                 .id(classRoom.getGradeId())
+                                 .className(classRoom.getClassName())
+                                 .gradeId(classRoom.getGradeId())
+                                 .classTeacherId(classRoom.getClassTeacherId())
+                                 .classTeacherName(teacher.getFullName())
+                                 .classTeacherSubject(classRoom.getClassTeacherSubject())
+                                 .studentIds(classRoom.getStudentIds())
+                                 .build();
+                        classRooms.add(classRoomResponse);
                     }
                 }
             }

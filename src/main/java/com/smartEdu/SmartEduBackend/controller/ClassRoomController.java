@@ -11,6 +11,7 @@ import com.smartEdu.SmartEduBackend.util.ExceptionHandler;
 import com.smartEdu.SmartEduBackend.util.ResponseUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
 import java.util.List;
 
 @RestController
@@ -21,14 +22,18 @@ public class ClassRoomController {
     @Autowired
     private ClassRoomService service;
 
-    @PostMapping("/create")
-    public ResponseEntity<ResponseUtil> createClass(@RequestBody ClassRoom classRoom) {
+    @PostMapping
+    public ResponseEntity<ResponseUtil> createClass(
+            @RequestBody ClassRoom classRoom,
+            @RequestHeader("Authorization") String authHeader
+    ) {
         try {
+            String token = authHeader.replace("Bearer ", "");
             return ResponseEntity.ok(
                     new ResponseUtil(
                             HttpStatus.OK,
                             "Class saved successfully.",
-                            service.createClass(classRoom)
+                            service.createClass(classRoom,token)
                     )
             );
         } catch (Exception e) {
@@ -82,6 +87,7 @@ public class ClassRoomController {
             return ExceptionHandler.handleException(e);
         }
     }
+
     @GetMapping("/{id}")
     private ResponseEntity<ResponseUtil> findById(@PathVariable String id) {
         try {
