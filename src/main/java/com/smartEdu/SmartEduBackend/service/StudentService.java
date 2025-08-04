@@ -1,5 +1,6 @@
 package com.smartEdu.SmartEduBackend.service;
 
+import com.smartEdu.SmartEduBackend.entity.ClassRoom;
 import com.smartEdu.SmartEduBackend.entity.School;
 import com.smartEdu.SmartEduBackend.entity.Student;
 import com.smartEdu.SmartEduBackend.entity.StudentResponse;
@@ -44,7 +45,13 @@ public class StudentService {
 
         String schoolId = jwtUtil.extractInstitutionId(token);
         student.setSchoolId(schoolId);
-        return studentRepo.save(student);
+        Student save = studentRepo.save(student);
+
+        ClassRoom classRoom = classRoomRepo.findById(student.getClassId()).get();
+        classRoom.getStudentIds().add(save.getId());
+        classRoomRepo.save(classRoom);
+
+        return save;
     }
 
     public Student update(String id, Student student) {
