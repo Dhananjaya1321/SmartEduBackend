@@ -16,8 +16,7 @@ import java.util.List;
 @NoArgsConstructor
 @Data
 @Builder
-@Document(collection = "students")
-public class Student {
+public class StudentResponse {
     @Id
     private String id;
 
@@ -37,8 +36,10 @@ public class Student {
     // Other Info
     private String registrationNumber;
     private String gradeId;
+    private String gradeName;
     private String schoolId;
     private String classId;
+    private String className;
 
     private List<Achievements> achievements = new ArrayList<>();
 }
