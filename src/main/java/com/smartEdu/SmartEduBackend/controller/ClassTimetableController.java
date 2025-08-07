@@ -22,11 +22,23 @@ public class ClassTimetableController {
     private ClassTimetableService service;
 
     @PostMapping
-    public ResponseEntity<ResponseUtil> save(@RequestBody ClassTimetable timetable) {
+    public ResponseEntity<ResponseUtil> save(
+            @RequestBody ClassTimetable timetable,
+            @RequestHeader("Authorization") String authHeader
+    ) {
         try {
-            return ResponseEntity.ok(new ResponseUtil(HttpStatus.OK, "Timetable saved successfully.", service.save(timetable)));
+            String token = authHeader.replace("Bearer ", "");
+            return ResponseEntity.ok(
+                    new ResponseUtil(
+                            HttpStatus.OK,
+                            "Timetable saved successfully.",
+                            service.save(timetable, token)
+                    )
+            );
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
+            if (e.getMessage().equals("Timetable is already exists!"))
+                    return ExceptionHandler.handleCustomException(HttpStatus.NOT_FOUND, e);
             return ExceptionHandler.handleException(e);
         }
     }
@@ -78,16 +90,6 @@ public class ClassTimetableController {
     public ResponseEntity<ResponseUtil> findAll() {
         try {
             return ResponseEntity.ok(new ResponseUtil(HttpStatus.OK, "All timetables loaded.", service.findAll()));
-        } catch (Exception e) {
-            LOGGER.error(e.getMessage());
-            return ExceptionHandler.handleException(e);
-        }
-    }
-
-    @GetMapping("/grade/{grade}")
-    public ResponseEntity<ResponseUtil> findByGrade(@PathVariable String grade) {
-        try {
-            return ResponseEntity.ok(new ResponseUtil(HttpStatus.OK, "Grade timetables loaded.", service.findByGrade(grade)));
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
             return ExceptionHandler.handleException(e);

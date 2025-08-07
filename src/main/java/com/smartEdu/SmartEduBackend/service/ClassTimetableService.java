@@ -2,6 +2,7 @@ package com.smartEdu.SmartEduBackend.service;
 
 import com.smartEdu.SmartEduBackend.entity.ClassTimetable;
 import com.smartEdu.SmartEduBackend.repo.ClassTimetableRepo;
+import com.smartEdu.SmartEduBackend.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,11 +13,19 @@ import java.util.Optional;
 @Service
 @Transactional
 public class ClassTimetableService {
+    @Autowired
+    private JwtUtil jwtUtil;
 
     @Autowired
     private ClassTimetableRepo classTimetableRepo;
 
-    public ClassTimetable save(ClassTimetable timetable) {
+    public ClassTimetable save(ClassTimetable timetable, String token) {
+        Optional<ClassTimetable> classTimetable = classTimetableRepo.findByClassId(timetable.getClassId());
+        if (classTimetable.isPresent())
+            throw new RuntimeException("Timetable is already exists!");
+
+        String institutionId = jwtUtil.extractInstitutionId(token);
+        timetable.setSchoolId(institutionId);
         return classTimetableRepo.save(timetable);
     }
 
@@ -41,9 +50,5 @@ public class ClassTimetableService {
 
     public List<ClassTimetable> findAll() {
         return classTimetableRepo.findAll();
-    }
-
-    public List<ClassTimetable> findByGrade(String grade) {
-        return classTimetableRepo.findByGrade(grade);
     }
 }
