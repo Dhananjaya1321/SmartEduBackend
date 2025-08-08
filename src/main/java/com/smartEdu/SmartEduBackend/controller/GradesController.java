@@ -59,4 +59,19 @@ public class GradesController {
             return ExceptionHandler.handleException(e);
         }
     }
+
+    @GetMapping("/grades-with-timetables")
+    private ResponseEntity<ResponseUtil> getAllGradesWithTimetables(
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            return ResponseEntity.ok(
+                    new ResponseUtil(HttpStatus.OK, "Schools retrieved successfully.", service.getAllGradesWithTimetables(token))
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return ExceptionHandler.handleException(e);
+        }
+    }
 }

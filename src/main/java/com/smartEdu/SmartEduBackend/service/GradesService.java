@@ -2,6 +2,7 @@ package com.smartEdu.SmartEduBackend.service;
 
 import com.smartEdu.SmartEduBackend.entity.*;
 import com.smartEdu.SmartEduBackend.repo.ClassRoomRepo;
+import com.smartEdu.SmartEduBackend.repo.ClassTimetableRepo;
 import com.smartEdu.SmartEduBackend.repo.GradesRepo;
 import com.smartEdu.SmartEduBackend.repo.TeacherRepo;
 import com.smartEdu.SmartEduBackend.util.JwtUtil;
@@ -20,6 +21,9 @@ public class GradesService {
 
     @Autowired
     private GradesRepo gradesRepo;
+
+    @Autowired
+    private ClassTimetableRepo classTimetableRepo;
 
     @Autowired
     private TeacherRepo teacherRepo;
@@ -101,6 +105,49 @@ public class GradesService {
         return gradesResponses;
     }
 
+    public List<GradesResponse> getAllGradesWithTimetables(String token) {
+        String institutionId = jwtUtil.extractInstitutionId(token);
+        List<Grades> allBySchoolId = gradesRepo.findAllBySchoolId(institutionId);
+
+        List<GradesResponse> gradesResponses = new ArrayList<>();
+
+        for (Grades grade : allBySchoolId) {
+            List<ClassRoomResponse> classRooms = new ArrayList<>();
+
+            if (grade.getClassIds() != null && !grade.getClassIds().isEmpty()) {
+                for (String classId : grade.getClassIds()) {
+                    ClassRoom classRoom = classRoomRepo.findById(classId).orElse(null);
+                    ClassTimetable classTimetable = classTimetableRepo.findByClassId(classId).orElse(null);
+                    if (classRoom != null) {
+                        Teacher teacher = teacherRepo.findById(classRoom.getClassTeacherId()).get();
+
+                        ClassRoomResponse classRoomResponse=ClassRoomResponse.builder()
+                                .id(classRoom.getId())
+                                .className(classRoom.getClassName())
+                                .gradeId(classRoom.getGradeId())
+                                .classTeacherId(classRoom.getClassTeacherId())
+                                .classTeacherName(teacher.getFullName())
+                                .classTeacherSubject(classRoom.getClassTeacherSubject())
+                                .studentIds(classRoom.getStudentIds())
+                                .timetable(classTimetable)
+                                .build();
+                        classRooms.add(classRoomResponse);
+                    }
+                }
+            }
+
+
+            GradesResponse gradesResponse = GradesResponse.builder()
+                    .id(grade.getId())
+                    .gradeName(grade.getGradeName())
+                    .classRooms(classRooms)
+                    .stream(grade.getStream())
+                    .build();
+
+            gradesResponses.add(gradesResponse);
+        }
+        return gradesResponses;
+    }
 }
 
 

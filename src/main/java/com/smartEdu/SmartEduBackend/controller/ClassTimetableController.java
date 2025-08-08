@@ -95,4 +95,14 @@ public class ClassTimetableController {
             return ExceptionHandler.handleException(e);
         }
     }
+
+    @GetMapping("/by-gradeId/{gradeId}")
+    public ResponseEntity<ResponseUtil> findAllTimetablesByGradeId(@PathVariable String gradeId) {
+        try {
+            return ResponseEntity.ok(new ResponseUtil(HttpStatus.OK, "All timetables loaded.", service.findAllTimetablesByGradeId(gradeId)));
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return ExceptionHandler.handleException(e);
+        }
+    }
 }

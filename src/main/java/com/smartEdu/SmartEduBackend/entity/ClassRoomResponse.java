@@ -23,5 +23,6 @@ public class ClassRoomResponse {
     private String classTeacherName;
     private String classTeacherSubject;
 
+    private ClassTimetable timetable;
     private List<String> studentIds;
 }
