@@ -124,4 +124,27 @@ public class StudentController {
             return ExceptionHandler.handleException(e);
         }
     }
+
+    @GetMapping("/search/{inputValue}/{selectedApplication}")
+    private ResponseEntity<ResponseUtil> searchStudentsByName(
+            @RequestHeader("Authorization") String authHeader,
+            @PathVariable String inputValue,
+            @PathVariable String selectedApplication
+    ) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            return ResponseEntity.ok(
+                    new ResponseUtil(
+                            HttpStatus.OK,
+                            "Loaded successfully.",
+                            service.searchStudentsByName(token,inputValue,selectedApplication)
+                    )
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            if (e.getMessage().equals("School not found"))
+                return ExceptionHandler.handleCustomException(HttpStatus.NOT_FOUND, e);
+            return ExceptionHandler.handleException(e);
+        }
+    }
 }

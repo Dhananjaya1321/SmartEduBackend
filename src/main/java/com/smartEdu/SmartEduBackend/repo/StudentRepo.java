@@ -15,4 +15,7 @@ public interface StudentRepo extends MongoRepository<Student, String> {
     long countBySchoolIdAndEntryDateBetween(String schoolId, LocalDate start, LocalDate end);
 
     List<Student> findAllBySchoolId(String schoolId);
+
+    @Query("{ 'schoolId': ?0, 'gradeId': ?2, 'fullName': { $regex: ?1, $options: 'i' } }")
+    List<Student> findAllBySchoolIdAndFullNameAndGradeId(String schoolId,String fullName,String gradeId);
 }
