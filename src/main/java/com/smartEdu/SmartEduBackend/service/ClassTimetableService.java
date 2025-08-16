@@ -1,9 +1,7 @@
 package com.smartEdu.SmartEduBackend.service;
 
-import com.smartEdu.SmartEduBackend.entity.ClassRoom;
-import com.smartEdu.SmartEduBackend.entity.ClassTimetable;
-import com.smartEdu.SmartEduBackend.repo.ClassRoomRepo;
-import com.smartEdu.SmartEduBackend.repo.ClassTimetableRepo;
+import com.smartEdu.SmartEduBackend.entity.*;
+import com.smartEdu.SmartEduBackend.repo.*;
 import com.smartEdu.SmartEduBackend.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,6 +16,15 @@ import java.util.Optional;
 public class ClassTimetableService {
     @Autowired
     private JwtUtil jwtUtil;
+
+    @Autowired
+    private UserRepo userRepo;
+
+    @Autowired
+    private StudentRepo studentRepo;
+
+    @Autowired
+    private ParentRepo parentRepo;
 
     @Autowired
     private ClassRoomRepo classRoomRepo;
@@ -66,5 +73,17 @@ public class ClassTimetableService {
             classTimetable.ifPresent(classTimetables::add);
         }
         return classTimetables;
+    }
+
+    public ClassTimetable findTimetableToParent(String token) {
+        String username = jwtUtil.extractUsername(token);
+        User user = userRepo.findByUsername(username).get();
+        String profileId = user.getProfileId();
+
+        Parent parent = parentRepo.findById(profileId).get();
+        Student student = studentRepo.findById(parent.getStudentIds().getFirst()).get();
+        String classId = student.getClassId();
+
+        return classTimetableRepo.findByClassId(classId).get();
     }
 }
