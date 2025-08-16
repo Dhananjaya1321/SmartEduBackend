@@ -132,4 +132,24 @@ public class SchoolController {
             return ExceptionHandler.handleException(e);
         }
     }
+
+    @GetMapping("/to-teacher/{province}/{district}/{zonal}")
+    private ResponseEntity<ResponseUtil> getAllSchoolsByProvinceAndDistrictAndZonal(
+            @PathVariable String province,
+            @PathVariable String district,
+            @PathVariable String zonal
+    ) {
+        try {
+            return ResponseEntity.ok(
+                    new ResponseUtil(
+                            HttpStatus.OK,
+                            "Schools retrieved successfully.",
+                            service.getAllSchoolsByProvinceAndDistrictAndZonal(province,district,zonal)
+                    )
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return ExceptionHandler.handleException(e);
+        }
+    }
 }

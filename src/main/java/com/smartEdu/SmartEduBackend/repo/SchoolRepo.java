@@ -12,5 +12,7 @@ import java.util.Optional;
 public interface SchoolRepo extends MongoRepository<School, String> {
 
     Page<School> findAllByStatus(Pageable pageable);
+
+    Optional<School> findByProvinceAndDistrictAndZonal(String province,String district,String zonal);
 }
 
