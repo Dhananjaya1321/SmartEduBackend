@@ -30,6 +30,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/exams/**").permitAll()
                         .requestMatchers("/api/schools/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/teachers/register").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/parents/register").permitAll()
                         .requestMatchers("/api/pmoe/**").hasAnyRole("MOE_ADMIN","MOE_EMPLOYEE","PMOE_ADMIN","PMOE_EMPLOYEE")
                         .requestMatchers("/api/parents/**").hasAnyRole("PARENT")
                         .requestMatchers("/api/letters/**").hasAnyRole("PARENT","SCHOOL_ADMIN")
