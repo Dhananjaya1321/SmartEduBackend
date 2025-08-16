@@ -2,6 +2,7 @@ package com.smartEdu.SmartEduBackend.service;
 
 import com.smartEdu.SmartEduBackend.entity.*;
 import com.smartEdu.SmartEduBackend.repo.*;
+import com.smartEdu.SmartEduBackend.util.FindStudentByParentUsernameUtil;
 import com.smartEdu.SmartEduBackend.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -20,16 +21,7 @@ public class EventService {
     private JwtUtil jwtUtil;
 
     @Autowired
-    private UserRepo userRepo;
-
-    @Autowired
     private GradesRepo gradesRepo;
-
-    @Autowired
-    private StudentRepo studentRepo;
-
-    @Autowired
-    private ParentRepo parentRepo;
 
     @Autowired
     private EventRepo eventRepo;
@@ -64,12 +56,7 @@ public class EventService {
     }
 
     public List<Event> getEventsByGrade(String token) {
-        String username = jwtUtil.extractUsername(token);
-        User user = userRepo.findByUsername(username).get();
-        String profileId = user.getProfileId();
-
-        Parent parent = parentRepo.findById(profileId).get();
-        Student student = studentRepo.findById(parent.getStudentIds().getFirst()).get();
+        Student student = new FindStudentByParentUsernameUtil().getStudent(token);
         String gradeId = student.getGradeId();
 
         Grades grades = gradesRepo.findById(gradeId).get();
@@ -84,9 +71,6 @@ public class EventService {
 
         return eventList;
     }
-
-
-
 
     public static List<String> getMatchingGrades(String input) {
         // Parse the grade number from input (ignore stream if present)
