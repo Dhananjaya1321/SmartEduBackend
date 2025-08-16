@@ -88,9 +88,11 @@ public class EventController {
     }
 
     @GetMapping("/by-grade")
-    public ResponseEntity<ResponseUtil> getEventsByGrade(@RequestParam String grade) {
+    public ResponseEntity<ResponseUtil> getEventsByGrade(@RequestHeader("Authorization") String authHeader
+    ) {
         try {
-            List<Event> events = eventService.getEventsByGrade(grade);
+            String token = authHeader.replace("Bearer ", "");
+            List<Event> events = eventService.getEventsByGrade(token);
             return ResponseEntity.ok(new ResponseUtil(HttpStatus.OK, "Events fetched successfully.", events));
         } catch (Exception e) {
             LOGGER.error("Error fetching events by grade", e);
