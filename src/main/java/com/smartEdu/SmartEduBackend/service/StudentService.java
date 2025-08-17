@@ -25,9 +25,11 @@ public class StudentService {
     @Autowired
     private ParentRepo parentRepo;
 
-
     @Autowired
     private StudentRepo studentRepo;
+
+    @Autowired
+    private TeacherRepo teacherRepo;
 
     @Autowired
     private GradesRepo gradesRepo;
@@ -72,6 +74,32 @@ public class StudentService {
         return studentRepo.findById(id);
     }
 
+
+    public List<StudentResponse> findMyClassAllStudents(String token) {
+        String username = jwtUtil.extractUsername(token);
+        User user = userRepo.findByUsername(username).get();
+        String profileId = user.getProfileId();
+
+        ClassRoom byClassTeacherId = classRoomRepo.findByClassTeacherId(profileId);
+
+        List<StudentResponse> studentList=new ArrayList<>();
+        for (String s:byClassTeacherId.getStudentIds()){
+            Student student = studentRepo.findById(s).get();
+
+            StudentResponse studentResponse=StudentResponse
+                    .builder()
+                    .id(student.getId())
+                    .fullNameWithInitials(student.getFullNameWithInitials())
+                    .registrationNumber(student.getRegistrationNumber())
+                    .gradeName(gradesRepo.findById(student.getGradeId()).get().getGradeName())
+                    .gradeId(student.getGradeId())
+                    .className(classRoomRepo.findById(student.getClassId()).get().getClassName())
+                    .classId(student.getClassId())
+                    .build();
+            studentList.add(studentResponse);
+        }
+        return studentList;
+    }
 
     public StudentResponse findStudentToParent(String token) {
         String username = jwtUtil.extractUsername(token);

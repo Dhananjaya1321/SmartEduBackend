@@ -77,15 +77,16 @@ public class EventService {
         List<String> matchingGrades = getMatchingGrades(gradeName);
         List<Event> eventList=new ArrayList<>();
         for (String g:matchingGrades){
-            List<Event> byGrades = eventRepo.findByGrades(g);
+            List<Event> byGrades = eventRepo.findByGradesAndSchoolId(g,student.getSchoolId());
             eventList.addAll(byGrades);
         }
 
         return eventList;
     }
 
-
-
+    public List<Event> getEventsToTeacher(String token) {
+       return eventRepo.findByGradesAndSchoolId("all_grade",jwtUtil.extractInstitutionId(token));
+    }
 
     public static List<String> getMatchingGrades(String input) {
         // Parse the grade number from input (ignore stream if present)

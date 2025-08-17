@@ -11,4 +11,6 @@ public interface ClassRoomRepo extends MongoRepository<ClassRoom, String> {
 
     @Query("{ 'className': { $regex: '^?0-', $options: 'i' } }")
     List<ClassRoom> findClassByGradeName(String keyword);
+
+    ClassRoom findByClassTeacherId(String profileId);
 }

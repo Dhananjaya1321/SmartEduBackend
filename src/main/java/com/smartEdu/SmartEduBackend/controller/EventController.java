@@ -88,11 +88,26 @@ public class EventController {
     }
 
     @GetMapping("/by-grade")
-    public ResponseEntity<ResponseUtil> getEventsByGrade(@RequestHeader("Authorization") String authHeader
+    public ResponseEntity<ResponseUtil> getEventsByGrade(
+            @RequestHeader("Authorization") String authHeader
     ) {
         try {
             String token = authHeader.replace("Bearer ", "");
             List<Event> events = eventService.getEventsByGrade(token);
+            return ResponseEntity.ok(new ResponseUtil(HttpStatus.OK, "Events fetched successfully.", events));
+        } catch (Exception e) {
+            LOGGER.error("Error fetching events by grade", e);
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
+    @GetMapping("/to-teacher")
+    public ResponseEntity<ResponseUtil> getEventsToTeacher(
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            List<Event> events = eventService.getEventsToTeacher(token);
             return ResponseEntity.ok(new ResponseUtil(HttpStatus.OK, "Events fetched successfully.", events));
         } catch (Exception e) {
             LOGGER.error("Error fetching events by grade", e);

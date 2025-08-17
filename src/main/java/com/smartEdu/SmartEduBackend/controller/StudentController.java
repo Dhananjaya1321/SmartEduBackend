@@ -102,6 +102,22 @@ public class StudentController {
         }
     }
 
+    @GetMapping("/my-class/to-teacher")
+    private ResponseEntity<ResponseUtil> findMyClassAllStudents(
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            return ResponseEntity.ok(
+                    new ResponseUtil(HttpStatus.OK, "Student retrieved successfully.", service.findMyClassAllStudents(token)
+                    )
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
     @GetMapping
     private ResponseEntity<ResponseUtil> findAll(
             @RequestParam(defaultValue = "0") int page,
