@@ -75,6 +75,23 @@ public class StudentService {
     }
 
 
+    public List<StudentResponse> findClassAllStudentsByClassId(String id) {
+        ClassRoom classRoom = classRoomRepo.findById(id).get();
+        List<StudentResponse> studentList = new ArrayList<>();
+        for (String s : classRoom.getStudentIds()) {
+            Student student = studentRepo.findById(s).get();
+
+            StudentResponse studentResponse = StudentResponse
+                    .builder()
+                    .id(student.getId())
+                    .fullNameWithInitials(student.getFullNameWithInitials())
+                    .registrationNumber(student.getRegistrationNumber())
+                    .build();
+            studentList.add(studentResponse);
+        }
+        return studentList;
+    }
+
     public List<StudentResponse> findMyClassAllStudents(String token) {
         String username = jwtUtil.extractUsername(token);
         User user = userRepo.findByUsername(username).get();
@@ -82,11 +99,11 @@ public class StudentService {
 
         ClassRoom byClassTeacherId = classRoomRepo.findByClassTeacherId(profileId);
 
-        List<StudentResponse> studentList=new ArrayList<>();
-        for (String s:byClassTeacherId.getStudentIds()){
+        List<StudentResponse> studentList = new ArrayList<>();
+        for (String s : byClassTeacherId.getStudentIds()) {
             Student student = studentRepo.findById(s).get();
 
-            StudentResponse studentResponse=StudentResponse
+            StudentResponse studentResponse = StudentResponse
                     .builder()
                     .id(student.getId())
                     .fullNameWithInitials(student.getFullNameWithInitials())

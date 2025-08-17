@@ -118,6 +118,21 @@ public class StudentController {
         }
     }
 
+    @GetMapping("/other-class-by-class-id/to-teacher/{id}")
+    private ResponseEntity<ResponseUtil> findClassAllStudentsByClassId(
+            @PathVariable String id
+    ) {
+        try {
+            return ResponseEntity.ok(
+                    new ResponseUtil(HttpStatus.OK, "Student retrieved successfully.", service.findClassAllStudentsByClassId(id)
+                    )
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
     @GetMapping
     private ResponseEntity<ResponseUtil> findAll(
             @RequestParam(defaultValue = "0") int page,
