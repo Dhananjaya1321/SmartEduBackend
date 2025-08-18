@@ -131,4 +131,11 @@ public class ClassTimetableService {
                 .timetablePeriods(teacherPeriods)
                 .build();
     }
+
+    public ClassTimetable findOtherClassesTimetableToTeacherByClassId(String classId) {
+        if (classTimetableRepo.findByClassId(classId).isPresent()){
+            return classTimetableRepo.findByClassId(classId).get();
+        }
+        return null;
+    }
 }

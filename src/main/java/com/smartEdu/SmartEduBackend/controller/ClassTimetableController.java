@@ -38,7 +38,7 @@ public class ClassTimetableController {
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
             if (e.getMessage().equals("Timetable is already exists!"))
-                    return ExceptionHandler.handleCustomException(HttpStatus.NOT_FOUND, e);
+                return ExceptionHandler.handleCustomException(HttpStatus.NOT_FOUND, e);
             return ExceptionHandler.handleException(e);
         }
     }
@@ -132,6 +132,21 @@ public class ClassTimetableController {
                     HttpStatus.OK,
                     "All timetables loaded.",
                     service.findMyClassesTimetableToTeacher(token)));
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
+    @GetMapping("/other-classes/to-teacher/{classId}")
+    public ResponseEntity<ResponseUtil> findOtherClassesTimetableToTeacherByClassId(
+            @PathVariable String classId
+    ) {
+        try {
+            return ResponseEntity.ok(new ResponseUtil(
+                    HttpStatus.OK,
+                    "All timetables loaded.",
+                    service.findOtherClassesTimetableToTeacherByClassId(classId)));
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
             return ExceptionHandler.handleException(e);
