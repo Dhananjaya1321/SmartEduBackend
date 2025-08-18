@@ -121,4 +121,20 @@ public class ClassTimetableController {
             return ExceptionHandler.handleException(e);
         }
     }
+
+    @GetMapping("/my-classes/to-teacher")
+    public ResponseEntity<ResponseUtil> findMyClassesTimetableToTeacher(
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            return ResponseEntity.ok(new ResponseUtil(
+                    HttpStatus.OK,
+                    "All timetables loaded.",
+                    service.findMyClassesTimetableToTeacher(token)));
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return ExceptionHandler.handleException(e);
+        }
+    }
 }

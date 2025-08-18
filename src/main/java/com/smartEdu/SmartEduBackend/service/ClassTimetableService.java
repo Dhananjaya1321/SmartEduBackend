@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -85,5 +86,49 @@ public class ClassTimetableService {
         String classId = student.getClassId();
 
         return classTimetableRepo.findByClassId(classId).get();
+    }
+
+    public ClassTimetable findMyClassesTimetableToTeacher(String token) {
+        String username = jwtUtil.extractUsername(token);
+        String schoolId = jwtUtil.extractInstitutionId(token);
+        User user = userRepo.findByUsername(username).orElseThrow();
+        String profileId = user.getProfileId();
+
+        // Get all class timetables in the school
+        List<ClassTimetable> classTimetables = classTimetableRepo.findBySchoolId(schoolId);
+
+        // Initialize teacher timetable with empty 8 periods
+        List<TimetablePeriod> teacherPeriods = new ArrayList<>();
+        for (int i = 0; i < 8; i++) {
+            TimetablePeriod period = TimetablePeriod.builder()
+                    .period(i)
+                    .slots(new ArrayList<>(Collections.nCopies(5, null))) // 5 days
+                    .build();
+            teacherPeriods.add(period);
+        }
+
+        // Loop through all class timetables
+        for (ClassTimetable ct : classTimetables) {
+            for (TimetablePeriod tp : ct.getTimetablePeriods()) {
+                int periodNumber = tp.getPeriod()-1;
+
+                // Loop through slots (5 days)
+                for (int day = 0; day < tp.getSlots().size(); day++) {
+                    TimetableSlot slot = tp.getSlots().get(day);
+
+                    if (slot != null && slot.getTeacherId().equals(profileId)) {
+                        // Place teacher's slot into their timetable
+                        teacherPeriods.get(periodNumber).getSlots().set(day, slot);
+                    }
+                }
+            }
+        }
+
+        // Build final timetable object for teacher
+        return ClassTimetable.builder()
+                .schoolId(schoolId)
+                .classId("TEACHER_" + profileId) // pseudo classId to represent teacher
+                .timetablePeriods(teacherPeriods)
+                .build();
     }
 }
