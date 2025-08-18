@@ -1,6 +1,7 @@
 package com.smartEdu.SmartEduBackend.controller;
 
 import com.smartEdu.SmartEduBackend.entity.Attendance;
+import com.smartEdu.SmartEduBackend.entity.AttendanceRequest;
 import com.smartEdu.SmartEduBackend.service.AttendanceService;
 import com.smartEdu.SmartEduBackend.util.ExceptionHandler;
 import com.smartEdu.SmartEduBackend.util.ResponseUtil;
@@ -26,10 +27,9 @@ public class AttendanceController {
     private AttendanceService attendanceService;
 
     @PostMapping
-    public ResponseEntity<ResponseUtil> saveAttendance(@RequestBody Attendance attendance) {
+    public ResponseEntity<ResponseUtil> saveAttendance(@RequestBody AttendanceRequest attendance) {
         try {
-            Attendance saved = attendanceService.saveAttendance(attendance);
-            return ResponseEntity.ok(new ResponseUtil(HttpStatus.OK, "Attendance saved successfully", saved));
+            return ResponseEntity.ok(new ResponseUtil(HttpStatus.OK, "Attendance saved successfully", attendanceService.saveAttendance(attendance)));
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
             return ExceptionHandler.handleException(e);

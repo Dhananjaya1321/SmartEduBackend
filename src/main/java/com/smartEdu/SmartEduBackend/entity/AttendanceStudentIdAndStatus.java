@@ -1,7 +1,10 @@
 package com.smartEdu.SmartEduBackend.entity;
 
 import com.smartEdu.SmartEduBackend.enums.AttendanceStatus;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -11,14 +14,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Document(collection = "attendances")
-public class Attendance {
-
-    @Id
-    private String id;
-
+public class AttendanceStudentIdAndStatus {
     private String studentId;
-    private String classId;
-    private LocalDate date;
     private AttendanceStatus status;
 }

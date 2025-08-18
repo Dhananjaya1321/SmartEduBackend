@@ -1,6 +1,7 @@
 package com.smartEdu.SmartEduBackend.service;
 
 import com.smartEdu.SmartEduBackend.entity.Attendance;
+import com.smartEdu.SmartEduBackend.entity.AttendanceRequest;
 import com.smartEdu.SmartEduBackend.repo.AttendanceRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,8 +17,18 @@ public class AttendanceService {
     @Autowired
     private AttendanceRepo attendanceRepository;
 
-    public Attendance saveAttendance(Attendance attendance) {
-        return attendanceRepository.save(attendance);
+    public AttendanceRequest saveAttendance(AttendanceRequest attendance) {
+        for (int i = 0; i < attendance.getAttendance().size(); i++) {
+            attendanceRepository.save(
+                    Attendance.builder()
+                            .date(attendance.getDate())
+                            .classId(attendance.getClassId())
+                            .studentId(attendance.getAttendance().get(i).getStudentId())
+                            .status(attendance.getAttendance().get(i).getStatus())
+                            .build()
+            );
+        }
+        return attendance;
     }
 
     public List<Attendance> getTodayAttendanceByClass(String classId) {
