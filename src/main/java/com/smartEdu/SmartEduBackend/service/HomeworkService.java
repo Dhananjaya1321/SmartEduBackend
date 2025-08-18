@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @Transactional
@@ -19,10 +18,9 @@ public class HomeworkService {
     @Autowired
     private ClassRoomRepo classRoomRepo;
 
-    public Homeworks save(Homeworks homework) {
+    public Homeworks saveHomework(Homeworks homework) {
         return homeworkRepo.save(homework);
     }
-
     public Homeworks update(String id, Homeworks updatedHomework) {
         homeworkRepo.findById(id).orElseThrow(() -> new RuntimeException("Homework is not exists!"));
 
