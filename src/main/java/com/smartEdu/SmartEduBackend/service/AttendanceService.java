@@ -2,12 +2,15 @@ package com.smartEdu.SmartEduBackend.service;
 
 import com.smartEdu.SmartEduBackend.entity.Attendance;
 import com.smartEdu.SmartEduBackend.entity.AttendanceRequest;
+import com.smartEdu.SmartEduBackend.entity.AttendanceResponse;
 import com.smartEdu.SmartEduBackend.repo.AttendanceRepo;
+import com.smartEdu.SmartEduBackend.repo.StudentRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -16,6 +19,9 @@ public class AttendanceService {
 
     @Autowired
     private AttendanceRepo attendanceRepository;
+
+    @Autowired
+    private StudentRepo studentRepo;
 
     public AttendanceRequest saveAttendance(AttendanceRequest attendance) {
         for (int i = 0; i < attendance.getAttendance().size(); i++) {
@@ -31,8 +37,25 @@ public class AttendanceService {
         return attendance;
     }
 
-    public List<Attendance> getTodayAttendanceByClass(String classId) {
-        return attendanceRepository.findByClassIdAndDate(classId, LocalDate.now());
+    public List<AttendanceResponse> getTodayAttendanceByClass(String classId) {
+        List<Attendance> byClassIdAndDate = attendanceRepository.findByClassIdAndDate(classId, LocalDate.now());
+        List<AttendanceResponse> attendanceResponses = new ArrayList<>();
+        for (Attendance a:byClassIdAndDate){
+            attendanceResponses.add(AttendanceResponse.builder()
+                    .studentId(a.getStudentId())
+                    .studentName(studentRepo.findById(a.getStudentId()).get().getFullNameWithInitials())
+                    .status(a.getStatus())
+                    .build());
+        }
+
+        return attendanceResponses;
+    }
+
+    public List<Attendance> getAllAttendanceByStudentId(String studentId) {
+        int year = LocalDate.now().getYear();
+        LocalDate startDate = LocalDate.parse(year + "-01-01");
+        LocalDate today = LocalDate.now().plusDays(1);
+        return attendanceRepository.findByStudentIdAndDateBetween(studentId,startDate,today );
     }
 
     public List<Attendance> getClassAttendanceBetween(String classId, LocalDate start, LocalDate end) {

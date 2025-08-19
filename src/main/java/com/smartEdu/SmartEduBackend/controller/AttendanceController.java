@@ -36,11 +36,26 @@ public class AttendanceController {
         }
     }
 
-    @GetMapping("/class/today")
-    public ResponseEntity<ResponseUtil> getTodayAttendance(@RequestParam String classId) {
+    @GetMapping("/class/today/{classId}")
+    public ResponseEntity<ResponseUtil> getTodayAttendance(@PathVariable String classId) {
         try {
-            List<Attendance> result = attendanceService.getTodayAttendanceByClass(classId);
-            return ResponseEntity.ok(new ResponseUtil(HttpStatus.OK, "Today's class attendance fetched", result));
+            return ResponseEntity.ok(new ResponseUtil(HttpStatus.OK, "Today's class attendance fetched", attendanceService.getTodayAttendanceByClass(classId)));
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
+    @GetMapping("/class/by-student-id/{studentId}")
+    public ResponseEntity<ResponseUtil> getAllAttendanceByStudentId(@PathVariable String studentId) {
+        try {
+            return ResponseEntity.ok(
+                    new ResponseUtil(
+                            HttpStatus.OK,
+                            "Today's class attendance fetched",
+                            attendanceService.getAllAttendanceByStudentId(studentId)
+                    )
+            );
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
             return ExceptionHandler.handleException(e);
