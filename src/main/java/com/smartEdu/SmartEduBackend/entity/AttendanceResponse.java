@@ -17,5 +17,9 @@ import java.time.LocalDate;
 public class AttendanceResponse {
     private String studentId;
     private String studentName;
+    private int totalAttended;
+    private int totalAbsent;
+    private int totalDays;
+    private double attendedRate;
     private AttendanceStatus status;
 }

@@ -46,6 +46,16 @@ public class AttendanceController {
         }
     }
 
+    @GetMapping("/class/year/{classId}")
+    public ResponseEntity<ResponseUtil> getAllStudentsAllAttendanceByClassId(@PathVariable String classId) {
+        try {
+            return ResponseEntity.ok(new ResponseUtil(HttpStatus.OK, "Today's class attendance fetched", attendanceService.getAllStudentsAllAttendanceByClassId(classId)));
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
     @GetMapping("/class/by-student-id/{studentId}")
     public ResponseEntity<ResponseUtil> getAllAttendanceByStudentId(@PathVariable String studentId) {
         try {
