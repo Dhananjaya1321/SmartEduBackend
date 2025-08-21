@@ -91,13 +91,13 @@ public class LetterRequestController {
 
     @PutMapping("/reject/{id}")
     public ResponseEntity<ResponseUtil> rejectRequest(
-            @PathVariable String id,
-            @RequestParam String principalRemarks
+            @PathVariable String id
+//            @RequestParam String principalRemarks
     ) {
         try {
             return ResponseEntity.ok(
                     new ResponseUtil(HttpStatus.OK, "Letter rejected successfully.",
-                            service.reject(id, principalRemarks))
+                            service.reject(id))
             );
         } catch (Exception e) {
             return ExceptionHandler.handleException(e);

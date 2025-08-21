@@ -105,10 +105,10 @@ public class LetterRequestService {
         return letterRequestRepo.save(request);
     }
 
-    public LetterRequest reject(String id, String remarks) {
+    public LetterRequest reject(String id) {
         LetterRequest request = letterRequestRepo.findById(id).orElseThrow(() -> new RuntimeException("Letter not found"));
         request.setStatus(LetterStatus.REJECTED);
-        request.setPrincipalRemarks(remarks);
+        request.setPrincipalRemarks("Visit the principal at the school.");
         return letterRequestRepo.save(request);
     }
 
