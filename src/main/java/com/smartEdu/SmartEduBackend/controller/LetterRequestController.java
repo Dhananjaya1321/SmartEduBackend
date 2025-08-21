@@ -20,10 +20,18 @@ public class LetterRequestController {
     private LetterRequestService service;
 
     @PostMapping
-    public ResponseEntity<ResponseUtil> createRequest(@RequestBody LetterRequest request) {
+    public ResponseEntity<ResponseUtil> createRequest(
+            @RequestBody LetterRequest request,
+            @RequestHeader("Authorization") String authHeader
+    ) {
         try {
+            String token = authHeader.replace("Bearer ", "");
             return ResponseEntity.ok(
-                    new ResponseUtil(HttpStatus.CREATED, "Letter request submitted successfully.", service.create(request))
+                    new ResponseUtil(
+                            HttpStatus.CREATED,
+                            "Letter request submitted successfully.",
+                            service.create(request,token)
+                    )
             );
         } catch (Exception e) {
             return ExceptionHandler.handleException(e);
@@ -56,6 +64,20 @@ public class LetterRequestController {
             return ResponseEntity.ok(
                     new ResponseUtil(HttpStatus.OK, "Letter rejected successfully.",
                             service.reject(id, principalRemarks))
+            );
+        } catch (Exception e) {
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
+    @GetMapping("/accepted/to-parents")
+    public ResponseEntity<ResponseUtil> getAllAcceptedLettersAndCertificatesToParents(
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            return ResponseEntity.ok(
+                    new ResponseUtil(HttpStatus.OK, "Student letters loaded.", service.getAllAcceptedLettersAndCertificatesToParents(token))
             );
         } catch (Exception e) {
             return ExceptionHandler.handleException(e);

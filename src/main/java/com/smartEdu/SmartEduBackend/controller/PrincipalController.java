@@ -72,7 +72,22 @@ public class PrincipalController {
     private ResponseEntity<ResponseUtil> findById(@PathVariable String id) {
         try {
             return ResponseEntity.ok(
-                    new ResponseUtil(HttpStatus.OK, "Principal retrieved successfully.", service.findById(id).orElse(null))
+                    new ResponseUtil(HttpStatus.OK, "Principal retrieved successfully.", service.findById(id))
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
+    @GetMapping("/by-id")
+    private ResponseEntity<ResponseUtil> findByIdToSchool(
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            return ResponseEntity.ok(
+                    new ResponseUtil(HttpStatus.OK, "Principal retrieved successfully.", service.findByIdToSchool(token))
             );
         } catch (Exception e) {
             LOGGER.error(e.getMessage());

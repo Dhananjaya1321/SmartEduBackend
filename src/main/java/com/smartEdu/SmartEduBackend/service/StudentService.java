@@ -118,6 +118,34 @@ public class StudentService {
         return studentList;
     }
 
+    public StudentResponse getStudentByStudentId(String id, String token) {
+        Student student = studentRepo.findById(id).get();
+
+        String gradeName = gradesRepo.findById(student.getGradeId()).get().getGradeName();
+        String className = classRoomRepo.findById(student.getClassId()).get().getClassName();
+
+        return StudentResponse.builder()
+                .id(student.getId())
+                .entryDate(student.getEntryDate())
+                .fatherName(student.getFatherName())
+                .fullNameWithInitials(student.getFullNameWithInitials())
+                .dateOfBirth(student.getDateOfBirth())
+                .motherName(student.getMotherName())
+                .motherContact(student.getMotherContact())
+                .fullName(student.getFullName())
+                .fatherContact(student.getFatherContact())
+                .address(student.getAddress())
+                .registrationNumber(student.getRegistrationNumber())
+                .gradeId(student.getGradeId())
+                .gradeName(gradeName)
+                .classId(student.getClassId())
+                .className(className)
+                .schoolId(student.getSchoolId())
+                .achievements(student.getAchievements())
+                .build();
+    }
+
+
     public StudentResponse findStudentToParent(String token) {
         String username = jwtUtil.extractUsername(token);
         User user = userRepo.findByUsername(username).get();

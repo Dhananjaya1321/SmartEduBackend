@@ -133,6 +133,26 @@ public class StudentController {
         }
     }
 
+        @GetMapping("/by-studentId/{id}")
+    private ResponseEntity<ResponseUtil> getStudentByStudentId(
+            @PathVariable String id,
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            return ResponseEntity.ok(
+                    new ResponseUtil(
+                            HttpStatus.OK,
+                            "Students retrieved successfully.",
+                            service.getStudentByStudentId(id, token)
+                    )
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
     @GetMapping
     private ResponseEntity<ResponseUtil> findAll(
             @RequestParam(defaultValue = "0") int page,

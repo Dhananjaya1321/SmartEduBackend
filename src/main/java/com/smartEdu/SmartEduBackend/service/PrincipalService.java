@@ -127,8 +127,24 @@ public class PrincipalService {
         principalRepo.deleteById(id);
     }
 
-    public Optional<Principal> findById(String id) {
-        return principalRepo.findById(id);
+    public PrincipalResponse findById(String id) {
+        Principal principal = principalRepo.findById(id).get();
+
+        return PrincipalResponse.builder()
+                .schoolName(schoolRepo.findById(principal.getSchoolId()).get().getSchoolName())
+                .fullName(principal.getFullName())
+                .build();
+    }
+
+    public PrincipalResponse findByIdToSchool(String token) {
+        String username = jwtUtil.extractUsername(token);
+        User user = userRepo.findByUsername(username).get();
+        Principal principal = principalRepo.findById(user.getProfileId()).get();
+
+        return PrincipalResponse.builder()
+                .schoolName(schoolRepo.findById(principal.getSchoolId()).get().getSchoolName())
+                .fullName(principal.getFullName())
+                .build();
     }
 
     public Page<PrincipalResponse> findAll(int page, int size, String token) {

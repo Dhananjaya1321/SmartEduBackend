@@ -36,7 +36,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/homeworks/**").hasAnyRole("PARENT","TEACHER")
                         .requestMatchers("/api/parents/**").hasAnyRole("PARENT")
                         .requestMatchers("/api/letters/**").hasAnyRole("PARENT","SCHOOL_ADMIN")
-                        .requestMatchers("/api/principals/**").hasAnyRole("PARENT","ZMOE_ADMIN","ZMOE_EMPLOYEE")
+                        .requestMatchers("/api/principals/**").hasAnyRole("PARENT","SCHOOL_ADMIN","ZMOE_ADMIN","ZMOE_EMPLOYEE")
                         .requestMatchers("/api/attendance/**").hasAnyRole("PARENT","TEACHER","SCHOOL_ADMIN","SCHOOL_EMPLOYEE")
                         .requestMatchers("/api/classes/**").hasAnyRole("PARENT","TEACHER","SCHOOL_ADMIN","SCHOOL_EMPLOYEE")
                         .requestMatchers("/api/timetables/**").hasAnyRole("PARENT","TEACHER","SCHOOL_ADMIN","SCHOOL_EMPLOYEE")
