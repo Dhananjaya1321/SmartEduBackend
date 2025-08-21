@@ -74,6 +74,7 @@ public class LetterRequestService {
         return letterRequestRepo.findByStudentIdAndStatus(student.getId(), LetterStatus.APPROVED);
     }
 
+
     public LetterRequest approve(String id, String signatureUrl, String documentUrl, String remarks) {
         LetterRequest request = letterRequestRepo.findById(id).orElseThrow(() -> new RuntimeException("Letter not found"));
         request.setStatus(LetterStatus.APPROVED);
