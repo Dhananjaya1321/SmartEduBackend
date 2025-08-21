@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 
 @RestController
@@ -32,6 +33,23 @@ public class LetterRequestController {
                             "Letter request submitted successfully.",
                             service.create(request,token)
                     )
+            );
+        } catch (Exception e) {
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
+    @PostMapping("/save-pdf/{studentId}/{requestId}")
+    public ResponseEntity<ResponseUtil> uploadCertificate(
+            @PathVariable String studentId,
+            @PathVariable String requestId,
+            @RequestParam("file") MultipartFile pdfFile,
+            @RequestParam(value = "signature", required = false) MultipartFile signatureFile
+    ) {
+        try {
+            return ResponseEntity.ok(
+                    new ResponseUtil(HttpStatus.OK, "Letter approved successfully.",
+                            service.uploadCertificate(studentId, requestId, pdfFile, signatureFile))
             );
         } catch (Exception e) {
             return ExceptionHandler.handleException(e);

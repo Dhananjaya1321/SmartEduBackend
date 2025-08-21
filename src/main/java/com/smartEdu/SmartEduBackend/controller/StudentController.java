@@ -133,7 +133,7 @@ public class StudentController {
         }
     }
 
-        @GetMapping("/by-studentId/{id}")
+    @GetMapping("/by-studentId/{id}")
     private ResponseEntity<ResponseUtil> getStudentByStudentId(
             @PathVariable String id,
             @RequestHeader("Authorization") String authHeader
@@ -204,7 +204,7 @@ public class StudentController {
                     new ResponseUtil(
                             HttpStatus.OK,
                             "Loaded successfully.",
-                            service.searchStudentsByName(token,inputValue,selectedApplication)
+                            service.searchStudentsByName(token, inputValue, selectedApplication)
                     )
             );
         } catch (Exception e) {
