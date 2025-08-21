@@ -47,7 +47,7 @@ public class LetterRequestController {
                     new ResponseUtil(
                             HttpStatus.CREATED,
                             "Letter request submitted successfully.",
-                            service.create(request,token)
+                            service.create(request, token)
                     )
             );
         } catch (Exception e) {
@@ -138,6 +138,34 @@ public class LetterRequestController {
             String token = authHeader.replace("Bearer ", "");
             return ResponseEntity.ok(
                     new ResponseUtil(HttpStatus.OK, "Student letters loaded.", service.getAllAcceptedLettersAndCertificatesToParents(token))
+            );
+        } catch (Exception e) {
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
+    @GetMapping("/pending/to-parents")
+    public ResponseEntity<ResponseUtil> getPendingLettersAndCertificatesToParents(
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            return ResponseEntity.ok(
+                    new ResponseUtil(HttpStatus.OK, "Student letters loaded.", service.getPendingLettersAndCertificatesToParents(token))
+            );
+        } catch (Exception e) {
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
+    @GetMapping("/reject/to-parents")
+    public ResponseEntity<ResponseUtil> getRejectLettersAndCertificatesToParents(
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            return ResponseEntity.ok(
+                    new ResponseUtil(HttpStatus.OK, "Student letters loaded.", service.getRejectLettersAndCertificatesToParents(token))
             );
         } catch (Exception e) {
             return ExceptionHandler.handleException(e);

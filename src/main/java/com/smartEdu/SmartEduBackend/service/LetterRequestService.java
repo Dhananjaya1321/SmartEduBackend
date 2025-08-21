@@ -74,6 +74,26 @@ public class LetterRequestService {
         return letterRequestRepo.findByStudentIdAndStatus(student.getId(), LetterStatus.APPROVED);
     }
 
+    public  List<LetterRequest> getPendingLettersAndCertificatesToParents(String token) {
+        String username = jwtUtil.extractUsername(token);
+        User user = userRepo.findByUsername(username).get();
+        String profileId = user.getProfileId();
+
+        Parent parent = parentRepo.findById(profileId).get();
+        Student student = studentRepo.findById(parent.getStudentIds().getFirst()).get();
+        return letterRequestRepo.findByStudentIdAndStatus(student.getId(), LetterStatus.PENDING);
+    }
+
+    public  List<LetterRequest> getRejectLettersAndCertificatesToParents(String token) {
+        String username = jwtUtil.extractUsername(token);
+        User user = userRepo.findByUsername(username).get();
+        String profileId = user.getProfileId();
+
+        Parent parent = parentRepo.findById(profileId).get();
+        Student student = studentRepo.findById(parent.getStudentIds().getFirst()).get();
+        return letterRequestRepo.findByStudentIdAndStatus(student.getId(), LetterStatus.REJECTED);
+    }
+
 
     public LetterRequest approve(String id, String signatureUrl, String documentUrl, String remarks) {
         LetterRequest request = letterRequestRepo.findById(id).orElseThrow(() -> new RuntimeException("Letter not found"));
