@@ -72,6 +72,44 @@ public class AttendanceController {
         }
     }
 
+    @GetMapping("/class/by-student-id/to-parents")
+    public ResponseEntity<ResponseUtil> getAllAttendanceByStudentIdToParents(
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            return ResponseEntity.ok(
+                    new ResponseUtil(
+                            HttpStatus.OK,
+                            "Today's class attendance fetched",
+                            attendanceService.getAllAttendanceByStudentIdToParents(token)
+                    )
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
+    @GetMapping("/class/by-student-id/today/to-parents")
+    public ResponseEntity<ResponseUtil> getTodayAttendanceStatus(
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            return ResponseEntity.ok(
+                    new ResponseUtil(
+                            HttpStatus.OK,
+                            "Today's class attendance fetched",
+                            attendanceService.getTodayAttendanceStatus(token)
+                    )
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
     @GetMapping("/class/range")
     public ResponseEntity<ResponseUtil> getClassAttendanceInRange(
             @RequestParam String classId,

@@ -1,12 +1,9 @@
 package com.smartEdu.SmartEduBackend.service;
 
-import com.smartEdu.SmartEduBackend.entity.Attendance;
-import com.smartEdu.SmartEduBackend.entity.AttendanceRequest;
-import com.smartEdu.SmartEduBackend.entity.AttendanceResponse;
-import com.smartEdu.SmartEduBackend.entity.Student;
+import com.smartEdu.SmartEduBackend.entity.*;
 import com.smartEdu.SmartEduBackend.enums.AttendanceStatus;
-import com.smartEdu.SmartEduBackend.repo.AttendanceRepo;
-import com.smartEdu.SmartEduBackend.repo.StudentRepo;
+import com.smartEdu.SmartEduBackend.repo.*;
+import com.smartEdu.SmartEduBackend.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,10 +11,25 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional
 public class AttendanceService {
+    @Autowired
+    private JwtUtil jwtUtil;
+
+    @Autowired
+    private UserRepo userRepo;
+
+    @Autowired
+    private ClassRoomRepo classRoomRepo;
+
+    @Autowired
+    private TeacherRepo teacherRepo;
+
+    @Autowired
+    private ParentRepo parentRepo;
 
     @Autowired
     private AttendanceRepo attendanceRepository;
@@ -58,6 +70,62 @@ public class AttendanceService {
         LocalDate startDate = LocalDate.parse(year + "-01-01");
         LocalDate today = LocalDate.now().plusDays(1);
         return attendanceRepository.findByStudentIdAndDateBetween(studentId, startDate, today);
+    }
+
+
+    public AttendanceResponse getAllAttendanceByStudentIdToParents(String token) {
+        String username = jwtUtil.extractUsername(token);
+        User user = userRepo.findByUsername(username).get();
+        String profileId = user.getProfileId();
+
+        Parent parent = parentRepo.findById(profileId).get();
+        Student student = studentRepo.findById(parent.getStudentIds().getFirst()).get();
+        int year = LocalDate.now().getYear();
+        LocalDate startDate = LocalDate.parse(year + "-01-01");
+        LocalDate today = LocalDate.now().plusDays(1);
+
+        List<Attendance> attendanceList = attendanceRepository.findByStudentIdAndDateBetween(student.getId(), startDate, today);
+        int totalDays = attendanceList.size();
+        int totalAbsent = 0;
+        int totalAttended = 0;
+
+        for (Attendance a : attendanceList) {
+            if (a.getStatus().equals(AttendanceStatus.ABSENT)) {
+                totalAbsent++;
+            } else {
+                totalAttended++;
+            }
+        }
+
+        return AttendanceResponse.builder()
+                .studentId(student.getId())
+                .studentName(student.getFullNameWithInitials())
+                .totalDays(totalDays)
+                .totalAttended(totalAttended)
+                .totalAbsent(totalAbsent)
+                .attendedRate(((double) totalAttended / totalDays) * 100)
+                .build();
+
+    }
+
+
+    public Attendance getTodayAttendanceStatus(String token) {
+        String username = jwtUtil.extractUsername(token);
+        User user = userRepo.findByUsername(username).get();
+        String profileId = user.getProfileId();
+
+        Parent parent = parentRepo.findById(profileId).get();
+        Student student = studentRepo.findById(parent.getStudentIds().getFirst()).get();
+        LocalDate today = LocalDate.now();
+        Optional byStudentIdAndDate = attendanceRepository.findByStudentIdAndDate(student.getId(), today);
+        if (byStudentIdAndDate.isEmpty()) {
+            return null;
+        }
+        Attendance attendance= (Attendance) byStudentIdAndDate.get();
+        ClassRoom classRoom = classRoomRepo.findById(attendance.getClassId()).get();
+        Teacher teacher = teacherRepo.findById(classRoom.getClassTeacherId()).get();
+        attendance.setClassId(userRepo.findByProfileId(teacher.getId()).getContact());
+        return (Attendance) byStudentIdAndDate.get();
     }
 
     public List<AttendanceResponse> getAllStudentsAllAttendanceByClassId(String classId) {
@@ -111,4 +179,5 @@ public class AttendanceService {
     public long countSchoolDaysForClass(String classId) {
         return attendanceRepository.countDistinctByClassId(classId);
     }
+
 }
