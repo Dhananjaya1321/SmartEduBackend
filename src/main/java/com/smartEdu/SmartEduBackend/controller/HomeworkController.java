@@ -92,4 +92,20 @@ public class HomeworkController {
             return ExceptionHandler.handleException(e);
         }
     }
+
+    @GetMapping("/class/to-parents")
+    public ResponseEntity<ResponseUtil> getHomeworksToParents(
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            return ResponseEntity.ok(new ResponseUtil(HttpStatus.OK, "Class homeworks loaded", homeworkService.getHomeworksToParents(token)));
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            if (e.getMessage().equals("Class is not exists!"))
+                return ExceptionHandler.handleCustomException(HttpStatus.NOT_FOUND, e);
+
+            return ExceptionHandler.handleException(e);
+        }
+    }
 }
