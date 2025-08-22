@@ -1,6 +1,7 @@
 package com.smartEdu.SmartEduBackend.repo;
 
 import com.smartEdu.SmartEduBackend.entity.Exam;
+import com.smartEdu.SmartEduBackend.enums.ExamLevel;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
@@ -10,4 +11,8 @@ import java.util.List;
 public interface ExamRepo extends MongoRepository<Exam, String> {
     List<Exam> findByGrade(String grade);
     List<Exam> findByYear(int year);
+
+    List<Exam> findByLevel(ExamLevel level);
+    List<Exam> findByLevelAndInstitutionId(ExamLevel level,String institutionId);
+    List<Exam> findByInstitutionId(String institutionId);
 }

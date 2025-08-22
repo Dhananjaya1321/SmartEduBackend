@@ -23,10 +23,14 @@ public class ExamController {
     private ExamService examService;
 
     @PostMapping
-    public ResponseEntity<ResponseUtil> save(@RequestBody Exam exam) {
+    public ResponseEntity<ResponseUtil> save(
+            @RequestBody Exam exam,
+            @RequestHeader("Authorization") String authHeader
+    ) {
         try {
+            String token = authHeader.replace("Bearer ", "");
             return ResponseEntity.ok(
-                    new ResponseUtil(HttpStatus.OK, "Exam saved successfully.", examService.save(exam))
+                    new ResponseUtil(HttpStatus.OK, "Exam saved successfully.", examService.save(exam, token))
             );
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
@@ -70,13 +74,17 @@ public class ExamController {
     }
 
     @GetMapping
-    public ResponseEntity<ResponseUtil> getAll(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+    public ResponseEntity<ResponseUtil> getAll(@RequestHeader("Authorization") String authHeader
     ) {
         try {
-            Page<Exam> exams = examService.findAll(page, size);
-            return ResponseEntity.ok(new ResponseUtil(HttpStatus.OK, "Exams retrieved successfully.", exams.getContent()));
+            String token = authHeader.replace("Bearer ", "");
+            return ResponseEntity.ok(
+                    new ResponseUtil(
+                            HttpStatus.OK,
+                            "Exams retrieved successfully.",
+                            examService.findAll(token)
+                    )
+            );
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
             return ExceptionHandler.handleException(e);
