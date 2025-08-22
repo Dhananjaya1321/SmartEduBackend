@@ -13,11 +13,12 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @NoArgsConstructor
 @Data
 @Builder
-@Document(collection = "examsAndNICApplication")
-public class ExamsAndNICApplication {
+public class ExamsAndNICApplicationResponse {
     @Id
     private String id;
     private String studentId;
+    private String studentName;
+    private String registrationNumber;
     private String schoolId;
     private String type;
     private ExamsAndNICApplicationStatus status;
