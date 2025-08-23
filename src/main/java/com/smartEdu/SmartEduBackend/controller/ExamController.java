@@ -129,6 +129,53 @@ public class ExamController {
             return ExceptionHandler.handleException(e);
         }
     }
+    @GetMapping("/grade/al-exams/to-parents")
+    public ResponseEntity<ResponseUtil> getByGradeALExamsToParents() {
+        try {
+            return ResponseEntity.ok(
+                    new ResponseUtil(
+                            HttpStatus.OK,
+                            "Exams by grade retrieved successfully.",
+                            examService.getByGradeALExamsToParents()
+                    )
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
+  @GetMapping("/grade/ol-exams/to-parents")
+    public ResponseEntity<ResponseUtil> getByGradeOLExamsToParents() {
+        try {
+            return ResponseEntity.ok(
+                    new ResponseUtil(
+                            HttpStatus.OK,
+                            "Exams by grade retrieved successfully.",
+                            examService.getByGradeOLExamsToParents()
+                    )
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
+    @GetMapping("/grade/g5-exams/to-parents")
+    public ResponseEntity<ResponseUtil> getByGradeG5ExamsToParents() {
+        try {
+            return ResponseEntity.ok(
+                    new ResponseUtil(
+                            HttpStatus.OK,
+                            "Exams by grade retrieved successfully.",
+                            examService.getByGradeG5ExamsToParents()
+                    )
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return ExceptionHandler.handleException(e);
+        }
+    }
 
     @GetMapping("/year")
     public ResponseEntity<ResponseUtil> getByYear(@RequestParam String year) {

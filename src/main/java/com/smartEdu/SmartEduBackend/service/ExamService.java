@@ -171,14 +171,29 @@ public class ExamService {
         exams.addAll(nationalLevel);
 
         List<Exam> termExams = new ArrayList<>();
-        for (Exam e:exams){
-            if (e.getExamName().equals("First Term Exam") || e.getExamName().equals("Mid-Term Exam") || e.getExamName().equals("Final Term Exam")){
+        for (Exam e : exams) {
+            if (e.getExamName().equals("First Term Exam") || e.getExamName().equals("Mid-Term Exam") || e.getExamName().equals("Final Term Exam")) {
                 termExams.add(e);
             }
         }
 
 
         return termExams;
+    }
+
+    public List<Exam> getByGradeALExamsToParents() {
+        String year = String.valueOf(LocalDate.now().getYear());
+        return examRepo.findByGradeAndLevelAndYearAndExamName("13", ExamLevel.NATIONAL, year,"G.C.E. (A/L) Examination");
+    }
+
+    public List<Exam> getByGradeOLExamsToParents() {
+        String year = String.valueOf(LocalDate.now().getYear());
+        return examRepo.findByGradeAndLevelAndYearAndExamName("11", ExamLevel.NATIONAL, year,"G.C.E. (O/L) Examination");
+    }
+
+    public List<Exam> getByGradeG5ExamsToParents() {
+        String year = String.valueOf(LocalDate.now().getYear());
+        return examRepo.findByGradeAndLevelAndYearAndExamName("5", ExamLevel.NATIONAL, year,"Grade 5 Scholarship Examination");
     }
 
     public List<Exam> findByYear(String year) {
