@@ -129,6 +129,25 @@ public class ExamController {
             return ExceptionHandler.handleException(e);
         }
     }
+
+    @GetMapping("/grade/term-exams/to-teachers")
+    public ResponseEntity<ResponseUtil> getByGradeTermExamsToTeacher(
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            return ResponseEntity.ok(
+                    new ResponseUtil(
+                            HttpStatus.OK,
+                            "Exams by grade retrieved successfully.",
+                            examService.getByGradeTermExamsToTeacher((token))
+                    )
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return ExceptionHandler.handleException(e);
+        }
+    }
     @GetMapping("/grade/al-exams/to-parents")
     public ResponseEntity<ResponseUtil> getByGradeALExamsToParents() {
         try {

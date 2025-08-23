@@ -24,4 +24,8 @@ public interface ExamRepo extends MongoRepository<Exam, String> {
     List<Exam> findByGradeAndLevelAndYear(String gradeName,ExamLevel level, String year);
 
     List<Exam> findByGradeAndLevelAndYearAndExamName(String number, ExamLevel examLevel, String year, String examName);
+
+    List<Exam> findByInstitutionIdAndYear(String institutionId, String year);
+
+    List<Exam> findByLevelAndYear(ExamLevel examLevel, String year);
 }

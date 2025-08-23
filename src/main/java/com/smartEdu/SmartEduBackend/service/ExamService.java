@@ -181,6 +181,36 @@ public class ExamService {
         return termExams;
     }
 
+    public List<Exam> getByGradeTermExamsToTeacher(String token) {
+        String institutionId = jwtUtil.extractInstitutionId(token);
+        String year = String.valueOf(LocalDate.now().getYear());
+
+        ZonalEducationOffice zonalEducationOffice = zonalEducationOfficeRepo.findAllBySchoolsIds(institutionId);
+        ProvincialEducationOffice provincialEducationOffice = provincialEducationOfficeRepo.findByProvince(zonalEducationOffice.getProvince());
+
+        List<Exam> exams = new ArrayList<>();
+
+        List<Exam> schoolLevel = examRepo.findByInstitutionIdAndYear(institutionId, year);
+        List<Exam> zonalLevel = examRepo.findByInstitutionIdAndYear(zonalEducationOffice.getId(), year);
+        List<Exam> provincialLevel = examRepo.findByInstitutionIdAndYear(provincialEducationOffice.getId(), year);
+        List<Exam> nationalLevel = examRepo.findByLevelAndYear(ExamLevel.NATIONAL, year);
+
+        exams.addAll(schoolLevel);
+        exams.addAll(zonalLevel);
+        exams.addAll(provincialLevel);
+        exams.addAll(nationalLevel);
+
+        List<Exam> termExams = new ArrayList<>();
+        for (Exam e : exams) {
+            if (e.getExamName().equals("First Term Exam") || e.getExamName().equals("Mid-Term Exam") || e.getExamName().equals("Final Term Exam")) {
+                termExams.add(e);
+            }
+        }
+
+
+        return termExams;
+    }
+
     public List<Exam> getByGradeALExamsToParents() {
         String year = String.valueOf(LocalDate.now().getYear());
         return examRepo.findByGradeAndLevelAndYearAndExamName("13", ExamLevel.NATIONAL, year,"G.C.E. (A/L) Examination");
