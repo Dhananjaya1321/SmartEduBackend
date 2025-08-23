@@ -196,6 +196,27 @@ public class ExamController {
         }
     }
 
+    @GetMapping("/check-term-tests/to-teachers/{gradeId}/{year}")
+    public ResponseEntity<ResponseUtil> checkExamResults(
+            @PathVariable String gradeId,
+            @PathVariable String year,
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            return ResponseEntity.ok(
+                    new ResponseUtil(
+                            HttpStatus.OK,
+                            "Exams by grade retrieved successfully.",
+                            examService.checkExamResults(gradeId,year,token)
+                    )
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
     @GetMapping("/year")
     public ResponseEntity<ResponseUtil> getByYear(@RequestParam String year) {
         try {

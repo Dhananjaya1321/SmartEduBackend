@@ -25,6 +25,9 @@ public class ExamService {
     private StudentRepo studentRepo;
 
     @Autowired
+    private ExamResultsRepo examResultsRepo;
+
+    @Autowired
     private GradesRepo gradesRepo;
 
     @Autowired
@@ -231,4 +234,34 @@ public class ExamService {
     }
 
 
+    public Exam checkExamResults(String gradeId, String year,String token) {
+        String institutionId = jwtUtil.extractInstitutionId(token);
+        Grades grades = gradesRepo.findById(gradeId).get();
+
+        ZonalEducationOffice zonalEducationOffice = zonalEducationOfficeRepo.findAllBySchoolsIds(institutionId);
+        ProvincialEducationOffice provincialEducationOffice = provincialEducationOfficeRepo.findByProvince(zonalEducationOffice.getProvince());
+
+        List<Exam> exams = new ArrayList<>();
+
+        List<Exam> schoolLevel = examRepo.findByGradeAndInstitutionIdAndYear(grades.getGradeName(),institutionId, year);
+        List<Exam> zonalLevel = examRepo.findByGradeAndInstitutionIdAndYear(grades.getGradeName(),zonalEducationOffice.getId(), year);
+        List<Exam> provincialLevel = examRepo.findByGradeAndInstitutionIdAndYear(grades.getGradeName(),provincialEducationOffice.getId(), year);
+        List<Exam> nationalLevel = examRepo.findByGradeAndLevelAndYear(grades.getGradeName(),ExamLevel.NATIONAL, year);
+
+        exams.addAll(schoolLevel);
+        exams.addAll(zonalLevel);
+        exams.addAll(provincialLevel);
+        exams.addAll(nationalLevel);
+
+
+        for (Exam e : exams) {
+            if (e.getExamName().equals("First Term Exam") || e.getExamName().equals("Mid-Term Exam") || e.getExamName().equals("Final Term Exam")) {
+                List<ExamResults> resultsRepoByExamId = examResultsRepo.findByExamId(e.getId());
+                if (resultsRepoByExamId.isEmpty()){
+                    return e;
+                }
+            }
+        }
+        return null;
+    }
 }
