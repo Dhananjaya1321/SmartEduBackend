@@ -1,23 +1,17 @@
 package com.smartEdu.SmartEduBackend.service;
 
-import com.smartEdu.SmartEduBackend.entity.Exam;
-import com.smartEdu.SmartEduBackend.entity.ProvincialEducationOffice;
-import com.smartEdu.SmartEduBackend.entity.User;
-import com.smartEdu.SmartEduBackend.entity.ZonalEducationOffice;
+import com.smartEdu.SmartEduBackend.entity.*;
 import com.smartEdu.SmartEduBackend.enums.ExamLevel;
 import com.smartEdu.SmartEduBackend.enums.Role;
-import com.smartEdu.SmartEduBackend.repo.ExamRepo;
-import com.smartEdu.SmartEduBackend.repo.ProvincialEducationOfficeRepo;
-import com.smartEdu.SmartEduBackend.repo.UserRepo;
-import com.smartEdu.SmartEduBackend.repo.ZonalEducationOfficeRepo;
+import com.smartEdu.SmartEduBackend.repo.*;
 import com.smartEdu.SmartEduBackend.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,6 +20,15 @@ import java.util.Optional;
 public class ExamService {
     @Autowired
     private JwtUtil jwtUtil;
+
+    @Autowired
+    private StudentRepo studentRepo;
+
+    @Autowired
+    private GradesRepo gradesRepo;
+
+    @Autowired
+    private ParentRepo parentRepo;
 
     @Autowired
     private ExamRepo examRepo;
@@ -73,6 +76,9 @@ public class ExamService {
         }
         exam.setLevel(examLevel);
         exam.setInstitutionId(institutionId);
+
+        String str = exam.getGrade();
+        exam.setGrade(str.split("_")[1]);
         return examRepo.save(exam);
     }
 
@@ -80,6 +86,7 @@ public class ExamService {
         Optional<Exam> existing = examRepo.findById(id);
         if (existing.isPresent()) {
             exam.setId(id);
+            exam.setInstitutionId(existing.get().getInstitutionId());
             return examRepo.save(exam);
         } else {
             throw new Exception("Exam not found!");
@@ -132,11 +139,49 @@ public class ExamService {
         return exams;
     }
 
-    public List<Exam> findByGrade(String grade) {
+    public List<Exam> findByGrade(String grade, String token) {
         return examRepo.findByGrade(grade);
     }
 
-    public List<Exam> findByYear(int year) {
+    public List<Exam> getByGradeTermExamsToParents(String token) {
+        String username = jwtUtil.extractUsername(token);
+        User user = userRepo.findByUsername(username).get();
+        String profileId = user.getProfileId();
+
+        Parent parent = parentRepo.findById(profileId).get();
+        Student student = studentRepo.findById(parent.getStudentIds().getFirst()).get();
+        String gradeId = student.getGradeId();
+        Grades grades = gradesRepo.findById(gradeId).get();
+
+        String year = String.valueOf(LocalDate.now().getYear());
+
+        ZonalEducationOffice zonalEducationOffice = zonalEducationOfficeRepo.findAllBySchoolsIds(student.getSchoolId());
+        ProvincialEducationOffice provincialEducationOffice = provincialEducationOfficeRepo.findByProvince(zonalEducationOffice.getProvince());
+
+        List<Exam> exams = new ArrayList<>();
+
+        List<Exam> schoolLevel = examRepo.findByGradeAndInstitutionIdAndYear(grades.getGradeName(), student.getSchoolId(), year);
+        List<Exam> zonalLevel = examRepo.findByGradeAndInstitutionIdAndYear(grades.getGradeName(), zonalEducationOffice.getId(), year);
+        List<Exam> provincialLevel = examRepo.findByGradeAndInstitutionIdAndYear(grades.getGradeName(), provincialEducationOffice.getId(), year);
+        List<Exam> nationalLevel = examRepo.findByGradeAndLevelAndYear(grades.getGradeName(), ExamLevel.NATIONAL, year);
+
+        exams.addAll(schoolLevel);
+        exams.addAll(zonalLevel);
+        exams.addAll(provincialLevel);
+        exams.addAll(nationalLevel);
+
+        List<Exam> termExams = new ArrayList<>();
+        for (Exam e:exams){
+            if (e.getExamName().equals("First Term Exam") || e.getExamName().equals("Mid-Term Exam") || e.getExamName().equals("Final Term Exam")){
+                termExams.add(e);
+            }
+        }
+
+
+        return termExams;
+    }
+
+    public List<Exam> findByYear(String year) {
         return examRepo.findByYear(year);
     }
 

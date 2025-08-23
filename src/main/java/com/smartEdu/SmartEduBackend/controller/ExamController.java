@@ -92,10 +92,37 @@ public class ExamController {
     }
 
     @GetMapping("/grade")
-    public ResponseEntity<ResponseUtil> getByGrade(@RequestParam String grade) {
+    public ResponseEntity<ResponseUtil> getByGrade(
+            @RequestParam String grade,
+            @RequestHeader("Authorization") String authHeader
+    ) {
         try {
+            String token = authHeader.replace("Bearer ", "");
             return ResponseEntity.ok(
-                    new ResponseUtil(HttpStatus.OK, "Exams by grade retrieved successfully.", examService.findByGrade(grade))
+                    new ResponseUtil(
+                            HttpStatus.OK,
+                            "Exams by grade retrieved successfully.",
+                            examService.findByGrade(grade,token)
+                    )
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
+    @GetMapping("/grade/term-exams/to-parents")
+    public ResponseEntity<ResponseUtil> getByGradeTermExamsToParents(
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            return ResponseEntity.ok(
+                    new ResponseUtil(
+                            HttpStatus.OK,
+                            "Exams by grade retrieved successfully.",
+                            examService.getByGradeTermExamsToParents((token))
+                    )
             );
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
@@ -104,7 +131,7 @@ public class ExamController {
     }
 
     @GetMapping("/year")
-    public ResponseEntity<ResponseUtil> getByYear(@RequestParam int year) {
+    public ResponseEntity<ResponseUtil> getByYear(@RequestParam String year) {
         try {
             return ResponseEntity.ok(
                     new ResponseUtil(HttpStatus.OK, "Exams by year retrieved successfully.", examService.findByYear(year))

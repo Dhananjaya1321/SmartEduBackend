@@ -10,9 +10,16 @@ import java.util.List;
 @Repository
 public interface ExamRepo extends MongoRepository<Exam, String> {
     List<Exam> findByGrade(String grade);
-    List<Exam> findByYear(int year);
+
+    List<Exam> findByYear(String year);
 
     List<Exam> findByLevel(ExamLevel level);
-    List<Exam> findByLevelAndInstitutionId(ExamLevel level,String institutionId);
+
+    List<Exam> findByLevelAndInstitutionId(ExamLevel level, String institutionId);
+
     List<Exam> findByInstitutionId(String institutionId);
+
+    List<Exam> findByGradeAndInstitutionIdAndYear(String gradeName, String institutionId,String year);
+
+    List<Exam> findByGradeAndLevelAndYear(String gradeName,ExamLevel level, String year);
 }
