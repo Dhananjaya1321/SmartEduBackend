@@ -176,4 +176,34 @@ public class ExamResultsService {
         return examResultsRepo.save(examResults);
     }
 
+    public List<ReportResponse> getAllClassStudentsResultsDetails(String examId, String token) {
+        String username = jwtUtil.extractUsername(token);
+        User user = userRepo.findByUsername(username).orElseThrow();
+        ClassRoom classRoom = classRoomRepo.findByClassTeacherId(user.getProfileId());
+
+        List<ReportResponse> reportResponses = new ArrayList<>();
+        for (String studentId : classRoom.getStudentIds()) {
+            StudentReport studentReport = studentReportRepo.findByStudentId(studentId);
+            for (Report r:studentReport.getReports()){
+                if (r.getExamId().equals(examId)){
+                    reportResponses.add(
+                            ReportResponse.builder()
+                                    .studentId(studentId)
+                                    .studentName(studentReport.getStudentName())
+                                    .year(r.getYear())
+                                    .examId(r.getExamId())
+                                    .examName(r.getExamName())
+                                    .gradeId(r.getGradeId())
+                                    .gradeName(r.getGradeName())
+                                    .totalMarks(r.getTotalMarks())
+                                    .averageMarks(r.getAverageMarks())
+                                    .rank(r.getRank())
+                                    .marksList(r.getMarksList())
+                            .build()
+                    );
+                }
+            }
+        }
+        return reportResponses;
+    }
 }

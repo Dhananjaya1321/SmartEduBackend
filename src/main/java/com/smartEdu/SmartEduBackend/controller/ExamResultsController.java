@@ -1,5 +1,6 @@
 package com.smartEdu.SmartEduBackend.controller;
 
+import com.smartEdu.SmartEduBackend.entity.Event;
 import com.smartEdu.SmartEduBackend.entity.ExamResults;
 import com.smartEdu.SmartEduBackend.entity.SubjectResults;
 import com.smartEdu.SmartEduBackend.service.ExamResultsService;
@@ -11,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/results")
@@ -50,6 +53,26 @@ public class ExamResultsController {
             );
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
+    @GetMapping("/my-class/to-teachers/{examId}")
+    public ResponseEntity<ResponseUtil> getAllClassStudentsResultsDetails(
+            @PathVariable String examId,
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            return ResponseEntity.ok(
+                    new ResponseUtil(
+                            HttpStatus.OK,
+                            "Events fetched successfully.",
+                            examResultsService.getAllClassStudentsResultsDetails(examId,token)
+                    )
+            );
+        } catch (Exception e) {
+            LOGGER.error("Error fetching events by grade", e);
             return ExceptionHandler.handleException(e);
         }
     }
