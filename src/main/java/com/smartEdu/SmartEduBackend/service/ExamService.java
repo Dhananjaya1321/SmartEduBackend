@@ -2,6 +2,8 @@ package com.smartEdu.SmartEduBackend.service;
 
 import com.smartEdu.SmartEduBackend.entity.*;
 import com.smartEdu.SmartEduBackend.enums.ExamLevel;
+import com.smartEdu.SmartEduBackend.enums.ExamsResults;
+import com.smartEdu.SmartEduBackend.enums.ExamsSubjectResults;
 import com.smartEdu.SmartEduBackend.enums.Role;
 import com.smartEdu.SmartEduBackend.repo.*;
 import com.smartEdu.SmartEduBackend.util.JwtUtil;
@@ -11,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,6 +27,9 @@ public class ExamService {
 
     @Autowired
     private ExamResultsRepo examResultsRepo;
+
+    @Autowired
+    private SubjectResultsRepo subjectResultsRepo;
 
     @Autowired
     private GradesRepo gradesRepo;
@@ -216,17 +220,17 @@ public class ExamService {
 
     public List<Exam> getByGradeALExamsToParents() {
         String year = String.valueOf(LocalDate.now().getYear());
-        return examRepo.findByGradeAndLevelAndYearAndExamName("13", ExamLevel.NATIONAL, year,"G.C.E. (A/L) Examination");
+        return examRepo.findByGradeAndLevelAndYearAndExamName("13", ExamLevel.NATIONAL, year, "G.C.E. (A/L) Examination");
     }
 
     public List<Exam> getByGradeOLExamsToParents() {
         String year = String.valueOf(LocalDate.now().getYear());
-        return examRepo.findByGradeAndLevelAndYearAndExamName("11", ExamLevel.NATIONAL, year,"G.C.E. (O/L) Examination");
+        return examRepo.findByGradeAndLevelAndYearAndExamName("11", ExamLevel.NATIONAL, year, "G.C.E. (O/L) Examination");
     }
 
     public List<Exam> getByGradeG5ExamsToParents() {
         String year = String.valueOf(LocalDate.now().getYear());
-        return examRepo.findByGradeAndLevelAndYearAndExamName("5", ExamLevel.NATIONAL, year,"Grade 5 Scholarship Examination");
+        return examRepo.findByGradeAndLevelAndYearAndExamName("5", ExamLevel.NATIONAL, year, "Grade 5 Scholarship Examination");
     }
 
     public List<Exam> findByYear(String year) {
@@ -234,7 +238,7 @@ public class ExamService {
     }
 
 
-    public Exam checkExamResults(String gradeId, String year,String token) {
+    public Exam checkExamResults(String gradeId, String year, String token) {
         String institutionId = jwtUtil.extractInstitutionId(token);
         Grades grades = gradesRepo.findById(gradeId).get();
 
@@ -243,10 +247,10 @@ public class ExamService {
 
         List<Exam> exams = new ArrayList<>();
 
-        List<Exam> schoolLevel = examRepo.findByGradeAndInstitutionIdAndYear(grades.getGradeName(),institutionId, year);
-        List<Exam> zonalLevel = examRepo.findByGradeAndInstitutionIdAndYear(grades.getGradeName(),zonalEducationOffice.getId(), year);
-        List<Exam> provincialLevel = examRepo.findByGradeAndInstitutionIdAndYear(grades.getGradeName(),provincialEducationOffice.getId(), year);
-        List<Exam> nationalLevel = examRepo.findByGradeAndLevelAndYear(grades.getGradeName(),ExamLevel.NATIONAL, year);
+        List<Exam> schoolLevel = examRepo.findByGradeAndInstitutionIdAndYear(grades.getGradeName(), institutionId, year);
+        List<Exam> zonalLevel = examRepo.findByGradeAndInstitutionIdAndYear(grades.getGradeName(), zonalEducationOffice.getId(), year);
+        List<Exam> provincialLevel = examRepo.findByGradeAndInstitutionIdAndYear(grades.getGradeName(), provincialEducationOffice.getId(), year);
+        List<Exam> nationalLevel = examRepo.findByGradeAndLevelAndYear(grades.getGradeName(), ExamLevel.NATIONAL, year);
 
         exams.addAll(schoolLevel);
         exams.addAll(zonalLevel);
@@ -256,12 +260,82 @@ public class ExamService {
 
         for (Exam e : exams) {
             if (e.getExamName().equals("First Term Exam") || e.getExamName().equals("Mid-Term Exam") || e.getExamName().equals("Final Term Exam")) {
-                List<ExamResults> resultsRepoByExamId = examResultsRepo.findByExamId(e.getId());
-                if (resultsRepoByExamId.isEmpty()){
+                ExamResults examIdAndSchoolIdAndGradeId = examResultsRepo.findByExamIdAndSchoolIdAndGradeId(e.getId(), institutionId, gradeId);
+                if (examIdAndSchoolIdAndGradeId==null) {
                     return e;
                 }
             }
         }
         return null;
+    }
+
+    public List<ExamResponseToReport> getByGradeTermExamsToTeacherMyClass(String gradeId, String year, String token) {
+        String institutionId = jwtUtil.extractInstitutionId(token);
+        Grades grades = gradesRepo.findById(gradeId).get();
+
+        ZonalEducationOffice zonalEducationOffice = zonalEducationOfficeRepo.findAllBySchoolsIds(institutionId);
+        ProvincialEducationOffice provincialEducationOffice = provincialEducationOfficeRepo.findByProvince(zonalEducationOffice.getProvince());
+
+        List<Exam> exams = new ArrayList<>();
+
+        List<Exam> schoolLevel = examRepo.findByGradeAndInstitutionIdAndYear(grades.getGradeName(), institutionId, year);
+        List<Exam> zonalLevel = examRepo.findByGradeAndInstitutionIdAndYear(grades.getGradeName(), zonalEducationOffice.getId(), year);
+        List<Exam> provincialLevel = examRepo.findByGradeAndInstitutionIdAndYear(grades.getGradeName(), provincialEducationOffice.getId(), year);
+        List<Exam> nationalLevel = examRepo.findByGradeAndLevelAndYear(grades.getGradeName(), ExamLevel.NATIONAL, year);
+
+        exams.addAll(schoolLevel);
+        exams.addAll(zonalLevel);
+        exams.addAll(provincialLevel);
+        exams.addAll(nationalLevel);
+
+        List<ExamResponseToReport> examResponseToReports = new ArrayList<>();
+        for (Exam e : exams) {
+            if (e.getExamName().equals("First Term Exam") || e.getExamName().equals("Mid-Term Exam") || e.getExamName().equals("Final Term Exam")) {
+                ExamResponseToReport examResponseToReport = ExamResponseToReport.builder()
+                        .id(e.getId())
+                        .examName(e.getExamName())
+                        .institutionId(e.getInstitutionId())
+                        .grade(e.getGrade())
+                        .year(e.getYear())
+                        .level(e.getLevel())
+                        .build();
+                List<ExamTimetableEntryToReport> examTimetableEntryToReports = new ArrayList<>();
+                int pendingCount = 0;
+
+                for (ExamTimetableEntry ete : e.getTimetable()) {
+                    if (ete.getPaper().equals("part_1")){
+                        ExamTimetableEntryToReport examTimetableEntryToReport = ExamTimetableEntryToReport.builder()
+                                .stream(ete.getStream())
+                                .subject(ete.getSubject())
+                                .paper(ete.getPaper())
+                                .date(ete.getDate())
+                                .startTime(ete.getStartTime())
+                                .endTime(ete.getEndTime())
+                                .build();
+
+                        SubjectResults byExamIdAndSubject = subjectResultsRepo.findByExamIdAndSubjectAndGradeIdAndSchoolId(e.getId(), ete.getSubject(), gradeId, institutionId);
+                        if (byExamIdAndSubject == null) {
+                            pendingCount++;
+                            examTimetableEntryToReport.setExamsSubjectResultsStatus(ExamsSubjectResults.PENDING);
+                        } else {
+                            examTimetableEntryToReport.setExamsSubjectResultsStatus(ExamsSubjectResults.RELEASED);
+                        }
+
+                        examTimetableEntryToReports.add(examTimetableEntryToReport);
+                    }
+                }
+
+                ExamResults examIdAndSchoolIdAndGradeId = examResultsRepo.findByExamIdAndSchoolIdAndGradeId(e.getId(), institutionId, gradeId);
+                if (pendingCount == 0 && examIdAndSchoolIdAndGradeId!=null) {
+                    examResponseToReport.setExamsResultsStatus(ExamsResults.RELEASED);
+                } else {
+                    examResponseToReport.setExamsResultsStatus(ExamsResults.PENDING);
+                }
+
+                examResponseToReport.setTimetable(examTimetableEntryToReports);
+                examResponseToReports.add(examResponseToReport);
+            }
+        }
+        return examResponseToReports;
     }
 }

@@ -102,7 +102,7 @@ public class ExamController {
                     new ResponseUtil(
                             HttpStatus.OK,
                             "Exams by grade retrieved successfully.",
-                            examService.findByGrade(grade,token)
+                            examService.findByGrade(grade, token)
                     )
             );
         } catch (Exception e) {
@@ -148,6 +148,28 @@ public class ExamController {
             return ExceptionHandler.handleException(e);
         }
     }
+
+    @GetMapping("/grade/term-exams/my-class/to-teachers/{gradeId}/{year}")
+    public ResponseEntity<ResponseUtil> getByGradeTermExamsToTeacherMyClass(
+            @PathVariable String gradeId,
+            @PathVariable String year,
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            return ResponseEntity.ok(
+                    new ResponseUtil(
+                            HttpStatus.OK,
+                            "Exams by grade retrieved successfully.",
+                            examService.getByGradeTermExamsToTeacherMyClass(gradeId,year, token)
+                    )
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
     @GetMapping("/grade/al-exams/to-parents")
     public ResponseEntity<ResponseUtil> getByGradeALExamsToParents() {
         try {
@@ -164,7 +186,7 @@ public class ExamController {
         }
     }
 
-  @GetMapping("/grade/ol-exams/to-parents")
+    @GetMapping("/grade/ol-exams/to-parents")
     public ResponseEntity<ResponseUtil> getByGradeOLExamsToParents() {
         try {
             return ResponseEntity.ok(
@@ -208,7 +230,7 @@ public class ExamController {
                     new ResponseUtil(
                             HttpStatus.OK,
                             "Exams by grade retrieved successfully.",
-                            examService.checkExamResults(gradeId,year,token)
+                            examService.checkExamResults(gradeId, year, token)
                     )
             );
         } catch (Exception e) {

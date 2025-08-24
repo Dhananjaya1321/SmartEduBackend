@@ -13,8 +13,8 @@ import java.util.List;
 @NoArgsConstructor
 @Data
 @Builder
-@Document(collection = "exam_results")
-public class ExamResults {
+@Document(collection = "subject_results")
+public class SubjectResults {
     @Id
     private String id;
     private String classId;
@@ -22,6 +22,8 @@ public class ExamResults {
     private String gradeId;
     private String examId;
     private String examName;
-    private ExamResults examResultsStatus;
+    private String subject;
     private String year;
+
+    private List<StudentWithSubjectMarks> students;
 }
