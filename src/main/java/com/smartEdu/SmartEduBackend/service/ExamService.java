@@ -23,6 +23,9 @@ public class ExamService {
     private JwtUtil jwtUtil;
 
     @Autowired
+    private ClassRoomRepo classRoomRepo;
+
+    @Autowired
     private StudentRepo studentRepo;
 
     @Autowired
@@ -272,6 +275,9 @@ public class ExamService {
     public List<ExamResponseToReport> getByGradeTermExamsToTeacherMyClass(String gradeId, String year, String token) {
         String institutionId = jwtUtil.extractInstitutionId(token);
         Grades grades = gradesRepo.findById(gradeId).get();
+        String username = jwtUtil.extractUsername(token);
+        User user = userRepo.findByUsername(username).get();
+        ClassRoom classRoom = classRoomRepo.findByClassTeacherId(user.getProfileId());
 
         ZonalEducationOffice zonalEducationOffice = zonalEducationOfficeRepo.findAllBySchoolsIds(institutionId);
         ProvincialEducationOffice provincialEducationOffice = provincialEducationOfficeRepo.findByProvince(zonalEducationOffice.getProvince());
@@ -325,7 +331,7 @@ public class ExamService {
                     }
                 }
 
-                ExamResults examIdAndSchoolIdAndGradeId = examResultsRepo.findByExamIdAndSchoolIdAndGradeId(e.getId(), institutionId, gradeId);
+                ExamResults examIdAndSchoolIdAndGradeId = examResultsRepo.findByExamIdAndSchoolIdAndGradeIdAndClassId(e.getId(), institutionId, gradeId,classRoom.getId());
                 if (pendingCount == 0 && examIdAndSchoolIdAndGradeId!=null) {
                     examResponseToReport.setExamsResultsStatus(ExamsResults.RELEASED);
                 } else {

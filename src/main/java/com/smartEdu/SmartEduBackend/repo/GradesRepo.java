@@ -10,4 +10,6 @@ public interface GradesRepo extends MongoRepository<Grades, String> {
     List<Grades> findAllBySchoolId(String id);
 
     Grades findByGradeName(String gradeName);
+
+    Grades findByGradeNameAndSchoolId(String gradeName,String schoolId);
 }

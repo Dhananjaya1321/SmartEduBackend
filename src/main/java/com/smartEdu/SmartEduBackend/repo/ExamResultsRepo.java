@@ -9,5 +9,7 @@ import java.util.List;
 
 @Repository
 public interface ExamResultsRepo extends MongoRepository<ExamResults, String> {
+    ExamResults findByExamIdAndSchoolIdAndGradeIdAndClassId(String id, String institutionId, String gradeId, String classId);
+
     ExamResults findByExamIdAndSchoolIdAndGradeId(String id, String institutionId, String gradeId);
 }

@@ -1,5 +1,6 @@
 package com.smartEdu.SmartEduBackend.controller;
 
+import com.smartEdu.SmartEduBackend.entity.ExamResults;
 import com.smartEdu.SmartEduBackend.entity.SubjectResults;
 import com.smartEdu.SmartEduBackend.service.ExamResultsService;
 import com.smartEdu.SmartEduBackend.util.ExceptionHandler;
@@ -20,6 +21,22 @@ public class ExamResultsController {
 
     @Autowired
     private ExamResultsService examResultsService;
+
+    @PostMapping("/exam")
+    public ResponseEntity<ResponseUtil> saveExamResults(
+            @RequestBody ExamResults examResults,
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            return ResponseEntity.ok(
+                    new ResponseUtil(HttpStatus.OK, "Exam saved successfully.", examResultsService.saveExamResults(examResults, token))
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return ExceptionHandler.handleException(e);
+        }
+    }
 
     @PostMapping
     public ResponseEntity<ResponseUtil> save(
