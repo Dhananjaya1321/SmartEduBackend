@@ -11,4 +11,6 @@ public interface SubjectResultsRepo extends MongoRepository<SubjectResults, Stri
 //    List<SubjectResults> findByExamId(String examId);
 
     SubjectResults findByExamIdAndSubjectAndGradeIdAndSchoolId(String id, String subject, String gradeId, String schoolId);
+
+    SubjectResults findByExamIdAndSubjectAndGradeIdAndSchoolIdAndClassIdAndYear(String examId, String subject, String gradeId, String schoolId, String classId, String year);
 }
