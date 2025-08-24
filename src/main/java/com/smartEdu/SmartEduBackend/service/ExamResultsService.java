@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -21,6 +22,9 @@ public class ExamResultsService {
 
     @Autowired
     private UserRepo userRepo;
+
+    @Autowired
+    private ParentRepo parentRepo;
 
     @Autowired
     private GradesRepo gradesRepo;
@@ -184,8 +188,8 @@ public class ExamResultsService {
         List<ReportResponse> reportResponses = new ArrayList<>();
         for (String studentId : classRoom.getStudentIds()) {
             StudentReport studentReport = studentReportRepo.findByStudentId(studentId);
-            for (Report r:studentReport.getReports()){
-                if (r.getExamId().equals(examId)){
+            for (Report r : studentReport.getReports()) {
+                if (r.getExamId().equals(examId)) {
                     reportResponses.add(
                             ReportResponse.builder()
                                     .studentId(studentId)
@@ -199,11 +203,56 @@ public class ExamResultsService {
                                     .averageMarks(r.getAverageMarks())
                                     .rank(r.getRank())
                                     .marksList(r.getMarksList())
-                            .build()
+                                    .build()
                     );
                 }
             }
         }
         return reportResponses;
+    }
+
+    public StudentReport getStudentsResultsDetailsToTeacher(String studentId, String token) {
+        String year = String.valueOf(LocalDate.now().getYear());
+
+        StudentReport studentReport = studentReportRepo.findByStudentId(studentId);
+        List<Report> reports = new ArrayList<>();
+        for (Report r : studentReport.getReports()) {
+            if (r.getYear().equals(year) && r.getExamName().equals("First Term Exam")) {
+                reports.add(r);
+            }else if (r.getYear().equals(year) && r.getExamName().equals("Mid-Term Exam")) {
+                reports.add(r);
+            }else if (r.getYear().equals(year) && r.getExamName().equals("Final Term Exam")) {
+                reports.add(r);
+            }
+        }
+        studentReport.setReports(reports);
+        return studentReport;
+    }
+
+    public StudentReport getStudentsResultsDetailsToParents(String token) {
+        String username = jwtUtil.extractUsername(token);
+        User user = userRepo.findByUsername(username).get();
+        String profileId = user.getProfileId();
+
+        Parent parent = parentRepo.findById(profileId).get();
+        Student student = studentRepo.findById(parent.getStudentIds().getFirst()).get();
+
+        String year = String.valueOf(LocalDate.now().getYear());
+
+        StudentReport studentReport = studentReportRepo.findByStudentId(student.getId());
+        List<Report> reports = new ArrayList<>();
+        for (Report r : studentReport.getReports()) {
+            if (r.getYear().equals(year) && r.getExamName().equals("First Term Exam")) {
+                reports.add(r);
+            }
+            if (r.getYear().equals(year) && r.getExamName().equals("Mid-Term Exam")) {
+                reports.add(r);
+            }
+            if (r.getYear().equals(year) && r.getExamName().equals("Final Term Exam")) {
+                reports.add(r);
+            }
+        }
+        studentReport.setReports(reports);
+        return studentReport;
     }
 }

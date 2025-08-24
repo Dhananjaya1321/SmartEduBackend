@@ -77,4 +77,43 @@ public class ExamResultsController {
         }
     }
 
+    @GetMapping("/my-class/student/to-teachers/{studentId}")
+    public ResponseEntity<ResponseUtil> getStudentsResultsDetailsToTeacher(
+            @PathVariable String studentId,
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            return ResponseEntity.ok(
+                    new ResponseUtil(
+                            HttpStatus.OK,
+                            "Events fetched successfully.",
+                            examResultsService.getStudentsResultsDetailsToTeacher(studentId,token)
+                    )
+            );
+        } catch (Exception e) {
+            LOGGER.error("Error fetching events by grade", e);
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
+    @GetMapping("/student-report/to-parents")
+    public ResponseEntity<ResponseUtil> getStudentsResultsDetailsToParents(
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            return ResponseEntity.ok(
+                    new ResponseUtil(
+                            HttpStatus.OK,
+                            "Events fetched successfully.",
+                            examResultsService.getStudentsResultsDetailsToParents(token)
+                    )
+            );
+        } catch (Exception e) {
+            LOGGER.error("Error fetching events by grade", e);
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
 }
