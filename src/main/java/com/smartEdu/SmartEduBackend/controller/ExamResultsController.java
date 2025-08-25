@@ -155,7 +155,7 @@ public class ExamResultsController {
         }
     }
 
-    @GetMapping("/national_level_exams_results/to-parents/{indexNumber}/{examName}/{year}")
+    @GetMapping("/national-level-exams-results/to-parents/{indexNumber}/{examName}/{year}")
     public ResponseEntity<ResponseUtil> getNationalLevelExamsResults(
             @PathVariable String indexNumber,
             @PathVariable String examName,

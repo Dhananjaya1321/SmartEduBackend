@@ -340,6 +340,13 @@ public class ExamResultsService {
     }
 
     public NationalLevelExamsResults getNationalLevelExamsResults(String indexNumber, String examName, String year) {
+        if (examName.equals("al")) {
+            examName="G.C.E. (A/L) Examination";
+        } else if (examName.equals("ol")) {
+            examName="G.C.E. (O/L) Examination";
+        }else if (examName.equals("g5")){
+            examName="Grade 5 Scholarship Examination";
+        }
         return nationalLevelExamsResultsRepo.findByIndexNumberAndExamNameAndYear(indexNumber, examName, year);
     }
 }

@@ -35,5 +35,5 @@ public class NationalLevelExamsResults {
     private String stream; // Specific to G.C.E. (A/L)
     private String zScore; // Specific to G.C.E. (A/L)
 
-    private List<NationalLevelExamsResult> examsResults = new ArrayList<>();
+    private List<NationalLevelExamsResult> results = new ArrayList<>();
 }
