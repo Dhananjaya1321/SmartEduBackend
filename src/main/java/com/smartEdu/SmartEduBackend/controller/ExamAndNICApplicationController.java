@@ -60,4 +60,23 @@ public class ExamAndNICApplicationController {
             return ExceptionHandler.handleException(e);
         }
     }
+
+    @GetMapping("/to-parents")
+    public ResponseEntity<ResponseUtil> findAllToParents(
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            return ResponseEntity.ok(
+                    new ResponseUtil(
+                            HttpStatus.OK,
+                            "Application retrieved successfully",
+                            examsAndNICApplicationService.findAllToParents(token)
+                    )
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return ExceptionHandler.handleException(e);
+        }
+    }
 }
