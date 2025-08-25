@@ -154,4 +154,24 @@ public class ExamResultsController {
             return ExceptionHandler.handleException(e);
         }
     }
+
+    @GetMapping("/national_level_exams_results/to-parents/{indexNumber}/{examName}/{year}")
+    public ResponseEntity<ResponseUtil> getNationalLevelExamsResults(
+            @PathVariable String indexNumber,
+            @PathVariable String examName,
+            @PathVariable String year
+    ) {
+        try {
+            return ResponseEntity.ok(
+                    new ResponseUtil(
+                            HttpStatus.OK,
+                            "Events fetched successfully.",
+                            examResultsService.getNationalLevelExamsResults(indexNumber,examName,year)
+                    )
+            );
+        } catch (Exception e) {
+            LOGGER.error("Error fetching events by grade", e);
+            return ExceptionHandler.handleException(e);
+        }
+    }
 }

@@ -24,6 +24,9 @@ public class ExamResultsService {
     private UserRepo userRepo;
 
     @Autowired
+    private NationalLevelExamsResultsRepo nationalLevelExamsResultsRepo;
+
+    @Autowired
     private ParentRepo parentRepo;
 
     @Autowired
@@ -318,7 +321,7 @@ public class ExamResultsService {
         ReportResponse response = null;
         for (Report r : studentReport.getReports()) {
             if (r.getExamId().equals(examId)) {
-                 response = ReportResponse.builder()
+                response = ReportResponse.builder()
                         .studentId(student.getId())
                         .studentName(studentReport.getStudentName())
                         .year(r.getYear())
@@ -334,5 +337,9 @@ public class ExamResultsService {
             }
         }
         return response;
+    }
+
+    public NationalLevelExamsResults getNationalLevelExamsResults(String indexNumber, String examName, String year) {
+        return nationalLevelExamsResultsRepo.findByIndexNumberAndExamNameAndYear(indexNumber, examName, year);
     }
 }

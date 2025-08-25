@@ -19,6 +19,8 @@ import java.util.List;
 @Document(collection = "national_level_exams_results")
 public class NationalLevelExamsResults {
     @Id
+    private String id;
+
     private String examName;
     private String indexNumber;
     private String studentName;
