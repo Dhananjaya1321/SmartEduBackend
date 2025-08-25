@@ -219,9 +219,9 @@ public class ExamResultsService {
         for (Report r : studentReport.getReports()) {
             if (r.getYear().equals(year) && r.getExamName().equals("First Term Exam")) {
                 reports.add(r);
-            }else if (r.getYear().equals(year) && r.getExamName().equals("Mid-Term Exam")) {
+            } else if (r.getYear().equals(year) && r.getExamName().equals("Mid-Term Exam")) {
                 reports.add(r);
-            }else if (r.getYear().equals(year) && r.getExamName().equals("Final Term Exam")) {
+            } else if (r.getYear().equals(year) && r.getExamName().equals("Final Term Exam")) {
                 reports.add(r);
             }
         }
@@ -254,5 +254,85 @@ public class ExamResultsService {
         }
         studentReport.setReports(reports);
         return studentReport;
+    }
+
+    public List<ReportResponse> getAllClassStudentsResultsDetailsToParents(String token) {
+        String username = jwtUtil.extractUsername(token);
+        User user = userRepo.findByUsername(username).get();
+        String profileId = user.getProfileId();
+
+        Parent parent = parentRepo.findById(profileId).get();
+        Student student = studentRepo.findById(parent.getStudentIds().getFirst()).get();
+        ClassRoom classRoom = classRoomRepo.findById(student.getClassId()).get();
+        String year = String.valueOf(LocalDate.now().getYear());
+
+        StudentReport studentReport = studentReportRepo.findByStudentId(student.getId());
+        String examId = null;
+        for (Report r : studentReport.getReports()) {
+            if (r.getYear().equals(year) && r.getExamName().equals("Final Term Exam")) {
+                examId = r.getExamId();
+                break;
+            } else if (r.getYear().equals(year) && r.getExamName().equals("Mid-Term Exam")) {
+                examId = r.getExamId();
+                break;
+            } else if (r.getYear().equals(year) && r.getExamName().equals("First Term Exam")) {
+                examId = r.getExamId();
+                break;
+            }
+        }
+
+        List<ReportResponse> reportResponses = new ArrayList<>();
+        for (String studentId : classRoom.getStudentIds()) {
+            studentReport = studentReportRepo.findByStudentId(studentId);
+            for (Report r : studentReport.getReports()) {
+                if (r.getExamId().equals(examId)) {
+                    reportResponses.add(
+                            ReportResponse.builder()
+                                    .studentId(studentId)
+                                    .studentName(studentReport.getStudentName())
+                                    .year(r.getYear())
+                                    .examId(r.getExamId())
+                                    .examName(r.getExamName())
+                                    .gradeId(r.getGradeId())
+                                    .gradeName(r.getGradeName())
+                                    .totalMarks(r.getTotalMarks())
+                                    .averageMarks(r.getAverageMarks())
+                                    .rank(r.getRank())
+                                    .marksList(r.getMarksList())
+                                    .build()
+                    );
+                }
+            }
+        }
+        return reportResponses;
+    }
+
+    public ReportResponse getMyChildData(String examId, String token) {
+        String username = jwtUtil.extractUsername(token);
+        User user = userRepo.findByUsername(username).get();
+        String profileId = user.getProfileId();
+
+        Parent parent = parentRepo.findById(profileId).get();
+        Student student = studentRepo.findById(parent.getStudentIds().getFirst()).get();
+        StudentReport studentReport = studentReportRepo.findByStudentId(student.getId());
+        ReportResponse response = null;
+        for (Report r : studentReport.getReports()) {
+            if (r.getExamId().equals(examId)) {
+                 response = ReportResponse.builder()
+                        .studentId(student.getId())
+                        .studentName(studentReport.getStudentName())
+                        .year(r.getYear())
+                        .examId(r.getExamId())
+                        .examName(r.getExamName())
+                        .gradeId(r.getGradeId())
+                        .gradeName(r.getGradeName())
+                        .totalMarks(r.getTotalMarks())
+                        .averageMarks(r.getAverageMarks())
+                        .rank(r.getRank())
+                        .marksList(r.getMarksList())
+                        .build();
+            }
+        }
+        return response;
     }
 }
