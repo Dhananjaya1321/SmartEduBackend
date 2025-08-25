@@ -73,6 +73,36 @@ public class AttendanceService {
     }
 
 
+    public AttendanceResponse getAllAttendanceByStudentIdToPrincipal(String studentId) {
+        Student student = studentRepo.findById(studentId).get();
+        int year = LocalDate.now().getYear();
+        LocalDate startDate = LocalDate.parse(year + "-01-01");
+        LocalDate today = LocalDate.now().plusDays(1);
+
+        List<Attendance> attendanceList = attendanceRepository.findByStudentIdAndDateBetween(studentId, startDate, today);
+        int totalDays = attendanceList.size();
+        int totalAbsent = 0;
+        int totalAttended = 0;
+
+        for (Attendance a : attendanceList) {
+            if (a.getStatus().equals(AttendanceStatus.ABSENT)) {
+                totalAbsent++;
+            } else {
+                totalAttended++;
+            }
+        }
+
+        return AttendanceResponse.builder()
+                .studentId(student.getId())
+                .studentName(student.getFullNameWithInitials())
+                .totalDays(totalDays)
+                .totalAttended(totalAttended)
+                .totalAbsent(totalAbsent)
+                .attendedRate(((double) totalAttended / totalDays) * 100)
+                .build();
+
+    }
+
     public AttendanceResponse getAllAttendanceByStudentIdToParents(String token) {
         String username = jwtUtil.extractUsername(token);
         User user = userRepo.findByUsername(username).get();

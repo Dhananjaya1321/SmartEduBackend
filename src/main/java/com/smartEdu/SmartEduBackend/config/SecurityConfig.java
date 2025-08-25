@@ -29,6 +29,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/user/**").permitAll()
                         .requestMatchers("/api/exams/**").permitAll()
                         .requestMatchers("/api/schools/**").permitAll()
+                        .requestMatchers("/api/achievements/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/teachers/register").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/teachers/to-teacher").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/parents/register").permitAll()

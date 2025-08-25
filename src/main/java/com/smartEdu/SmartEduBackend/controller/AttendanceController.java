@@ -91,6 +91,24 @@ public class AttendanceController {
         }
     }
 
+    @GetMapping("/to-principal/{studentId}")
+    public ResponseEntity<ResponseUtil> getAllAttendanceByStudentIdToPrincipal(
+            @PathVariable String studentId
+    ) {
+        try {
+            return ResponseEntity.ok(
+                    new ResponseUtil(
+                            HttpStatus.OK,
+                            "Today's class attendance fetched",
+                            attendanceService.getAllAttendanceByStudentIdToPrincipal(studentId)
+                    )
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
     @GetMapping("/class/by-student-id/today/to-parents")
     public ResponseEntity<ResponseUtil> getTodayAttendanceStatus(
             @RequestHeader("Authorization") String authHeader
