@@ -128,12 +128,15 @@ public class ExamService {
             List<Exam> schoolLevel = examRepo.findByInstitutionId(institutionId);
             List<Exam> zonalLevel = examRepo.findByInstitutionId(zonalEducationOffice.getId());
             List<Exam> provincialLevel = examRepo.findByInstitutionId(provincialEducationOffice.getId());
-            List<Exam> nationalLevel = examRepo.findByLevel(ExamLevel.NATIONAL);
+
+            String[] te = {"First Term Exam", "Mid-Term Exam", "Final Term Exam"};
+            for (int i = 0; i < te.length; i++) {
+                exams.addAll(examRepo.findByLevelAndExamName(ExamLevel.NATIONAL, te[i]));
+            }
 
             exams.addAll(schoolLevel);
             exams.addAll(zonalLevel);
             exams.addAll(provincialLevel);
-            exams.addAll(nationalLevel);
         } else if (role.equals(Role.ZMOE_ADMIN) || role.equals(Role.ZMOE_EMPLOYEE)) {
             ZonalEducationOffice zonalEducationOffice = zonalEducationOfficeRepo.findById(institutionId).get();
             List<Exam> zonalLevel = examRepo.findByInstitutionId(zonalEducationOffice.getId());
@@ -264,7 +267,7 @@ public class ExamService {
         for (Exam e : exams) {
             if (e.getExamName().equals("First Term Exam") || e.getExamName().equals("Mid-Term Exam") || e.getExamName().equals("Final Term Exam")) {
                 ExamResults examIdAndSchoolIdAndGradeId = examResultsRepo.findByExamIdAndSchoolIdAndGradeId(e.getId(), institutionId, gradeId);
-                if (examIdAndSchoolIdAndGradeId==null) {
+                if (examIdAndSchoolIdAndGradeId == null) {
                     return e;
                 }
             }
@@ -309,7 +312,7 @@ public class ExamService {
                 int pendingCount = 0;
 
                 for (ExamTimetableEntry ete : e.getTimetable()) {
-                    if (ete.getPaper().equals("part_1")){
+                    if (ete.getPaper().equals("part_1")) {
                         ExamTimetableEntryToReport examTimetableEntryToReport = ExamTimetableEntryToReport.builder()
                                 .stream(ete.getStream())
                                 .subject(ete.getSubject())
@@ -331,8 +334,8 @@ public class ExamService {
                     }
                 }
 
-                ExamResults examIdAndSchoolIdAndGradeId = examResultsRepo.findByExamIdAndSchoolIdAndGradeIdAndClassId(e.getId(), institutionId, gradeId,classRoom.getId());
-                if (pendingCount == 0 && examIdAndSchoolIdAndGradeId!=null) {
+                ExamResults examIdAndSchoolIdAndGradeId = examResultsRepo.findByExamIdAndSchoolIdAndGradeIdAndClassId(e.getId(), institutionId, gradeId, classRoom.getId());
+                if (pendingCount == 0 && examIdAndSchoolIdAndGradeId != null) {
                     examResponseToReport.setExamsResultsStatus(ExamsResults.RELEASED);
                 } else {
                     examResponseToReport.setExamsResultsStatus(ExamsResults.PENDING);
