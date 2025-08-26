@@ -42,7 +42,6 @@ public class ClassRoomController {
         }
     }
 
-    // Bulk create classes for multiple grades
     @PostMapping("/bulk")
     private ResponseEntity<ResponseUtil> saveMultiple(@RequestBody List<ClassRoom> classRooms) {
         try {
@@ -69,6 +68,21 @@ public class ClassRoomController {
             LOGGER.error(e.getMessage());
             if (e.getMessage().equals("Class not found!"))
                 return ExceptionHandler.handleCustomException(HttpStatus.NOT_FOUND, e);
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
+    @PutMapping("/classes-reshuffle")
+    private ResponseEntity<ResponseUtil> classesReshuffle(
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            return ResponseEntity.ok(
+                    new ResponseUtil(HttpStatus.OK, "Classes reshuffle successfully.", service.classesReshuffle(token))
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
             return ExceptionHandler.handleException(e);
         }
     }

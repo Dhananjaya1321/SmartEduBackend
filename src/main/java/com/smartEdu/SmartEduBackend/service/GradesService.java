@@ -7,10 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @Transactional
@@ -155,19 +152,27 @@ public class GradesService {
     public List<GradesResponse> getAllGradesITeach(String token) {
         String username = jwtUtil.extractUsername(token);
         String schoolId = jwtUtil.extractInstitutionId(token);
-        User user = userRepo.findByUsername(username).get();
+        User user = userRepo.findByUsername(username).orElseThrow();
         String profileId = user.getProfileId();
 
         Map<String, GradesResponse> gradeMap = new HashMap<>(); // key: gradeId
         Map<String, ClassRoomResponse> classMap = new HashMap<>(); // key: gradeId+classId
 
         List<ClassTimetable> classTimetables = classTimetableRepo.findBySchoolId(schoolId);
+
         for (ClassTimetable ct : classTimetables) {
+            boolean teacherFoundInClass = false;
+
             for (TimetablePeriod tp : ct.getTimetablePeriods()) {
                 for (TimetableSlot ts : tp.getSlots()) {
-                    if (ts.getTeacherId().equals(profileId)) {
-                        ClassRoom classRoom = classRoomRepo.findById(ct.getClassId()).get();
-                        Grades grades = gradesRepo.findById(classRoom.getGradeId()).get();
+
+                    if (ts.getTeacherId() != null && ts.getTeacherId().equals(profileId)) {
+                        teacherFoundInClass = true;
+
+                        ClassRoom classRoom = classRoomRepo.findById(ct.getClassId())
+                                .orElseThrow();
+                        Grades grades = gradesRepo.findById(classRoom.getGradeId())
+                                .orElseThrow();
 
                         // Build unique keys
                         String gradeKey = grades.getId();
@@ -190,28 +195,38 @@ public class GradesService {
                                     ClassRoomResponse cr = ClassRoomResponse.builder()
                                             .id(classRoom.getId())
                                             .className(classRoom.getClassName())
-                                            .classTeacherSubject("") // start empty, will append
+                                            .classTeacherSubject("") // start empty
                                             .build();
                                     gradeResponse.getClassRooms().add(cr);
                                     return cr;
                                 }
                         );
 
-                        // Append subject (comma-separated if multiple)
-                        if (classRoomResponse.getClassTeacherSubject() == null || classRoomResponse.getClassTeacherSubject().isEmpty()) {
-                            classRoomResponse.setClassTeacherSubject(ts.getSubject());
-                        } else if (!classRoomResponse.getClassTeacherSubject().contains(ts.getSubject())) {
-                            classRoomResponse.setClassTeacherSubject(
-                                    classRoomResponse.getClassTeacherSubject() + ", " + ts.getSubject()
+                        // Append subject (ensure no duplicates)
+                        if (ts.getSubject() != null && !ts.getSubject().isEmpty()) {
+                            List<String> existingSubjects = Arrays.asList(
+                                    classRoomResponse.getClassTeacherSubject().split(", ")
                             );
+                            if (!existingSubjects.contains(ts.getSubject())) {
+                                if (classRoomResponse.getClassTeacherSubject().isEmpty()) {
+                                    classRoomResponse.setClassTeacherSubject(ts.getSubject());
+                                } else {
+                                    classRoomResponse.setClassTeacherSubject(
+                                            classRoomResponse.getClassTeacherSubject() + ", " + ts.getSubject()
+                                    );
+                                }
+                            }
                         }
                     }
                 }
             }
+
+            // (Optional) if you only want classes where teacher actually teaches → handled by teacherFoundInClass flag
         }
 
         return new ArrayList<>(gradeMap.values());
     }
+
 
 }
 

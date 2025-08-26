@@ -11,5 +11,7 @@ public interface GradesRepo extends MongoRepository<Grades, String> {
 
     Grades findByGradeName(String gradeName);
 
-    Grades findByGradeNameAndSchoolId(String gradeName,String schoolId);
+    Grades findByGradeNameAndSchoolId(String gradeName, String schoolId);
+
+    Grades findAllBySchoolIdAndGradeName(String institutionId, String gradeName);
 }
