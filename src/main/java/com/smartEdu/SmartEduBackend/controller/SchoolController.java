@@ -152,4 +152,24 @@ public class SchoolController {
             return ExceptionHandler.handleException(e);
         }
     }
+
+    @GetMapping("/al-apply-admission/to-parents/{schoolName}")
+    private ResponseEntity<ResponseUtil> getAllSchoolsToParentsCanApplyForALs(
+            @PathVariable String schoolName,
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            return ResponseEntity.ok(
+                    new ResponseUtil(
+                            HttpStatus.OK,
+                            "Schools retrieved successfully.",
+                            service.getAllSchoolsToParentsCanApplyForALs(schoolName,token)
+                    )
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return ExceptionHandler.handleException(e);
+        }
+    }
 }

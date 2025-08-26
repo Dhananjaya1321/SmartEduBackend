@@ -25,6 +25,12 @@ public class SchoolService {
     private SchoolRepo schoolRepo;
 
     @Autowired
+    private ParentRepo parentRepo;
+
+    @Autowired
+    private StudentRepo studentRepo;
+
+    @Autowired
     private GradesRepo gradesRepo;
 
     @Autowired
@@ -175,5 +181,18 @@ public class SchoolService {
 
     public Optional<School> getAllSchoolsByProvinceAndDistrictAndZonal(String province, String district, String zonal) {
         return schoolRepo.findByProvinceAndDistrictAndZonal(province,district,zonal);
+    }
+
+    public List<School> getAllSchoolsToParentsCanApplyForALs(String schoolName, String token) {
+        String username = jwtUtil.extractUsername(token);
+        User user = userRepo.findByUsername(username).get();
+        String profileId = user.getProfileId();
+
+        Parent parent = parentRepo.findById(profileId).get();
+        Student student = studentRepo.findById(parent.getStudentIds().getFirst()).get();
+        School school = schoolRepo.findById(student.getSchoolId()).get();
+        String province = school.getProvince();
+
+        return schoolRepo.findBySchoolNameAndProvince(schoolName,province);
     }
 }
