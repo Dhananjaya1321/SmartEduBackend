@@ -218,10 +218,11 @@ public class ExamController {
         }
     }
 
-    @GetMapping("/check-term-tests/to-teachers/{gradeId}/{year}")
+    @GetMapping("/check-term-tests/to-teachers/{gradeId}/{year}/{classId}")
     public ResponseEntity<ResponseUtil> checkExamResults(
             @PathVariable String gradeId,
             @PathVariable String year,
+            @PathVariable String classId,
             @RequestHeader("Authorization") String authHeader
     ) {
         try {
@@ -230,7 +231,7 @@ public class ExamController {
                     new ResponseUtil(
                             HttpStatus.OK,
                             "Exams by grade retrieved successfully.",
-                            examService.checkExamResults(gradeId, year, token)
+                            examService.checkExamResults(gradeId, year,classId, token)
                     )
             );
         } catch (Exception e) {

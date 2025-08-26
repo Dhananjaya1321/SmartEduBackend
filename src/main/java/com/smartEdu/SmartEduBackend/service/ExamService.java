@@ -244,7 +244,7 @@ public class ExamService {
     }
 
 
-    public Exam checkExamResults(String gradeId, String year, String token) {
+    public Exam checkExamResults(String gradeId, String year, String classId, String token) {
         String institutionId = jwtUtil.extractInstitutionId(token);
         Grades grades = gradesRepo.findById(gradeId).get();
 
@@ -266,7 +266,7 @@ public class ExamService {
 
         for (Exam e : exams) {
             if (e.getExamName().equals("First Term Exam") || e.getExamName().equals("Mid-Term Exam") || e.getExamName().equals("Final Term Exam")) {
-                ExamResults examIdAndSchoolIdAndGradeId = examResultsRepo.findByExamIdAndSchoolIdAndGradeId(e.getId(), institutionId, gradeId);
+                ExamResults examIdAndSchoolIdAndGradeId = examResultsRepo.findByExamIdAndSchoolIdAndGradeIdAndClassId(e.getId(), institutionId, gradeId,classId);
                 if (examIdAndSchoolIdAndGradeId == null) {
                     return e;
                 }
@@ -322,7 +322,7 @@ public class ExamService {
                                 .endTime(ete.getEndTime())
                                 .build();
 
-                        SubjectResults byExamIdAndSubject = subjectResultsRepo.findByExamIdAndSubjectAndGradeIdAndSchoolId(e.getId(), ete.getSubject(), gradeId, institutionId);
+                        SubjectResults byExamIdAndSubject = subjectResultsRepo.findByExamIdAndSubjectAndGradeIdAndSchoolIdAndClassIdAndYear(e.getId(), ete.getSubject(), gradeId, institutionId,classRoom.getId(),year);
                         if (byExamIdAndSubject == null) {
                             pendingCount++;
                             examTimetableEntryToReport.setExamsSubjectResultsStatus(ExamsSubjectResults.PENDING);
