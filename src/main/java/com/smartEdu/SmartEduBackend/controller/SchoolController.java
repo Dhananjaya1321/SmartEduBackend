@@ -195,6 +195,61 @@ public class SchoolController {
         }
     }
 
+    @GetMapping("/view-al-admission-status/to-parents")
+    private ResponseEntity<ResponseUtil> getAllALAdmissionsStatusToParents(
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            return ResponseEntity.ok(
+                    new ResponseUtil(
+                            HttpStatus.OK,
+                            "Schools retrieved successfully.",
+                            service.getAllALAdmissionsStatusToParents(token)
+                    )
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return ExceptionHandler.handleException(e);
+        }
+    }
+    @GetMapping("/view-al-admissions/to-school")
+    private ResponseEntity<ResponseUtil> getAllALAdmissionsToSchools(
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            return ResponseEntity.ok(
+                    new ResponseUtil(
+                            HttpStatus.OK,
+                            "Schools retrieved successfully.",
+                            service.getAllALAdmissionsToSchools(token)
+                    )
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
+    @PutMapping("/accept-al-admissions/to-school/{id}")
+    private ResponseEntity<ResponseUtil> acceptTheALApplication(
+            @PathVariable String id
+    ) {
+        try {
+            return ResponseEntity.ok(
+                    new ResponseUtil(
+                            HttpStatus.OK,
+                            "Schools retrieved successfully.",
+                            service.acceptTheALApplication(id)
+                    )
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
     @GetMapping("/al-apply-admission/to-parents")
     private ResponseEntity<ResponseUtil> getAllSchoolsToParentsCanApplyForALs(
             @RequestHeader("Authorization") String authHeader

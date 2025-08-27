@@ -23,6 +23,7 @@ public class ALAdmission {
     @Id
     private String id;
     private String studentId;
+    private String studentName;
     private String indexNumber;
     private String year;
     private String subjectStream;
@@ -36,6 +37,7 @@ public class ALAdmission {
     private int provincialLevelAchievementsScore;
     private int zonalLevelAchievementsScore;
     private int totalScore;
+    private int cutOffScore;
 
     private List<String> olResults;
 }

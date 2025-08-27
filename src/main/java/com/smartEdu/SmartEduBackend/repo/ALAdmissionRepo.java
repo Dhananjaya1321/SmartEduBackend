@@ -8,4 +8,7 @@ import java.util.List;
 
 public interface ALAdmissionRepo extends MongoRepository<ALAdmission, String> {
     List<ALAdmission> findByStudentId(String studentId);
+
+    List<ALAdmission> findBySchoolId(String institutionId);
+
 }

@@ -310,4 +310,36 @@ public class SchoolService {
         }
         return request;
     }
+
+    public List<ALAdmission> getAllALAdmissionsStatusToParents(String token) {
+        String username = jwtUtil.extractUsername(token);
+        User user = userRepo.findByUsername(username).get();
+        String profileId = user.getProfileId();
+
+        Parent parent = parentRepo.findById(profileId).get();
+        Student student = studentRepo.findById(parent.getStudentIds().getFirst()).get();
+        return alAdmissionRepo.findByStudentId(student.getId());
+    }
+
+    public List<ALAdmission> getAllALAdmissionsToSchools(String token) {
+        String institutionId = jwtUtil.extractInstitutionId(token);
+        List<ALAdmission> alAdmissions = new ArrayList<>();
+        List<ALAdmission> bySchoolId = alAdmissionRepo.findBySchoolId(institutionId);
+        for (ALAdmission a : bySchoolId) {
+            if (!a.getStatus().equals(ALAdmissionStatus.STUDENT_REJECTED) &&
+                    !a.getStatus().equals(ALAdmissionStatus.SCHOOL_ACCEPTED) &&
+                    !a.getStatus().equals(ALAdmissionStatus.STUDENT_ACCEPTED)) {
+                String fullNameWithInitials = studentRepo.findById(a.getStudentId()).get().getFullNameWithInitials();
+                a.setStudentName(fullNameWithInitials);
+                alAdmissions.add(a);
+            }
+        }
+        return alAdmissions;
+    }
+
+    public ALAdmission acceptTheALApplication(String id) {
+        ALAdmission alAdmission = alAdmissionRepo.findById(id).get();
+        alAdmission.setStatus(ALAdmissionStatus.SCHOOL_ACCEPTED);
+        return alAdmissionRepo.save(alAdmission);
+    }
 }
