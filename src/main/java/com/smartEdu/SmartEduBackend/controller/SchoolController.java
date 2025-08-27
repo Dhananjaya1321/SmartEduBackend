@@ -1,5 +1,6 @@
 package com.smartEdu.SmartEduBackend.controller;
 
+import com.smartEdu.SmartEduBackend.entity.ALAdmissionRequest;
 import com.smartEdu.SmartEduBackend.entity.School;
 import com.smartEdu.SmartEduBackend.entity.SchoolRequest;
 import com.smartEdu.SmartEduBackend.enums.SchoolStatus;
@@ -153,8 +154,29 @@ public class SchoolController {
         }
     }
 
+    @PostMapping("/al-apply-admission/to-parents")
+    private ResponseEntity<ResponseUtil> applySchoolsToParentsForALs(
+            @RequestBody ALAdmissionRequest request,
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            return ResponseEntity.ok(
+                    new ResponseUtil(HttpStatus.OK, "School and Principal saved successfully.",
+                            service.applySchoolsToParentsForALs(request,token)
+                    )
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            if (e.getMessage().equals("The index number don't match with your index number!") ||
+                    e.getMessage().equals("Email is already exists!"))
+                return ExceptionHandler.handleCustomException(HttpStatus.NOT_FOUND, e);
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
     @GetMapping("/al-apply-admission/to-parents/{schoolName}")
-    private ResponseEntity<ResponseUtil> getAllSchoolsToParentsCanApplyForALs(
+    private ResponseEntity<ResponseUtil> searchAllSchoolsToParentsCanApplyForALs(
             @PathVariable String schoolName,
             @RequestHeader("Authorization") String authHeader
     ) {
@@ -164,7 +186,26 @@ public class SchoolController {
                     new ResponseUtil(
                             HttpStatus.OK,
                             "Schools retrieved successfully.",
-                            service.getAllSchoolsToParentsCanApplyForALs(schoolName,token)
+                            service.searchAllSchoolsToParentsCanApplyForALs(schoolName,token)
+                    )
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
+    @GetMapping("/al-apply-admission/to-parents")
+    private ResponseEntity<ResponseUtil> getAllSchoolsToParentsCanApplyForALs(
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            return ResponseEntity.ok(
+                    new ResponseUtil(
+                            HttpStatus.OK,
+                            "Schools retrieved successfully.",
+                            service.getAllSchoolsToParentsCanApplyForALs(token)
                     )
             );
         } catch (Exception e) {

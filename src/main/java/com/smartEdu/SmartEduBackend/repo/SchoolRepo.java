@@ -19,5 +19,7 @@ public interface SchoolRepo extends MongoRepository<School, String> {
 
     @Query("{ 'province': ?1, 'schoolName': { $regex: ?0, $options: 'i' } }")
     List<School> findBySchoolNameAndProvince(String schoolName,String province);
+
+    List<School> findByProvince(String province);
 }
 

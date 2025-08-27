@@ -20,6 +20,7 @@ import java.util.List;
 public class NationalLevelExamsResults {
     @Id
     private String id;
+    private String studentId;
 
     private String examName;
     private String indexNumber;

@@ -23,5 +23,4 @@ public class ALAdmissionRequest {
     private String year;
     private String subjectStream;
     private List<String> schoolIds;
-    private List<String> olResults;
 }

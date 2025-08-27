@@ -2,8 +2,7 @@ package com.smartEdu.SmartEduBackend.service;
 
 import com.smartEdu.SmartEduBackend.entity.*;
 
-import com.smartEdu.SmartEduBackend.enums.Role;
-import com.smartEdu.SmartEduBackend.enums.SchoolStatus;
+import com.smartEdu.SmartEduBackend.enums.*;
 import com.smartEdu.SmartEduBackend.repo.*;
 import com.smartEdu.SmartEduBackend.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +10,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -23,6 +23,18 @@ public class SchoolService {
 
     @Autowired
     private SchoolRepo schoolRepo;
+
+    @Autowired
+    private NationalLevelExamsResultsRepo nationalLevelExamsResultsRepo;
+
+    @Autowired
+    private ExamRepo examRepo;
+
+    @Autowired
+    private ALAdmissionRepo alAdmissionRepo;
+
+    @Autowired
+    private AchievementRepo achievementRepo;
 
     @Autowired
     private ParentRepo parentRepo;
@@ -130,7 +142,7 @@ public class SchoolService {
     }
 
     // Delete school by ID
-    public void delete(String id,String token) {
+    public void delete(String id, String token) {
         schoolRepo.findById(id).orElseThrow(() -> new RuntimeException("School not found!"));
         String institutionId = jwtUtil.extractInstitutionId(token);
 
@@ -180,10 +192,10 @@ public class SchoolService {
     }
 
     public Optional<School> getAllSchoolsByProvinceAndDistrictAndZonal(String province, String district, String zonal) {
-        return schoolRepo.findByProvinceAndDistrictAndZonal(province,district,zonal);
+        return schoolRepo.findByProvinceAndDistrictAndZonal(province, district, zonal);
     }
 
-    public List<School> getAllSchoolsToParentsCanApplyForALs(String schoolName, String token) {
+    public List<School> searchAllSchoolsToParentsCanApplyForALs(String schoolName, String token) {
         String username = jwtUtil.extractUsername(token);
         User user = userRepo.findByUsername(username).get();
         String profileId = user.getProfileId();
@@ -193,6 +205,109 @@ public class SchoolService {
         School school = schoolRepo.findById(student.getSchoolId()).get();
         String province = school.getProvince();
 
-        return schoolRepo.findBySchoolNameAndProvince(schoolName,province);
+        return schoolRepo.findBySchoolNameAndProvince(schoolName, province);
+    }
+
+    public List<School> getAllSchoolsToParentsCanApplyForALs(String token) {
+        String username = jwtUtil.extractUsername(token);
+        User user = userRepo.findByUsername(username).get();
+        String profileId = user.getProfileId();
+
+        Parent parent = parentRepo.findById(profileId).get();
+        Student student = studentRepo.findById(parent.getStudentIds().getFirst()).get();
+        School school = schoolRepo.findById(student.getSchoolId()).get();
+        String province = school.getProvince();
+
+        return schoolRepo.findByProvince(province);
+    }
+
+    public ALAdmissionRequest applySchoolsToParentsForALs(ALAdmissionRequest request, String token) {
+        String username = jwtUtil.extractUsername(token);
+        User user = userRepo.findByUsername(username).get();
+        String profileId = user.getProfileId();
+
+        Parent parent = parentRepo.findById(profileId).get();
+        Student student = studentRepo.findById(parent.getStudentIds().getFirst()).get();
+        School school = schoolRepo.findById(student.getSchoolId()).get();
+
+        List<String> olResults = new ArrayList<>();
+
+        NationalLevelExamsResults byIndexNumberAndExamNameAndYear = nationalLevelExamsResultsRepo.findByIndexNumberAndExamNameAndYear(request.getIndexNumber(), "G.C.E. (O/L) Examination", request.getYear());
+        if (!byIndexNumberAndExamNameAndYear.getStudentId().equals(student.getId()))
+            throw new RuntimeException("The index number don't match with your index number!");
+
+        for (NationalLevelExamsResult ol : byIndexNumberAndExamNameAndYear.getResults()) {
+            olResults.add(ol.getResult());
+        }
+
+        ALAdmission alAdmission = ALAdmission.builder()
+                .studentId(student.getId())
+                .indexNumber(request.getIndexNumber())
+                .year(request.getYear())
+                .subjectStream(request.getSubjectStream())
+                .status(ALAdmissionStatus.PENDING)
+                .olResults(olResults)
+                .build();
+
+        int olResultsScore = 0;
+        int nationalLevelAchievementsScore = 0;
+        int provincialLevelAchievementsScore = 0;
+        int zonalLevelAchievementsScore = 0;
+        int totalScore = 0;
+
+        for (String result : olResults) {
+            if (result.equals("A")) {
+                olResultsScore += 6;
+            } else if (result.equals("B")) {
+                olResultsScore += 5;
+            } else if (result.equals("C")) {
+                olResultsScore += 4;
+            } else if (result.equals("S")) {
+                olResultsScore += 2;
+            } else {
+                olResultsScore += 0;
+            }
+        }
+        alAdmission.setOlResultsScore(olResultsScore);
+
+        Exam olExam = examRepo.findByLevelAndExamNameAndYear(ExamLevel.NATIONAL, "G.C.E. (O/L) Examination", request.getYear());
+        int endYear = Integer.parseInt(olExam.getYear());
+        int startYear = endYear - 2;
+        LocalDate startDate = LocalDate.of(startYear, 1, 1);
+        LocalDate endDate = LocalDate.of(endYear, 1, 1);
+
+        List<Achievements> achievements = achievementRepo.findByStudentIdAndDateBetween(student.getId(), startDate, endDate);
+        for (Achievements a : achievements) {
+            if (a.getLevel().equals(AchievementsLevels.NATIONAL_LEVEL)) {
+                nationalLevelAchievementsScore += 6;
+            } else if (a.getLevel().equals(AchievementsLevels.PROVINCIAL_LEVEL)) {
+                provincialLevelAchievementsScore += 5;
+            } else if (a.getLevel().equals(AchievementsLevels.ZONAL_LEVEL)) {
+                zonalLevelAchievementsScore += 4;
+            }
+        }
+        alAdmission.setNationalLevelAchievementsScore(nationalLevelAchievementsScore);
+        alAdmission.setProvincialLevelAchievementsScore(provincialLevelAchievementsScore);
+        alAdmission.setZonalLevelAchievementsScore(zonalLevelAchievementsScore);
+
+        for (String sclId : request.getSchoolIds()) {
+            int residenceScore = 0;
+            School selectedSchool = schoolRepo.findById(sclId).get();
+            if (selectedSchool.getZonal().equals(school.getZonal())) {
+                residenceScore = 4;
+            } else if (selectedSchool.getDistrict().equals(school.getDistrict())) {
+                residenceScore = 3;
+            } else if (selectedSchool.getProvince().equals(school.getProvince())) {
+                residenceScore = 2;
+            }
+            alAdmission.setResidenceScore(residenceScore);
+            totalScore = olResultsScore + residenceScore + nationalLevelAchievementsScore + provincialLevelAchievementsScore + zonalLevelAchievementsScore;
+            alAdmission.setTotalScore(totalScore);
+            alAdmission.setSchoolId(sclId);
+            alAdmission.setSchoolName(selectedSchool.getSchoolName());
+
+            alAdmissionRepo.save(alAdmission);
+        }
+        return request;
     }
 }
