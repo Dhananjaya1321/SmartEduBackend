@@ -250,6 +250,43 @@ public class SchoolController {
         }
     }
 
+
+    @PutMapping("/accept-al-admissions/to-parents/{id}")
+    private ResponseEntity<ResponseUtil> acceptTheALApplicationStudent(
+            @PathVariable String id
+    ) {
+        try {
+            return ResponseEntity.ok(
+                    new ResponseUtil(
+                            HttpStatus.OK,
+                            "Schools retrieved successfully.",
+                            service.acceptTheALApplicationStudent(id)
+                    )
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
+    @PutMapping("/reject-al-admissions/to-parents/{id}")
+    private ResponseEntity<ResponseUtil> rejectTheALApplicationStudent(
+            @PathVariable String id
+    ) {
+        try {
+            return ResponseEntity.ok(
+                    new ResponseUtil(
+                            HttpStatus.OK,
+                            "Schools retrieved successfully.",
+                            service.rejectTheALApplicationStudent(id)
+                    )
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
     @GetMapping("/al-apply-admission/to-parents")
     private ResponseEntity<ResponseUtil> getAllSchoolsToParentsCanApplyForALs(
             @RequestHeader("Authorization") String authHeader
@@ -261,6 +298,25 @@ public class SchoolController {
                             HttpStatus.OK,
                             "Schools retrieved successfully.",
                             service.getAllSchoolsToParentsCanApplyForALs(token)
+                    )
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
+    @GetMapping("/student-accepted/al-apply-admission/to-school")
+    private ResponseEntity<ResponseUtil> getAllALAdmissionsAcceptedByStudentToSchools(
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            return ResponseEntity.ok(
+                    new ResponseUtil(
+                            HttpStatus.OK,
+                            "Schools retrieved successfully.",
+                            service.getAllALAdmissionsAcceptedByStudentToSchools(token)
                     )
             );
         } catch (Exception e) {

@@ -337,9 +337,42 @@ public class SchoolService {
         return alAdmissions;
     }
 
+    public List<ALAdmission> getAllALAdmissionsAcceptedByStudentToSchools(String token) {
+        String institutionId = jwtUtil.extractInstitutionId(token);
+        List<ALAdmission> alAdmissions = new ArrayList<>();
+        List<ALAdmission> bySchoolId = alAdmissionRepo.findBySchoolId(institutionId);
+        for (ALAdmission a : bySchoolId) {
+            if (a.getStatus().equals(ALAdmissionStatus.STUDENT_ACCEPTED)) {
+                String fullNameWithInitials = studentRepo.findById(a.getStudentId()).get().getFullNameWithInitials();
+                a.setStudentName(fullNameWithInitials);
+                alAdmissions.add(a);
+            }
+        }
+        return alAdmissions;
+    }
+
     public ALAdmission acceptTheALApplication(String id) {
         ALAdmission alAdmission = alAdmissionRepo.findById(id).get();
         alAdmission.setStatus(ALAdmissionStatus.SCHOOL_ACCEPTED);
         return alAdmissionRepo.save(alAdmission);
+    }
+
+    public ALAdmission acceptTheALApplicationStudent(String id) {
+        ALAdmission alAdmission = alAdmissionRepo.findById(id).get();
+        List<ALAdmission> byStudentId = alAdmissionRepo.findByStudentId(alAdmission.getStudentId());
+        for (ALAdmission a :byStudentId){
+            if (a.getStatus().equals(ALAdmissionStatus.STUDENT_ACCEPTED)) {
+                throw new RuntimeException("You already accept the school");
+            }
+        }
+        alAdmission.setStatus(ALAdmissionStatus.STUDENT_ACCEPTED);
+        return alAdmissionRepo.save(alAdmission);
+    }
+
+    public ALAdmission rejectTheALApplicationStudent(String id) {
+        ALAdmission alAdmission = alAdmissionRepo.findById(id).get();
+        alAdmission.setStatus(ALAdmissionStatus.STUDENT_REJECTED);
+        return alAdmissionRepo.save(alAdmission);
+
     }
 }
