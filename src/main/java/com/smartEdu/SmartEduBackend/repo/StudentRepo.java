@@ -20,4 +20,6 @@ public interface StudentRepo extends MongoRepository<Student, String> {
     List<Student> findAllBySchoolIdAndFullNameAndGradeId(String schoolId,String fullName,String gradeId);
 
     List<Student> findByClassId(String classId);
+
+    int countBySchoolId(String institutionId);
 }
