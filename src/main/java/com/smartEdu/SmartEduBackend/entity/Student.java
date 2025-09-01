@@ -9,6 +9,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -18,8 +20,6 @@ import java.time.LocalDate;
 public class Student {
     @Id
     private String id;
-    private String schoolId;
-    private String classId;
 
     // Basic Info
     private LocalDate entryDate;
@@ -36,5 +36,9 @@ public class Student {
 
     // Other Info
     private String registrationNumber;
-    private String grade;
+    private String gradeId;
+    private String schoolId;
+    private String classId;
+
+    private List<Achievements> achievements = new ArrayList<>();
 }

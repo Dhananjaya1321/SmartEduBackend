@@ -18,9 +18,10 @@ import java.time.LocalDate;
 public class Event {
     @Id
     private String id;
+    private String schoolId;
 
-    private String eventName;
-    private String[] grades;
+    private String name;
+    private String grades;
     private LocalDate startDate;
     private LocalDate endDate;
     private String description;

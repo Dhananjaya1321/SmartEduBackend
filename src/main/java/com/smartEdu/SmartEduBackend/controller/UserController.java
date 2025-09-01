@@ -25,14 +25,15 @@ public class UserController {
 
     @PostMapping
     private ResponseEntity<ResponseUtil> save(
-            @RequestBody User user
+            @RequestBody User user, @RequestHeader("Authorization") String authHeader
     ) {
         try {
+            String token = authHeader.replace("Bearer ", "");
             return ResponseEntity.ok(
                     new ResponseUtil(
                             HttpStatus.OK,
                             "User saved successfully.",
-                            service.save(user)
+                            service.save(user,token)
                     )
             );
         } catch (Exception e) {
@@ -47,7 +48,6 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('MOE_ADMIN', 'PMOE_ADMIN', 'ZMOE_ADMIN', 'SCHOOL_ADMIN')")
     private ResponseEntity<ResponseUtil> update(
             @PathVariable String id,
             @RequestBody User user
@@ -71,7 +71,6 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('MOE_ADMIN', 'PMOE_ADMIN', 'ZMOE_ADMIN', 'SCHOOL_ADMIN')")
     private ResponseEntity<ResponseUtil> delete(
             @PathVariable String id
     ) {
@@ -95,18 +94,62 @@ public class UserController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('MOE_ADMIN', 'PMOE_ADMIN', 'ZMOE_ADMIN', 'SCHOOL_ADMIN')")
-    private ResponseEntity<ResponseUtil> getAll() {
+    private ResponseEntity<ResponseUtil> getAll(@RequestHeader("Authorization") String authHeader) {
         try {
+            String token = authHeader.replace("Bearer ", "");
             return ResponseEntity.ok(
                     new ResponseUtil(
                             HttpStatus.OK,
                             "Users retrieved successfully.",
-                            service.findAllByRole()
+                            service.findAllByRole(token)
                     )
             );
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
+    @GetMapping("/check-email-and-send-otp")
+    public ResponseEntity<ResponseUtil> checkEmailAndSendOTP(@RequestParam String email) {
+        try {
+            String otp = service.checkEmailAndSendOTP(email);
+
+            return ResponseEntity.ok(
+                    new ResponseUtil(
+                            HttpStatus.OK,
+                            "OTP sent successfully.",
+                            otp
+                    )
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            if (e.getMessage().equals("Incorrect email"))
+                return ExceptionHandler.handleCustomException(HttpStatus.NOT_FOUND, e);
+
+            return ExceptionHandler.handleException(e);        }
+    }
+
+    @PutMapping("/update-password")
+    public ResponseEntity<ResponseUtil> updatePassword(
+            @RequestParam String email,
+            @RequestParam String newPassword
+    ) {
+        try {
+            Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            System.out.println(principal.toString());
+            return ResponseEntity.ok(
+                    new ResponseUtil(
+                            HttpStatus.OK,
+                            "Password updated successfully",
+                            service.updatePassword(email, newPassword)
+                    )
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            if (e.getMessage().equals("User not found with given email"))
+                return ExceptionHandler.handleCustomException(HttpStatus.NOT_FOUND, e);
+
             return ExceptionHandler.handleException(e);
         }
     }

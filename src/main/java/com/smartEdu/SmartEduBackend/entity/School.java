@@ -1,6 +1,7 @@
 package com.smartEdu.SmartEduBackend.entity;
 
 
+import com.smartEdu.SmartEduBackend.enums.SchoolStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -33,7 +34,9 @@ public class School {
     private String ethnicity;
     private String languageMedium;
 
-    private int studentPopulation;
-    private int teacherPopulation;
+    private String studentPopulation;
+    private String teacherPopulation;
     private int classCount;
+
+    private SchoolStatus status;
 }

@@ -12,11 +12,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional
 public class ParentService {
 
     @Autowired
@@ -48,18 +51,26 @@ public class ParentService {
                 .password(passwordEncoder.encode(request.getPassword()))
                 .nic(request.getNic())
                 .contact(request.getContact())
-                .address(request.getAddress())
                 .email(request.getEmail())
                 .role(Role.PARENT)
+                .name(request.getFullName())
+                .institutionID("PARENT") // paren dont want this
                 .active(true)
                 .build();
 
         user = userRepo.save(user);
 
+        List<String> studentIds=new ArrayList<>();
+        Optional<Student> byRegistrationNumber = studentRepo.findByRegistrationNumber(request.getStudentRegNumber());
+        if (byRegistrationNumber.isEmpty())
+            throw new RuntimeException("Student is not exists!");
+
+        studentIds.add(byRegistrationNumber.get().getId());
+
         // Step 2: Create Parent profile
         Parent parent = Parent.builder()
                 .fullName(request.getFullName())
-                .studentIds(List.of())
+                .studentIds(studentIds)
                 .build();
 
         parent = parentRepo.save(parent);

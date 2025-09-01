@@ -15,11 +15,7 @@ import java.util.Map;
 public class ClassTimetable {
     @Id
     private String id;
-
-    private String classId; // Linked to ClassRoom
-    private String grade;
-
-    // Monday to Friday -> 8 periods per day
-    private Map<String, List<Period>> schedule;
-    // e.g., "monday" -> List<Period>, "tuesday" -> List<Period>, etc.
+    private String classId;
+    private String schoolId;
+    private List<TimetablePeriod> timetablePeriods;
 }

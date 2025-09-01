@@ -5,6 +5,7 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 public interface AttendanceRepo extends MongoRepository<Attendance, String> {
     List<Attendance> findByClassIdAndDate(String classId, LocalDate date);
@@ -20,4 +21,6 @@ public interface AttendanceRepo extends MongoRepository<Attendance, String> {
     long countDistinctByClassIdAndDateBetween(String classId, LocalDate start, LocalDate end);
 
     long countDistinctByClassId(String classId);
+
+    Optional findByStudentIdAndDate(String id, LocalDate today);
 }

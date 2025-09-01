@@ -3,6 +3,7 @@ package com.smartEdu.SmartEduBackend.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -23,10 +24,27 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable) // Disable CSRF
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/user/**").permitAll()
-//                        .requestMatchers("/api/students/**").permitAll()
+                        .requestMatchers("/api/exams/**").permitAll()
+                        .requestMatchers("/api/schools/**").permitAll()
+                        .requestMatchers("/api/achievements/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/teachers/register").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/teachers/to-teacher").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/parents/register").permitAll()
+                        .requestMatchers("/api/pmoe/**").hasAnyRole("MOE_ADMIN","MOE_EMPLOYEE","PMOE_ADMIN","PMOE_EMPLOYEE")
+                        .requestMatchers("/api/homeworks/**").hasAnyRole("PARENT","TEACHER")
+                        .requestMatchers("/api/results/**").hasAnyRole("PARENT","TEACHER")
+                        .requestMatchers("/api/parents/**").hasAnyRole("PARENT")
+                        .requestMatchers("/api/letters/**").hasAnyRole("PARENT","SCHOOL_ADMIN")
+                        .requestMatchers("/api/principals/**").hasAnyRole("PARENT","SCHOOL_ADMIN","ZMOE_ADMIN","ZMOE_EMPLOYEE")
+                        .requestMatchers("/api/attendance/**").hasAnyRole("PARENT","TEACHER","SCHOOL_ADMIN","SCHOOL_EMPLOYEE")
+                        .requestMatchers("/api/classes/**").hasAnyRole("PARENT","TEACHER","SCHOOL_ADMIN","SCHOOL_EMPLOYEE")
+                        .requestMatchers("/api/timetables/**").hasAnyRole("PARENT","TEACHER","SCHOOL_ADMIN","SCHOOL_EMPLOYEE")
+                        .requestMatchers("/api/events/**").hasAnyRole("PARENT","TEACHER","SCHOOL_ADMIN","SCHOOL_EMPLOYEE")
                         .requestMatchers("/api/students/**").hasAnyRole("PARENT","TEACHER","SCHOOL_ADMIN","SCHOOL_EMPLOYEE")
+                        .requestMatchers("/api/teachers/**").hasAnyRole("PARENT","TEACHER","SCHOOL_ADMIN","SCHOOL_EMPLOYEE","ZMOE_ADMIN","ZMOE_EMPLOYEE")
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session

@@ -33,7 +33,8 @@ public class AuthController {
             );
         } catch (Exception e) {
             System.out.println("Authentication failed: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");        }
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
+        }
 
         // Load and cast to CustomUserDetails
         CustomUserDetails userDetails = (CustomUserDetails) userDetailsService.loadUserByUsername(request.getUsername());

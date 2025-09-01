@@ -39,7 +39,7 @@ public class TeacherController {
     }
 
     @PutMapping("/{id}")
-    private ResponseEntity<ResponseUtil> update(@PathVariable String id, @RequestBody Teacher teacher) {
+    private ResponseEntity<ResponseUtil> update(@PathVariable String id, @RequestBody TeacherRegisterRequest teacher) {
         try {
             return ResponseEntity.ok(
                     new ResponseUtil(HttpStatus.OK, "Teacher updated successfully.", service.update(id, teacher))
@@ -79,14 +79,33 @@ public class TeacherController {
         }
     }
 
-    @GetMapping
-    private ResponseEntity<ResponseUtil> findAll(
+    @GetMapping("/for-zonal-office")
+    private ResponseEntity<ResponseUtil> findAllForZonalOffice(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(defaultValue = "10") int size,
+            @RequestHeader("Authorization") String authHeader
     ) {
         try {
+            String token = authHeader.replace("Bearer ", "");
             return ResponseEntity.ok(
-                    new ResponseUtil(HttpStatus.OK, "Teachers retrieved successfully.", service.findAll(page, size))
+                    new ResponseUtil(HttpStatus.OK, "Teachers retrieved successfully.", service.findAllForZonalOffice(page, size,token))
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
+    @GetMapping("/for-school")
+    private ResponseEntity<ResponseUtil> findAllForSchool(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            return ResponseEntity.ok(
+                    new ResponseUtil(HttpStatus.OK, "Teachers retrieved successfully.", service.findAllForSchool(page, size,token))
             );
         } catch (Exception e) {
             LOGGER.error(e.getMessage());

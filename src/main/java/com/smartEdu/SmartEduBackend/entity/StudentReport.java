@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,13 +16,13 @@ import java.util.List;
 @NoArgsConstructor
 @Data
 @Builder
-@Document(collection = "provincialMinistryOfEducation")
-public class ProvincialMinistryOfEducation {
+@Document(collection = "students_report")
+public class StudentReport {
     @Id
     private String id;
+    private String studentId;
+    private String studentName;
+    private String schoolId;
 
-    private String province;
-    private String address;
-
-    private List<ZonalMinistryOfEducation> zonalOffices = new ArrayList<>();
+    private List<Report> reports = new ArrayList<>();
 }

@@ -22,11 +22,23 @@ public class ClassTimetableController {
     private ClassTimetableService service;
 
     @PostMapping
-    public ResponseEntity<ResponseUtil> save(@RequestBody ClassTimetable timetable) {
+    public ResponseEntity<ResponseUtil> save(
+            @RequestBody ClassTimetable timetable,
+            @RequestHeader("Authorization") String authHeader
+    ) {
         try {
-            return ResponseEntity.ok(new ResponseUtil(HttpStatus.OK, "Timetable saved successfully.", service.save(timetable)));
+            String token = authHeader.replace("Bearer ", "");
+            return ResponseEntity.ok(
+                    new ResponseUtil(
+                            HttpStatus.OK,
+                            "Timetable saved successfully.",
+                            service.save(timetable, token)
+                    )
+            );
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
+            if (e.getMessage().equals("Timetable is already exists!"))
+                return ExceptionHandler.handleCustomException(HttpStatus.NOT_FOUND, e);
             return ExceptionHandler.handleException(e);
         }
     }
@@ -84,10 +96,57 @@ public class ClassTimetableController {
         }
     }
 
-    @GetMapping("/grade/{grade}")
-    public ResponseEntity<ResponseUtil> findByGrade(@PathVariable String grade) {
+    @GetMapping("/by-gradeId/{gradeId}")
+    public ResponseEntity<ResponseUtil> findAllTimetablesByGradeId(@PathVariable String gradeId) {
         try {
-            return ResponseEntity.ok(new ResponseUtil(HttpStatus.OK, "Grade timetables loaded.", service.findByGrade(grade)));
+            return ResponseEntity.ok(new ResponseUtil(HttpStatus.OK, "All timetables loaded.", service.findAllTimetablesByGradeId(gradeId)));
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
+    @GetMapping("/to-parents")
+    public ResponseEntity<ResponseUtil> findTimetableToParent(
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            return ResponseEntity.ok(new ResponseUtil(
+                    HttpStatus.OK,
+                    "All timetables loaded.",
+                    service.findTimetableToParent(token)));
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
+    @GetMapping("/my-classes/to-teacher")
+    public ResponseEntity<ResponseUtil> findMyClassesTimetableToTeacher(
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            return ResponseEntity.ok(new ResponseUtil(
+                    HttpStatus.OK,
+                    "All timetables loaded.",
+                    service.findMyClassesTimetableToTeacher(token)));
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
+    @GetMapping("/other-classes/to-teacher/{classId}")
+    public ResponseEntity<ResponseUtil> findOtherClassesTimetableToTeacherByClassId(
+            @PathVariable String classId
+    ) {
+        try {
+            return ResponseEntity.ok(new ResponseUtil(
+                    HttpStatus.OK,
+                    "All timetables loaded.",
+                    service.findOtherClassesTimetableToTeacherByClassId(classId)));
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
             return ExceptionHandler.handleException(e);

@@ -10,5 +10,6 @@ import java.util.Optional;
 @Repository
 public interface ClassTimetableRepo extends MongoRepository<ClassTimetable, String> {
     Optional<ClassTimetable> findByClassId(String classId);
-    List<ClassTimetable> findByGrade(String grade);
+
+    List<ClassTimetable> findBySchoolId(String schoolId);
 }

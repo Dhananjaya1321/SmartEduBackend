@@ -1,13 +1,16 @@
 package com.smartEdu.SmartEduBackend.controller;
 
+import com.smartEdu.SmartEduBackend.entity.ALAdmissionRequest;
 import com.smartEdu.SmartEduBackend.entity.School;
 import com.smartEdu.SmartEduBackend.entity.SchoolRequest;
+import com.smartEdu.SmartEduBackend.enums.SchoolStatus;
 import com.smartEdu.SmartEduBackend.service.SchoolService;
 import com.smartEdu.SmartEduBackend.util.ExceptionHandler;
 import com.smartEdu.SmartEduBackend.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -29,7 +32,7 @@ public class SchoolController {
         try {
             return ResponseEntity.ok(
                     new ResponseUtil(HttpStatus.OK, "School and Principal saved successfully.",
-                            service.saveWithPrincipal(request))
+                            service.saveSchoolWithPrincipal(request))
             );
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
@@ -55,10 +58,28 @@ public class SchoolController {
         }
     }
 
-    @DeleteMapping("/{id}")
-    private ResponseEntity<ResponseUtil> delete(@PathVariable String id) {
+    @PutMapping("/update-school-status/{id}")
+    private ResponseEntity<ResponseUtil> updateSchoolStatus(@PathVariable String id, @Param("status") SchoolStatus status) {
         try {
-            service.delete(id);
+            return ResponseEntity.ok(
+                    new ResponseUtil(HttpStatus.OK, "School updated successfully.", service.updateSchoolStatus(id, status))
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            if (e.getMessage().equals("School not found!"))
+                return ExceptionHandler.handleCustomException(HttpStatus.NOT_FOUND, e);
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    private ResponseEntity<ResponseUtil> delete(
+            @PathVariable String id ,
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            service.delete(id,token);
             return ResponseEntity.ok(
                     new ResponseUtil(HttpStatus.OK, "School deleted successfully.", null)
             );
@@ -83,14 +104,220 @@ public class SchoolController {
         }
     }
 
-    @GetMapping
-    private ResponseEntity<ResponseUtil> findAll(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+    @GetMapping("/pending-schools")
+    private ResponseEntity<ResponseUtil> findAllPendingSchools(
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            return ResponseEntity.ok(
+                    new ResponseUtil(HttpStatus.OK, "Schools retrieved successfully.", service.findAllPendingSchools(token))
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
+    @GetMapping("/approved-schools")
+    private ResponseEntity<ResponseUtil> findAllApprovedSchools(
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            return ResponseEntity.ok(
+                    new ResponseUtil(HttpStatus.OK, "Schools retrieved successfully.", service.findAllApprovedSchools(token))
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
+    @GetMapping("/to-teacher/{province}/{district}/{zonal}")
+    private ResponseEntity<ResponseUtil> getAllSchoolsByProvinceAndDistrictAndZonal(
+            @PathVariable String province,
+            @PathVariable String district,
+            @PathVariable String zonal
     ) {
         try {
             return ResponseEntity.ok(
-                    new ResponseUtil(HttpStatus.OK, "Schools retrieved successfully.", service.findAll(page, size))
+                    new ResponseUtil(
+                            HttpStatus.OK,
+                            "Schools retrieved successfully.",
+                            service.getAllSchoolsByProvinceAndDistrictAndZonal(province,district,zonal)
+                    )
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
+    @PostMapping("/al-apply-admission/to-parents")
+    private ResponseEntity<ResponseUtil> applySchoolsToParentsForALs(
+            @RequestBody ALAdmissionRequest request,
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            return ResponseEntity.ok(
+                    new ResponseUtil(HttpStatus.OK, "School and Principal saved successfully.",
+                            service.applySchoolsToParentsForALs(request,token)
+                    )
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            if (e.getMessage().equals("The index number don't match with your index number!") ||
+                    e.getMessage().equals("Email is already exists!"))
+                return ExceptionHandler.handleCustomException(HttpStatus.NOT_FOUND, e);
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
+    @GetMapping("/al-apply-admission/to-parents/{schoolName}")
+    private ResponseEntity<ResponseUtil> searchAllSchoolsToParentsCanApplyForALs(
+            @PathVariable String schoolName,
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            return ResponseEntity.ok(
+                    new ResponseUtil(
+                            HttpStatus.OK,
+                            "Schools retrieved successfully.",
+                            service.searchAllSchoolsToParentsCanApplyForALs(schoolName,token)
+                    )
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
+    @GetMapping("/view-al-admission-status/to-parents")
+    private ResponseEntity<ResponseUtil> getAllALAdmissionsStatusToParents(
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            return ResponseEntity.ok(
+                    new ResponseUtil(
+                            HttpStatus.OK,
+                            "Schools retrieved successfully.",
+                            service.getAllALAdmissionsStatusToParents(token)
+                    )
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return ExceptionHandler.handleException(e);
+        }
+    }
+    @GetMapping("/view-al-admissions/to-school")
+    private ResponseEntity<ResponseUtil> getAllALAdmissionsToSchools(
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            return ResponseEntity.ok(
+                    new ResponseUtil(
+                            HttpStatus.OK,
+                            "Schools retrieved successfully.",
+                            service.getAllALAdmissionsToSchools(token)
+                    )
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
+    @PutMapping("/accept-al-admissions/to-school/{id}")
+    private ResponseEntity<ResponseUtil> acceptTheALApplication(
+            @PathVariable String id
+    ) {
+        try {
+            return ResponseEntity.ok(
+                    new ResponseUtil(
+                            HttpStatus.OK,
+                            "Schools retrieved successfully.",
+                            service.acceptTheALApplication(id)
+                    )
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
+
+    @PutMapping("/accept-al-admissions/to-parents/{id}")
+    private ResponseEntity<ResponseUtil> acceptTheALApplicationStudent(
+            @PathVariable String id
+    ) {
+        try {
+            return ResponseEntity.ok(
+                    new ResponseUtil(
+                            HttpStatus.OK,
+                            "Schools retrieved successfully.",
+                            service.acceptTheALApplicationStudent(id)
+                    )
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
+    @PutMapping("/reject-al-admissions/to-parents/{id}")
+    private ResponseEntity<ResponseUtil> rejectTheALApplicationStudent(
+            @PathVariable String id
+    ) {
+        try {
+            return ResponseEntity.ok(
+                    new ResponseUtil(
+                            HttpStatus.OK,
+                            "Schools retrieved successfully.",
+                            service.rejectTheALApplicationStudent(id)
+                    )
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
+    @GetMapping("/al-apply-admission/to-parents")
+    private ResponseEntity<ResponseUtil> getAllSchoolsToParentsCanApplyForALs(
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            return ResponseEntity.ok(
+                    new ResponseUtil(
+                            HttpStatus.OK,
+                            "Schools retrieved successfully.",
+                            service.getAllSchoolsToParentsCanApplyForALs(token)
+                    )
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
+    @GetMapping("/student-accepted/al-apply-admission/to-school")
+    private ResponseEntity<ResponseUtil> getAllALAdmissionsAcceptedByStudentToSchools(
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            return ResponseEntity.ok(
+                    new ResponseUtil(
+                            HttpStatus.OK,
+                            "Schools retrieved successfully.",
+                            service.getAllALAdmissionsAcceptedByStudentToSchools(token)
+                    )
             );
         } catch (Exception e) {
             LOGGER.error(e.getMessage());

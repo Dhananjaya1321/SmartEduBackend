@@ -1,6 +1,5 @@
 package com.smartEdu.SmartEduBackend.entity;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -8,21 +7,23 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
 @Builder
-@Document(collection = "zonalMinistryOfEducation")
-public class ZonalMinistryOfEducation {
+@Document(collection = "subject_results")
+public class SubjectResults {
     @Id
     private String id;
+    private String classId;
+    private String schoolId;
+    private String gradeId;
+    private String examId;
+    private String examName;
+    private String subject;
+    private String year;
 
-    private String district;
-    private String zonal;
-    private String address;
-
-    private List<School> schools = new ArrayList<>();
+    private List<StudentWithSubjectMarks> students;
 }

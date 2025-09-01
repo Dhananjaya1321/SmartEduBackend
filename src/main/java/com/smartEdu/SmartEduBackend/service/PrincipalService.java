@@ -1,24 +1,37 @@
 package com.smartEdu.SmartEduBackend.service;
 
-import com.smartEdu.SmartEduBackend.entity.Principal;
-import com.smartEdu.SmartEduBackend.entity.PrincipalRegisterRequest;
-import com.smartEdu.SmartEduBackend.entity.School;
-import com.smartEdu.SmartEduBackend.entity.User;
+import com.smartEdu.SmartEduBackend.entity.*;
 import com.smartEdu.SmartEduBackend.enums.Role;
+import com.smartEdu.SmartEduBackend.enums.SchoolStatus;
 import com.smartEdu.SmartEduBackend.repo.PrincipalRepo;
+import com.smartEdu.SmartEduBackend.repo.SchoolRepo;
 import com.smartEdu.SmartEduBackend.repo.UserRepo;
+import com.smartEdu.SmartEduBackend.repo.ZonalEducationOfficeRepo;
+import com.smartEdu.SmartEduBackend.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional
 public class PrincipalService {
+    @Autowired
+    private JwtUtil jwtUtil;
+
+    @Autowired
+    private SchoolRepo schoolRepo;
+
+    @Autowired
+    private ZonalEducationOfficeRepo zonalEducationOfficeRepo;
 
     @Autowired
     private PrincipalRepo principalRepo;
@@ -64,8 +77,10 @@ public class PrincipalService {
                 .address(request.getAddress())
                 .email(request.getEmail())
                 .role(Role.SCHOOL_ADMIN)
+                .name(request.getFullName())
                 .active(true)
                 .profileId(savedPrincipal.getId())
+                .institutionID(request.getSchoolId())
                 .build();
 
         userRepo.save(user);
@@ -73,12 +88,38 @@ public class PrincipalService {
         return savedPrincipal;
     }
 
-    public Principal update(String id, Principal updatedPrincipal) {
-        principalRepo.findById(id)
+    public PrincipalRegisterRequest update(String profileId, PrincipalRegisterRequest updatedPrincipal) {
+        Principal principalOld = principalRepo.findById(profileId)
                 .orElseThrow(() -> new RuntimeException("Principal not found!"));
 
-        updatedPrincipal.setId(id);
-        return principalRepo.save(updatedPrincipal);
+        School school = schoolRepo.findById(updatedPrincipal.getSchoolId()).get();
+        Principal principal = school.getPrincipal();
+        principal.setFullName(updatedPrincipal.getFullName());
+        school.setPrincipal(principal);
+        schoolRepo.save(school);
+
+        principalOld.setFullName(updatedPrincipal.getFullName());
+        principalRepo.save(principalOld);
+
+        User user = userRepo.findByProfileId(profileId);
+        user = User.builder()
+                .id(user.getId())
+                .nic(updatedPrincipal.getNic())
+                .contact(updatedPrincipal.getContact())
+                .username(user.getUsername())
+                .password(user.getPassword())
+                .address(updatedPrincipal.getAddress())
+                .email(updatedPrincipal.getEmail())
+                .role(Role.SCHOOL_ADMIN)
+                .name(updatedPrincipal.getFullName())
+                .active(true)
+                .profileId(profileId)
+                .institutionID(user.getInstitutionID())
+                .build();
+
+        userRepo.save(user);
+
+        return updatedPrincipal;
     }
 
     public void delete(String id) {
@@ -86,12 +127,75 @@ public class PrincipalService {
         principalRepo.deleteById(id);
     }
 
-    public Optional<Principal> findById(String id) {
-        return principalRepo.findById(id);
+    public PrincipalResponse findById(String id) {
+        Principal principal = principalRepo.findById(id).get();
+
+        return PrincipalResponse.builder()
+                .schoolName(schoolRepo.findById(principal.getSchoolId()).get().getSchoolName())
+                .fullName(principal.getFullName())
+                .build();
     }
 
-    public Page<Principal> findAll(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        return principalRepo.findAll(pageable);
+    public PrincipalResponse findByIdToSchool(String token) {
+        String username = jwtUtil.extractUsername(token);
+        User user = userRepo.findByUsername(username).get();
+        Principal principal = principalRepo.findById(user.getProfileId()).get();
+
+        return PrincipalResponse.builder()
+                .schoolName(schoolRepo.findById(principal.getSchoolId()).get().getSchoolName())
+                .fullName(principal.getFullName())
+                .build();
+    }
+
+    public Page<PrincipalResponse> findAll(int page, int size, String token) {
+        String institutionId = jwtUtil.extractInstitutionId(token);
+        ZonalEducationOffice zonalEducationOffice = zonalEducationOfficeRepo.findById(institutionId).orElse(null);
+
+        if (zonalEducationOffice == null) {
+            return Page.empty(); // or throw an exception
+        }
+
+        List<PrincipalResponse> allPrincipals = new ArrayList<>();
+        for (String schoolId : zonalEducationOffice.getSchoolsIds()) {
+            Principal principal = principalRepo.findBySchoolId(schoolId).get();
+            User user = userRepo.findByProfileId(principal.getId());
+            School school = schoolRepo.findById(schoolId).get();
+
+            PrincipalResponse principalRegisterRequest = PrincipalResponse.builder()
+                    .id(principal.getId())
+                    .schoolId(principal.getSchoolId())
+                    .schoolName(school.getSchoolName())
+                    .fullName(principal.getFullName())
+                    .moeId(principal.getMoeId())
+                    .nicFrontImageUrl(principal.getNicFrontImageUrl())
+                    .nicBackImageUrl(principal.getNicBackImageUrl())
+                    .moeIdFrontImageUrl(principal.getMoeIdFrontImageUrl())
+                    .moeIdBackImageUrl(principal.getMoeIdBackImageUrl())
+                    .appointmentLetterUrl(principal.getAppointmentLetterUrl())
+                    .nic(user.getNic())
+                    .contact(user.getContact())
+                    .username(user.getUsername())
+                    .address(user.getAddress())
+                    .email(user.getEmail())
+                    .build();
+
+            allPrincipals.add(principalRegisterRequest);
+        }
+
+        // Manual Pagination Logic
+        int start = page * size;
+        int end = Math.min(start + size, allPrincipals.size());
+
+        if (start > end) {
+            return Page.empty(); // no content for this page
+        }
+
+        List<PrincipalResponse> pagedList = allPrincipals.subList(start, end);
+        return new PageImpl<>(pagedList, PageRequest.of(page, size), allPrincipals.size());
+    }
+
+
+    public User getPrincipalUserAccountDetailsByProfileId(String id) {
+        return userRepo.findByProfileId(id);
     }
 }
