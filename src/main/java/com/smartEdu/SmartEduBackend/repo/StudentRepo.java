@@ -18,4 +18,8 @@ public interface StudentRepo extends MongoRepository<Student, String> {
 
     @Query("{ 'schoolId': ?0, 'gradeId': ?2, 'fullName': { $regex: ?1, $options: 'i' } }")
     List<Student> findAllBySchoolIdAndFullNameAndGradeId(String schoolId,String fullName,String gradeId);
+
+    List<Student> findByClassId(String classId);
+
+    int countBySchoolId(String institutionId);
 }

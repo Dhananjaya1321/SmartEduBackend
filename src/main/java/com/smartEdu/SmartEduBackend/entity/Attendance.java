@@ -20,5 +20,5 @@ public class Attendance {
     private String studentId;
     private String classId;
     private LocalDate date;
-    private boolean present;
+    private AttendanceStatus status;
 }

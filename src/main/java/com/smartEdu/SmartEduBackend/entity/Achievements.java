@@ -20,6 +20,7 @@ import java.time.LocalDate;
 public class Achievements {
     @Id
     private String id;
+    private String studentId;
     private String name;
     private String description;
     private AchievementsLevels level;//zonal level, province level, national level

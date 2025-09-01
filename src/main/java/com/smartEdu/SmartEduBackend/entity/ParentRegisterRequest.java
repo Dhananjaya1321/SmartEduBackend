@@ -10,9 +10,10 @@ import lombok.NoArgsConstructor;
 public class ParentRegisterRequest {
     private String fullName;
     private String nic;
-    private String address;
     private String contact;
+
     private String email;
+    private String studentRegNumber;
 
     private String username;
     private String password;

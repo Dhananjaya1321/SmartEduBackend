@@ -22,14 +22,56 @@ public class ExamAndNICApplicationController {
     private ExamsAndNICApplicationService examsAndNICApplicationService;
 
     @PostMapping
-    public ResponseEntity<ResponseUtil> save(@RequestBody ExamsAndNICApplication examsAndNICApplication) {
-        System.out.println(examsAndNICApplication);
+    public ResponseEntity<ResponseUtil> save(
+            @RequestBody ExamsAndNICApplication examsAndNICApplication,
+            @RequestHeader("Authorization") String authHeader
+    ) {
         try {
+            String token = authHeader.replace("Bearer ", "");
             return ResponseEntity.ok(
                     new ResponseUtil(
                             HttpStatus.OK,
                             "Exam saved successfully.",
-                            examsAndNICApplicationService.save(examsAndNICApplication)
+                            examsAndNICApplicationService.save(examsAndNICApplication,token)
+                    )
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
+    @GetMapping("/{applicationType}")
+    public ResponseEntity<ResponseUtil> findAll(
+            @PathVariable String applicationType,
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            return ResponseEntity.ok(
+                    new ResponseUtil(
+                            HttpStatus.OK,
+                            "Application retrieved successfully",
+                            examsAndNICApplicationService.findAll(applicationType, token)
+                    )
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
+    @GetMapping("/to-parents")
+    public ResponseEntity<ResponseUtil> findAllToParents(
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            return ResponseEntity.ok(
+                    new ResponseUtil(
+                            HttpStatus.OK,
+                            "Application retrieved successfully",
+                            examsAndNICApplicationService.findAllToParents(token)
                     )
             );
         } catch (Exception e) {

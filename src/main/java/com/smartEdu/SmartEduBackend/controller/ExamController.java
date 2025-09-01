@@ -23,10 +23,14 @@ public class ExamController {
     private ExamService examService;
 
     @PostMapping
-    public ResponseEntity<ResponseUtil> save(@RequestBody Exam exam) {
+    public ResponseEntity<ResponseUtil> save(
+            @RequestBody Exam exam,
+            @RequestHeader("Authorization") String authHeader
+    ) {
         try {
+            String token = authHeader.replace("Bearer ", "");
             return ResponseEntity.ok(
-                    new ResponseUtil(HttpStatus.OK, "Exam saved successfully.", examService.save(exam))
+                    new ResponseUtil(HttpStatus.OK, "Exam saved successfully.", examService.save(exam, token))
             );
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
@@ -70,13 +74,17 @@ public class ExamController {
     }
 
     @GetMapping
-    public ResponseEntity<ResponseUtil> getAll(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+    public ResponseEntity<ResponseUtil> getAll(@RequestHeader("Authorization") String authHeader
     ) {
         try {
-            Page<Exam> exams = examService.findAll(page, size);
-            return ResponseEntity.ok(new ResponseUtil(HttpStatus.OK, "Exams retrieved successfully.", exams.getContent()));
+            String token = authHeader.replace("Bearer ", "");
+            return ResponseEntity.ok(
+                    new ResponseUtil(
+                            HttpStatus.OK,
+                            "Exams retrieved successfully.",
+                            examService.findAll(token)
+                    )
+            );
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
             return ExceptionHandler.handleException(e);
@@ -84,10 +92,147 @@ public class ExamController {
     }
 
     @GetMapping("/grade")
-    public ResponseEntity<ResponseUtil> getByGrade(@RequestParam String grade) {
+    public ResponseEntity<ResponseUtil> getByGrade(
+            @RequestParam String grade,
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            return ResponseEntity.ok(
+                    new ResponseUtil(
+                            HttpStatus.OK,
+                            "Exams by grade retrieved successfully.",
+                            examService.findByGrade(grade, token)
+                    )
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
+    @GetMapping("/grade/term-exams/to-parents")
+    public ResponseEntity<ResponseUtil> getByGradeTermExamsToParents(
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            return ResponseEntity.ok(
+                    new ResponseUtil(
+                            HttpStatus.OK,
+                            "Exams by grade retrieved successfully.",
+                            examService.getByGradeTermExamsToParents((token))
+                    )
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
+    @GetMapping("/grade/term-exams/to-teachers")
+    public ResponseEntity<ResponseUtil> getByGradeTermExamsToTeacher(
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            return ResponseEntity.ok(
+                    new ResponseUtil(
+                            HttpStatus.OK,
+                            "Exams by grade retrieved successfully.",
+                            examService.getByGradeTermExamsToTeacher((token))
+                    )
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
+    @GetMapping("/grade/term-exams/my-class/to-teachers/{gradeId}/{year}")
+    public ResponseEntity<ResponseUtil> getByGradeTermExamsToTeacherMyClass(
+            @PathVariable String gradeId,
+            @PathVariable String year,
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            return ResponseEntity.ok(
+                    new ResponseUtil(
+                            HttpStatus.OK,
+                            "Exams by grade retrieved successfully.",
+                            examService.getByGradeTermExamsToTeacherMyClass(gradeId,year, token)
+                    )
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
+    @GetMapping("/grade/al-exams/to-parents")
+    public ResponseEntity<ResponseUtil> getByGradeALExamsToParents() {
         try {
             return ResponseEntity.ok(
-                    new ResponseUtil(HttpStatus.OK, "Exams by grade retrieved successfully.", examService.findByGrade(grade))
+                    new ResponseUtil(
+                            HttpStatus.OK,
+                            "Exams by grade retrieved successfully.",
+                            examService.getByGradeALExamsToParents()
+                    )
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
+    @GetMapping("/grade/ol-exams/to-parents")
+    public ResponseEntity<ResponseUtil> getByGradeOLExamsToParents() {
+        try {
+            return ResponseEntity.ok(
+                    new ResponseUtil(
+                            HttpStatus.OK,
+                            "Exams by grade retrieved successfully.",
+                            examService.getByGradeOLExamsToParents()
+                    )
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
+    @GetMapping("/grade/g5-exams/to-parents")
+    public ResponseEntity<ResponseUtil> getByGradeG5ExamsToParents() {
+        try {
+            return ResponseEntity.ok(
+                    new ResponseUtil(
+                            HttpStatus.OK,
+                            "Exams by grade retrieved successfully.",
+                            examService.getByGradeG5ExamsToParents()
+                    )
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
+    @GetMapping("/check-term-tests/to-teachers/{gradeId}/{year}/{classId}")
+    public ResponseEntity<ResponseUtil> checkExamResults(
+            @PathVariable String gradeId,
+            @PathVariable String year,
+            @PathVariable String classId,
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            return ResponseEntity.ok(
+                    new ResponseUtil(
+                            HttpStatus.OK,
+                            "Exams by grade retrieved successfully.",
+                            examService.checkExamResults(gradeId, year,classId, token)
+                    )
             );
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
@@ -96,7 +241,7 @@ public class ExamController {
     }
 
     @GetMapping("/year")
-    public ResponseEntity<ResponseUtil> getByYear(@RequestParam int year) {
+    public ResponseEntity<ResponseUtil> getByYear(@RequestParam String year) {
         try {
             return ResponseEntity.ok(
                     new ResponseUtil(HttpStatus.OK, "Exams by year retrieved successfully.", examService.findByYear(year))

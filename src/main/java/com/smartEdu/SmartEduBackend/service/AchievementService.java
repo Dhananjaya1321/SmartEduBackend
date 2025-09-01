@@ -28,6 +28,7 @@ public class AchievementService {
             throw new RuntimeException("Student is not exists!");
 
         Achievements achievements = Achievements.builder()
+                .studentId(studentId)
                 .name(achievement.getName())
                 .description(achievement.getDescription())
                 .level(achievement.getLevel())
@@ -54,9 +55,11 @@ public class AchievementService {
     }
 
     public void delete(String achievementId) {
-        achievementRepo.findById(achievementId).orElseThrow(() -> new RuntimeException("Achievement is not exists!"));
-
-        studentRepo.deleteById(achievementId);
+        Achievements achievements = achievementRepo.findById(achievementId).orElseThrow(() -> new RuntimeException("Achievement is not exists!"));
+        Student student = studentRepo.findById(achievements.getStudentId()).get();
+        student.getAchievements().removeIf(a -> a.getId().equals(achievementId));
+        studentRepo.save(student);
+        achievementRepo.deleteById(achievementId);
     }
 
     public List<Achievements> getAchievementsByStudentId(String studentId) {

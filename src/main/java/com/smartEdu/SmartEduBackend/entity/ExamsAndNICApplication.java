@@ -18,6 +18,8 @@ public class ExamsAndNICApplication {
     @Id
     private String id;
     private String studentId;
+    private String schoolId;
+    private String type;
     private ExamsAndNICApplicationStatus status;
 
     private String nicFrontImageUrl;

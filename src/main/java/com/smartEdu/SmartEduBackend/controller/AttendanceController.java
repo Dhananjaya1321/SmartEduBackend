@@ -1,6 +1,7 @@
 package com.smartEdu.SmartEduBackend.controller;
 
 import com.smartEdu.SmartEduBackend.entity.Attendance;
+import com.smartEdu.SmartEduBackend.entity.AttendanceRequest;
 import com.smartEdu.SmartEduBackend.service.AttendanceService;
 import com.smartEdu.SmartEduBackend.util.ExceptionHandler;
 import com.smartEdu.SmartEduBackend.util.ResponseUtil;
@@ -26,21 +27,101 @@ public class AttendanceController {
     private AttendanceService attendanceService;
 
     @PostMapping
-    public ResponseEntity<ResponseUtil> saveAttendance(@RequestBody Attendance attendance) {
+    public ResponseEntity<ResponseUtil> saveAttendance(@RequestBody AttendanceRequest attendance) {
         try {
-            Attendance saved = attendanceService.saveAttendance(attendance);
-            return ResponseEntity.ok(new ResponseUtil(HttpStatus.OK, "Attendance saved successfully", saved));
+            return ResponseEntity.ok(new ResponseUtil(HttpStatus.OK, "Attendance saved successfully", attendanceService.saveAttendance(attendance)));
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
             return ExceptionHandler.handleException(e);
         }
     }
 
-    @GetMapping("/class/today")
-    public ResponseEntity<ResponseUtil> getTodayAttendance(@RequestParam String classId) {
+    @GetMapping("/class/today/{classId}")
+    public ResponseEntity<ResponseUtil> getTodayAttendance(@PathVariable String classId) {
         try {
-            List<Attendance> result = attendanceService.getTodayAttendanceByClass(classId);
-            return ResponseEntity.ok(new ResponseUtil(HttpStatus.OK, "Today's class attendance fetched", result));
+            return ResponseEntity.ok(new ResponseUtil(HttpStatus.OK, "Today's class attendance fetched", attendanceService.getTodayAttendanceByClass(classId)));
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
+    @GetMapping("/class/year/{classId}")
+    public ResponseEntity<ResponseUtil> getAllStudentsAllAttendanceByClassId(@PathVariable String classId) {
+        try {
+            return ResponseEntity.ok(new ResponseUtil(HttpStatus.OK, "Today's class attendance fetched", attendanceService.getAllStudentsAllAttendanceByClassId(classId)));
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
+    @GetMapping("/class/by-student-id/{studentId}")
+    public ResponseEntity<ResponseUtil> getAllAttendanceByStudentId(@PathVariable String studentId) {
+        try {
+            return ResponseEntity.ok(
+                    new ResponseUtil(
+                            HttpStatus.OK,
+                            "Today's class attendance fetched",
+                            attendanceService.getAllAttendanceByStudentId(studentId)
+                    )
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
+    @GetMapping("/class/by-student-id/to-parents")
+    public ResponseEntity<ResponseUtil> getAllAttendanceByStudentIdToParents(
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            return ResponseEntity.ok(
+                    new ResponseUtil(
+                            HttpStatus.OK,
+                            "Today's class attendance fetched",
+                            attendanceService.getAllAttendanceByStudentIdToParents(token)
+                    )
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
+    @GetMapping("/to-principal/{studentId}")
+    public ResponseEntity<ResponseUtil> getAllAttendanceByStudentIdToPrincipal(
+            @PathVariable String studentId
+    ) {
+        try {
+            return ResponseEntity.ok(
+                    new ResponseUtil(
+                            HttpStatus.OK,
+                            "Today's class attendance fetched",
+                            attendanceService.getAllAttendanceByStudentIdToPrincipal(studentId)
+                    )
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
+    @GetMapping("/class/by-student-id/today/to-parents")
+    public ResponseEntity<ResponseUtil> getTodayAttendanceStatus(
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            return ResponseEntity.ok(
+                    new ResponseUtil(
+                            HttpStatus.OK,
+                            "Today's class attendance fetched",
+                            attendanceService.getTodayAttendanceStatus(token)
+                    )
+            );
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
             return ExceptionHandler.handleException(e);

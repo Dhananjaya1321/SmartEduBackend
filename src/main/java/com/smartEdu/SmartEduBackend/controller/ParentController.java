@@ -31,7 +31,8 @@ public class ParentController {
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
             if (e.getMessage().equals("Username is already exists!") ||
-                    e.getMessage().equals("Email is already exists!"))
+                    e.getMessage().equals("Email is already exists!") ||
+                    e.getMessage().equals("Student is not exists!"))
                 return ExceptionHandler.handleCustomException(HttpStatus.NOT_FOUND, e);
             return ExceptionHandler.handleException(e);
         }

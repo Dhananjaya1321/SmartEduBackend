@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -26,13 +27,14 @@ public class HomeworkController {
     @PostMapping
     public ResponseEntity<ResponseUtil> createHomework(@RequestBody Homeworks homework) {
         try {
-            Homeworks saved = homeworkService.save(homework);
-            return ResponseEntity.ok(new ResponseUtil(HttpStatus.CREATED, "Homework saved successfully", saved));
+            Homeworks saved = homeworkService.saveHomework(homework);
+            return ResponseEntity.ok(new ResponseUtil(HttpStatus.OK, "Homework saved successfully", saved));
         } catch (Exception e) {
-            LOGGER.error(e.getMessage());
+            LOGGER.error(e.getMessage(), e);
             return ExceptionHandler.handleException(e);
         }
     }
+
 
     @PutMapping("/{id}")
     public ResponseEntity<ResponseUtil> updateHomework(@PathVariable String id, @RequestBody Homeworks homework) {
@@ -82,6 +84,22 @@ public class HomeworkController {
     public ResponseEntity<ResponseUtil> getHomeworksByClassId(@PathVariable String classId) {
         try {
             return ResponseEntity.ok(new ResponseUtil(HttpStatus.OK, "Class homeworks loaded", homeworkService.getHomeworksByClassId(classId)));
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            if (e.getMessage().equals("Class is not exists!"))
+                return ExceptionHandler.handleCustomException(HttpStatus.NOT_FOUND, e);
+
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
+    @GetMapping("/class/to-parents")
+    public ResponseEntity<ResponseUtil> getHomeworksToParents(
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            return ResponseEntity.ok(new ResponseUtil(HttpStatus.OK, "Class homeworks loaded", homeworkService.getHomeworksToParents(token)));
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
             if (e.getMessage().equals("Class is not exists!"))

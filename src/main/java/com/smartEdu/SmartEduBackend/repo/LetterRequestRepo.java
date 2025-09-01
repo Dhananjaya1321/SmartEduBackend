@@ -8,5 +8,8 @@ import java.util.List;
 
 public interface LetterRequestRepo extends MongoRepository<LetterRequest, String> {
     List<LetterRequest> findByStudentId(String studentId);
+
     List<LetterRequest> findByStatus(LetterStatus status);
+
+    List<LetterRequest> findByStudentIdAndStatus(String studentId, LetterStatus status);
 }

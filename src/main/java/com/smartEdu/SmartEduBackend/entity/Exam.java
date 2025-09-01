@@ -23,8 +23,9 @@ public class Exam {
     private String id;
 
     private String examName;
+    private String institutionId;/*scl id, pmoe id, zmoe id, moe id*/
     private String grade;
-    private int year;
+    private String year;
 
     private ExamLevel level; //school level, zonal level, province level or national level
 

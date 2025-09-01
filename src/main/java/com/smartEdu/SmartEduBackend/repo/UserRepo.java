@@ -25,4 +25,6 @@ public interface UserRepo extends MongoRepository<User, String> {
 
     User findByProfileId(String id);
 
+    int countAllByInstitutionIDAndRole(String institutionId,Role role);
+
 }

@@ -14,6 +14,7 @@ import java.time.LocalTime;
 @Data
 @Builder
 public class ExamTimetableEntry {
+    private String stream;
     private String subject;
     private String paper;
     private LocalDate date;

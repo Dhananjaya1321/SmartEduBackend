@@ -6,5 +6,5 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import java.util.List;
 
 public interface EventRepo extends MongoRepository<Event, String> {
-    List<Event> findByGrades(String grade);
+    List<Event> findByGradesAndSchoolId(String grade,String schoolId);
 }

@@ -1,10 +1,7 @@
 package com.smartEdu.SmartEduBackend.service;
 
 import com.smartEdu.SmartEduBackend.entity.*;
-import com.smartEdu.SmartEduBackend.repo.ClassRoomRepo;
-import com.smartEdu.SmartEduBackend.repo.GradesRepo;
-import com.smartEdu.SmartEduBackend.repo.SchoolRepo;
-import com.smartEdu.SmartEduBackend.repo.StudentRepo;
+import com.smartEdu.SmartEduBackend.repo.*;
 import com.smartEdu.SmartEduBackend.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,7 +20,16 @@ public class StudentService {
     private JwtUtil jwtUtil;
 
     @Autowired
+    private UserRepo userRepo;
+
+    @Autowired
+    private ParentRepo parentRepo;
+
+    @Autowired
     private StudentRepo studentRepo;
+
+    @Autowired
+    private TeacherRepo teacherRepo;
 
     @Autowired
     private GradesRepo gradesRepo;
@@ -66,6 +72,111 @@ public class StudentService {
 
     public Optional<Student> findById(String id) {
         return studentRepo.findById(id);
+    }
+
+
+    public List<StudentResponse> findClassAllStudentsByClassId(String id) {
+        ClassRoom classRoom = classRoomRepo.findById(id).get();
+        List<StudentResponse> studentList = new ArrayList<>();
+        for (String s : classRoom.getStudentIds()) {
+            Student student = studentRepo.findById(s).get();
+
+            StudentResponse studentResponse = StudentResponse
+                    .builder()
+                    .id(student.getId())
+                    .fullNameWithInitials(student.getFullNameWithInitials())
+                    .registrationNumber(student.getRegistrationNumber())
+                    .build();
+            studentList.add(studentResponse);
+        }
+        return studentList;
+    }
+
+    public List<StudentResponse> findMyClassAllStudents(String token) {
+        String username = jwtUtil.extractUsername(token);
+        User user = userRepo.findByUsername(username).get();
+        String profileId = user.getProfileId();
+
+        ClassRoom byClassTeacherId = classRoomRepo.findByClassTeacherId(profileId);
+
+        List<StudentResponse> studentList = new ArrayList<>();
+        for (String s : byClassTeacherId.getStudentIds()) {
+            Student student = studentRepo.findById(s).get();
+
+            StudentResponse studentResponse = StudentResponse
+                    .builder()
+                    .id(student.getId())
+                    .fullNameWithInitials(student.getFullNameWithInitials())
+                    .registrationNumber(student.getRegistrationNumber())
+                    .gradeName(gradesRepo.findById(student.getGradeId()).get().getGradeName())
+                    .gradeId(student.getGradeId())
+                    .className(classRoomRepo.findById(student.getClassId()).get().getClassName())
+                    .classId(student.getClassId())
+                    .build();
+            studentList.add(studentResponse);
+        }
+        return studentList;
+    }
+
+    public StudentResponse getStudentByStudentId(String id, String token) {
+        Student student = studentRepo.findById(id).get();
+
+        String gradeName = gradesRepo.findById(student.getGradeId()).get().getGradeName();
+        String className = classRoomRepo.findById(student.getClassId()).get().getClassName();
+
+        return StudentResponse.builder()
+                .id(student.getId())
+                .entryDate(student.getEntryDate())
+                .fatherName(student.getFatherName())
+                .fullNameWithInitials(student.getFullNameWithInitials())
+                .dateOfBirth(student.getDateOfBirth())
+                .motherName(student.getMotherName())
+                .motherContact(student.getMotherContact())
+                .fullName(student.getFullName())
+                .fatherContact(student.getFatherContact())
+                .address(student.getAddress())
+                .registrationNumber(student.getRegistrationNumber())
+                .gradeId(student.getGradeId())
+                .gradeName(gradeName)
+                .classId(student.getClassId())
+                .className(className)
+                .schoolId(student.getSchoolId())
+                .achievements(student.getAchievements())
+                .build();
+    }
+
+
+    public StudentResponse findStudentToParent(String token) {
+        String username = jwtUtil.extractUsername(token);
+        User user = userRepo.findByUsername(username).get();
+        String profileId = user.getProfileId();
+
+        Parent parent = parentRepo.findById(profileId).get();
+        Student student = studentRepo.findById(parent.getStudentIds().getFirst()).get();
+
+
+        String gradeName = gradesRepo.findById(student.getGradeId()).get().getGradeName();
+        String className = classRoomRepo.findById(student.getClassId()).get().getClassName();
+
+        return StudentResponse.builder()
+                .id(student.getId())
+                .entryDate(student.getEntryDate())
+                .fatherName(student.getFatherName())
+                .fullNameWithInitials(student.getFullNameWithInitials())
+                .dateOfBirth(student.getDateOfBirth())
+                .motherName(student.getMotherName())
+                .motherContact(student.getMotherContact())
+                .fullName(student.getFullName())
+                .fatherContact(student.getFatherContact())
+                .address(student.getAddress())
+                .registrationNumber(student.getRegistrationNumber())
+                .gradeId(student.getGradeId())
+                .gradeName(gradeName)
+                .classId(student.getClassId())
+                .className(className)
+                .schoolId(student.getSchoolId())
+                .achievements(student.getAchievements())
+                .build();
     }
 
     public List<StudentResponse> findAll(int page, int size, String token) {
