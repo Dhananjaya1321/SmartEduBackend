@@ -1,6 +1,5 @@
 package com.smartEdu.SmartEduBackend.entity;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,14 +14,14 @@ import java.util.List;
 @NoArgsConstructor
 @Data
 @Builder
-@Document(collection = "zonalMinistryOfEducation")
-public class ZonalMinistryOfEducation {
+@Document(collection = "provincial_education_offices")
+public class ProvincialEducationOffice {
     @Id
     private String id;
 
-    private String district;
-    private String zonal;
-    private String address;
+    private String province;
+    private String officeAddress;
+    private String name;
 
-    private List<School> schools = new ArrayList<>();
+    private List<ZonalEducationOffice> zonalOffices = new ArrayList<>();
 }

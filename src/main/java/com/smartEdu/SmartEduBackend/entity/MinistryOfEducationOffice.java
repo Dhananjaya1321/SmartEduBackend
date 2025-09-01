@@ -15,11 +15,12 @@ import java.util.List;
 @NoArgsConstructor
 @Data
 @Builder
-@Document(collection = "ministryOfEducation")
-public class MinistryOfEducation {
+@Document(collection = "ministry_of_education_office")
+public class MinistryOfEducationOffice {
     @Id
     private String id;
+    private String officeAddress;
+    private String name;
 
-    private String name = "Ministry of Education";
-    private List<ProvincialMinistryOfEducation> provincialOffices = new ArrayList<>();
+    private List<ProvincialEducationOffice> provincialOffices = new ArrayList<>();
 }

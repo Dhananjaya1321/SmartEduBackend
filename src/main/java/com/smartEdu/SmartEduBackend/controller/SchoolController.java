@@ -29,7 +29,7 @@ public class SchoolController {
         try {
             return ResponseEntity.ok(
                     new ResponseUtil(HttpStatus.OK, "School and Principal saved successfully.",
-                            service.saveWithPrincipal(request))
+                            service.saveSchoolWithPrincipal(request))
             );
         } catch (Exception e) {
             LOGGER.error(e.getMessage());

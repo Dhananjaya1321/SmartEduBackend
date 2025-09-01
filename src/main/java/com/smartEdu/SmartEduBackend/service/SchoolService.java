@@ -1,14 +1,12 @@
 package com.smartEdu.SmartEduBackend.service;
 
-import com.smartEdu.SmartEduBackend.entity.Principal;
-import com.smartEdu.SmartEduBackend.entity.School;
-import com.smartEdu.SmartEduBackend.entity.SchoolRequest;
+import com.smartEdu.SmartEduBackend.entity.*;
 
-import com.smartEdu.SmartEduBackend.entity.User;
 import com.smartEdu.SmartEduBackend.enums.Role;
 import com.smartEdu.SmartEduBackend.repo.PrincipalRepo;
 import com.smartEdu.SmartEduBackend.repo.SchoolRepo;
 import com.smartEdu.SmartEduBackend.repo.UserRepo;
+import com.smartEdu.SmartEduBackend.repo.ZonalEducationOfficeRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -31,9 +29,12 @@ public class SchoolService {
     private PrincipalRepo principalRepo;
 
     @Autowired
+    private ZonalEducationOfficeRepo zonalEducationOfficeRepo;
+
+    @Autowired
     private BCryptPasswordEncoder passwordEncoder;
 
-    public School saveWithPrincipal(SchoolRequest request) {
+    public School saveSchoolWithPrincipal(SchoolRequest request) {
         // Check if username already exists
         Optional<User> existingUserByUsername = userRepo.findByUsername(request.getUsername());
         if (existingUserByUsername.isPresent())
@@ -44,21 +45,25 @@ public class SchoolService {
         if (existingUserByEmail.isPresent())
             throw new RuntimeException("Email is already exists!");
 
-        // Step 1: Save principal first
         Principal principal = request.getPrincipal();
         Principal savedPrincipal = principalRepo.save(principal);
 
-        // Step 2: Save school with principal
         School school = request.getSchool();
         school.setSchoolNumber(generateSchoolNumber());
         school.setPrincipal(savedPrincipal);
         School savedSchool = schoolRepo.save(school);
 
-        // Step 3: Update principal with schoolId
+        ZonalEducationOffice zonal = zonalEducationOfficeRepo.findByZonalAndDistrictAndProvince(
+                savedSchool.getZonal(),
+                savedSchool.getDistrict(),
+                savedSchool.getProvince()
+        );
+        zonal.getSchools().add(savedSchool);
+        zonalEducationOfficeRepo.save(zonal);
+
         savedPrincipal.setSchoolId(savedSchool.getId());
         principalRepo.save(savedPrincipal);
 
-        // Step 4: Create user for principal
         User user = User.builder()
                 .nic(request.getNic())
                 .contact(request.getContact())
