@@ -4,11 +4,13 @@ import com.smartEdu.SmartEduBackend.entity.Attendance;
 import com.smartEdu.SmartEduBackend.repo.AttendanceRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
 
 @Service
+@Transactional
 public class AttendanceService {
 
     @Autowired

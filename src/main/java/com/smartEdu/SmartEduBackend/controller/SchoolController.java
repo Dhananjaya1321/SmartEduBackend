@@ -2,12 +2,14 @@ package com.smartEdu.SmartEduBackend.controller;
 
 import com.smartEdu.SmartEduBackend.entity.School;
 import com.smartEdu.SmartEduBackend.entity.SchoolRequest;
+import com.smartEdu.SmartEduBackend.enums.SchoolStatus;
 import com.smartEdu.SmartEduBackend.service.SchoolService;
 import com.smartEdu.SmartEduBackend.util.ExceptionHandler;
 import com.smartEdu.SmartEduBackend.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -55,10 +57,28 @@ public class SchoolController {
         }
     }
 
-    @DeleteMapping("/{id}")
-    private ResponseEntity<ResponseUtil> delete(@PathVariable String id) {
+    @PutMapping("/update-school-status/{id}")
+    private ResponseEntity<ResponseUtil> updateSchoolStatus(@PathVariable String id, @Param("status") SchoolStatus status) {
         try {
-            service.delete(id);
+            return ResponseEntity.ok(
+                    new ResponseUtil(HttpStatus.OK, "School updated successfully.", service.updateSchoolStatus(id, status))
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            if (e.getMessage().equals("School not found!"))
+                return ExceptionHandler.handleCustomException(HttpStatus.NOT_FOUND, e);
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    private ResponseEntity<ResponseUtil> delete(
+            @PathVariable String id ,
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            service.delete(id,token);
             return ResponseEntity.ok(
                     new ResponseUtil(HttpStatus.OK, "School deleted successfully.", null)
             );
@@ -83,14 +103,29 @@ public class SchoolController {
         }
     }
 
-    @GetMapping
-    private ResponseEntity<ResponseUtil> findAll(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+    @GetMapping("/pending-schools")
+    private ResponseEntity<ResponseUtil> findAllPendingSchools(
+            @RequestHeader("Authorization") String authHeader
     ) {
         try {
+            String token = authHeader.replace("Bearer ", "");
             return ResponseEntity.ok(
-                    new ResponseUtil(HttpStatus.OK, "Schools retrieved successfully.", service.findAll(page, size))
+                    new ResponseUtil(HttpStatus.OK, "Schools retrieved successfully.", service.findAllPendingSchools(token))
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
+    @GetMapping("/approved-schools")
+    private ResponseEntity<ResponseUtil> findAllApprovedSchools(
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            return ResponseEntity.ok(
+                    new ResponseUtil(HttpStatus.OK, "Schools retrieved successfully.", service.findAllApprovedSchools(token))
             );
         } catch (Exception e) {
             LOGGER.error(e.getMessage());

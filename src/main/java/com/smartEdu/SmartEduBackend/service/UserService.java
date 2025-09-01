@@ -4,22 +4,25 @@ import com.smartEdu.SmartEduBackend.entity.CustomUserDetails;
 import com.smartEdu.SmartEduBackend.entity.User;
 import com.smartEdu.SmartEduBackend.repo.UserRepo;
 import com.smartEdu.SmartEduBackend.util.EmailUtil;
+import com.smartEdu.SmartEduBackend.util.JwtUtil;
 import com.smartEdu.SmartEduBackend.util.PasswordGeneratorUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 
 @Service
+@Transactional
 public class UserService {
+    @Autowired
+    private JwtUtil jwtUtil;
+
     @Autowired
     private UserRepo userRepo;
 
@@ -30,7 +33,7 @@ public class UserService {
     private EmailUtil emailUtil;
 
 
-    public User save(User user) {
+    public User save(User user, String token) {
         // Check if username already exists
         Optional<User> existingUserByUsername = userRepo.findByUsername(user.getUsername());
         if (existingUserByUsername.isPresent())
@@ -49,6 +52,10 @@ public class UserService {
 
         // Hash the password
         user.setPassword(passwordEncoder.encode(generatedPassword));
+
+        // Extract institution ID from token
+        String institutionId = jwtUtil.extractInstitutionId(token);
+        user.setInstitutionID(institutionId);
 
         // Save user
         User savedUser = userRepo.save(user);
@@ -74,6 +81,7 @@ public class UserService {
         targetUserOpt.orElseThrow(() -> new RuntimeException("User is not exists!"));
 
         user.setId(id);
+        user.setInstitutionID(targetUserOpt.get().getInstitutionID());
         return userRepo.save(user);
     }
 
@@ -94,11 +102,39 @@ public class UserService {
         return userRepo.findById(id);
     }
 
-    public List<User> findAllByRole() {
+    public List<User> findAllByRole(String token) {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String currentRole = extractRoleFromUserDetails(userDetails);
-        return userRepo.findAllByRoleStartingWith(getManagedRolePrefix(currentRole));
+
+        // Extract institution ID from token
+        String institutionId = jwtUtil.extractInstitutionId(token);
+
+        return userRepo.findAllByRoleStartingWithAndInstitutionID(getManagedRolePrefix(currentRole), institutionId);
     }
+
+
+    public String checkEmailAndSendOTP(String email) {
+        // Try finding user by email or username
+        User user = userRepo.findByEmail(email).orElseThrow(() -> new RuntimeException("Incorrect email"));
+
+        // Generate a 6-digit OTP
+        String otp = String.valueOf((int) (Math.random() * 900000) + 100000);
+
+        // Send password email
+        String subject = "SmartEdu Password Reset OTP";
+        String message = "Hello " + user.getUsername() + ",\n\n" +
+                "You have requested to reset your password. Use the following OTP to proceed:\n\n" +
+                "🔐 OTP: " + otp + "\n\n" +
+                "Please do not share this code with anyone. It will expire soon for security reasons.\n\n" +
+                "If you did not request this, please ignore this email.\n\n" +
+                "Regards,\nSmartEdu Team";
+
+        // Send the email
+        emailUtil.sendEmail(user.getEmail(), subject, message);
+
+        return otp;
+    }
+
 
     private String extractRoleFromUserDetails(UserDetails userDetails) {
         if (userDetails instanceof CustomUserDetails) {
@@ -137,4 +173,19 @@ public class UserService {
             default -> "";      // Employees or other roles have no prefix
         };
     }
+
+    public String updatePassword(String email, String newPassword) {
+        Optional<User> userOptional = userRepo.findByEmail(email);
+        if (userOptional.isEmpty()) {
+            throw new RuntimeException("User not found with given email");
+        }
+
+        User user = userOptional.get();
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepo.save(user);
+
+        return "Password updated for " + email;
+    }
+
+
 }

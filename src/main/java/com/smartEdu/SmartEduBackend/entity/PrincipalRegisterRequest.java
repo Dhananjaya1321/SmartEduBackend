@@ -2,12 +2,14 @@ package com.smartEdu.SmartEduBackend.entity;
 
 import com.smartEdu.SmartEduBackend.enums.Role;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class PrincipalRegisterRequest {
     // Principal fields
     private String schoolId;

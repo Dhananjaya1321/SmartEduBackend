@@ -22,6 +22,8 @@ public class JwtUtil {
     public String generateToken(CustomUserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("role", userDetails.getRole());
+        claims.put("institutionId", userDetails.getInstitutionId());
+
         return Jwts.builder()
                 .claims(claims)
                 .subject(userDetails.getUsername())
@@ -38,6 +40,15 @@ public class JwtUtil {
                 .parseSignedClaims(token)
                 .getPayload()
                 .getSubject();
+    }
+
+    public String extractInstitutionId(String token) {
+        return Jwts.parser()
+                .verifyWith(Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8)))
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .get("institutionId", String.class);
     }
 
     public boolean validateToken(String token, UserDetails userDetails) {

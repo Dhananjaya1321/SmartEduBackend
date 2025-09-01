@@ -21,13 +21,17 @@ public class StudentController {
     private StudentService service;
 
     @PostMapping
-    private ResponseEntity<ResponseUtil> save(@RequestBody Student student) {
+    private ResponseEntity<ResponseUtil> save(
+            @RequestBody Student student,
+            @RequestHeader("Authorization") String authHeader
+    ) {
         try {
+            String token = authHeader.replace("Bearer ", "");
             return ResponseEntity.ok(
                     new ResponseUtil(
                             HttpStatus.OK,
                             "Student saved successfully.",
-                            service.save(student)
+                            service.save(student, token)
                     )
             );
         } catch (Exception e) {
@@ -85,11 +89,16 @@ public class StudentController {
     @GetMapping
     private ResponseEntity<ResponseUtil> findAll(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(defaultValue = "10") int size,
+            @RequestHeader("Authorization") String authHeader
     ) {
         try {
+            String token = authHeader.replace("Bearer ", "");
             return ResponseEntity.ok(
-                    new ResponseUtil(HttpStatus.OK, "Students retrieved successfully.", service.findAll(page, size)
+                    new ResponseUtil(
+                            HttpStatus.OK,
+                            "Students retrieved successfully.",
+                            service.findAll(page, size, token)
                     )
             );
         } catch (Exception e) {
@@ -99,11 +108,37 @@ public class StudentController {
     }
 
     @GetMapping("/registration-number")
-    private ResponseEntity<ResponseUtil> generateRegistrationNumber(@RequestParam String schoolId) {
+    private ResponseEntity<ResponseUtil> generateRegistrationNumber(
+            @RequestHeader("Authorization") String authHeader
+    ) {
         try {
-            String regNumber = service.generateRegistrationNumber(schoolId);
+            String token = authHeader.replace("Bearer ", "");
+            String regNumber = service.generateRegistrationNumber(token);
             return ResponseEntity.ok(
                     new ResponseUtil(HttpStatus.OK, "Loaded successfully.", regNumber)
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            if (e.getMessage().equals("School not found"))
+                return ExceptionHandler.handleCustomException(HttpStatus.NOT_FOUND, e);
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
+    @GetMapping("/search/{inputValue}/{selectedApplication}")
+    private ResponseEntity<ResponseUtil> searchStudentsByName(
+            @RequestHeader("Authorization") String authHeader,
+            @PathVariable String inputValue,
+            @PathVariable String selectedApplication
+    ) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            return ResponseEntity.ok(
+                    new ResponseUtil(
+                            HttpStatus.OK,
+                            "Loaded successfully.",
+                            service.searchStudentsByName(token,inputValue,selectedApplication)
+                    )
             );
         } catch (Exception e) {
             LOGGER.error(e.getMessage());

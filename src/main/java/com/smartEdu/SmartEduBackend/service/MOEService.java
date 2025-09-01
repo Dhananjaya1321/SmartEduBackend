@@ -14,11 +14,13 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class MOEService {
     @Autowired
     private final UserRepo userRepo;
@@ -64,7 +66,7 @@ public class MOEService {
                 .contact(request.getContact())
                 .address(request.getAddress())
                 .active(true)
-                .profileId(savedOffice.getId())
+                .institutionID(savedOffice.getId())
                 .build();
 
         user = userRepo.save(user);

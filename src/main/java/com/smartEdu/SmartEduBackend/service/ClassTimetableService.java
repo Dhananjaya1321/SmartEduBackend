@@ -1,20 +1,37 @@
 package com.smartEdu.SmartEduBackend.service;
 
+import com.smartEdu.SmartEduBackend.entity.ClassRoom;
 import com.smartEdu.SmartEduBackend.entity.ClassTimetable;
+import com.smartEdu.SmartEduBackend.repo.ClassRoomRepo;
 import com.smartEdu.SmartEduBackend.repo.ClassTimetableRepo;
+import com.smartEdu.SmartEduBackend.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional
 public class ClassTimetableService {
+    @Autowired
+    private JwtUtil jwtUtil;
+
+    @Autowired
+    private ClassRoomRepo classRoomRepo;
 
     @Autowired
     private ClassTimetableRepo classTimetableRepo;
 
-    public ClassTimetable save(ClassTimetable timetable) {
+    public ClassTimetable save(ClassTimetable timetable, String token) {
+        Optional<ClassTimetable> classTimetable = classTimetableRepo.findByClassId(timetable.getClassId());
+        if (classTimetable.isPresent())
+            throw new RuntimeException("Timetable is already exists!");
+
+        String institutionId = jwtUtil.extractInstitutionId(token);
+        timetable.setSchoolId(institutionId);
         return classTimetableRepo.save(timetable);
     }
 
@@ -41,7 +58,13 @@ public class ClassTimetableService {
         return classTimetableRepo.findAll();
     }
 
-    public List<ClassTimetable> findByGrade(String grade) {
-        return classTimetableRepo.findByGrade(grade);
+    public List<ClassTimetable> findAllTimetablesByGradeId(String gradeId) {
+        List<ClassTimetable> classTimetables = new ArrayList<>();
+        List<ClassRoom> classByGradeName = classRoomRepo.findByGradeId(gradeId);
+        for (ClassRoom c : classByGradeName) {
+            Optional<ClassTimetable> classTimetable = classTimetableRepo.findByClassId(c.getId());
+            classTimetable.ifPresent(classTimetables::add);
+        }
+        return classTimetables;
     }
 }

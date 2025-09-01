@@ -1,9 +1,6 @@
 package com.smartEdu.SmartEduBackend.controller;
 
-import com.smartEdu.SmartEduBackend.entity.ProvincialEducationOffice;
-import com.smartEdu.SmartEduBackend.entity.ProvincialEducationOfficeRequest;
-import com.smartEdu.SmartEduBackend.entity.ZonalEducationOffice;
-import com.smartEdu.SmartEduBackend.entity.ZonalEducationOfficeRequest;
+import com.smartEdu.SmartEduBackend.entity.*;
 import com.smartEdu.SmartEduBackend.service.PMOEService;
 import com.smartEdu.SmartEduBackend.service.ZMOEService;
 import com.smartEdu.SmartEduBackend.util.ExceptionHandler;
@@ -39,7 +36,36 @@ public class ZMOEController {
         }
     }
 
-    @GetMapping
+    @PostMapping("/create-new-admin/{id}")
+    public ResponseEntity<ResponseUtil> createNewAdminForZonalEducationOffice(@PathVariable String id, @RequestBody ZonalEducationOfficeRequest request) {
+        try {
+            User user = zmoeService.createNewAdminForZonalEducationOffice(id,request);
+            return ResponseEntity.ok(new ResponseUtil(HttpStatus.OK, "Admin created successfully", user));
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            if (e.getMessage().equals("Username is already exists!") ||
+                    e.getMessage().equals("Email is already exists!"))
+                return ExceptionHandler.handleCustomException(HttpStatus.NOT_FOUND, e);
+
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
+    @PutMapping("/{id}")
+    private ResponseEntity<ResponseUtil> updateZMOE(@PathVariable String id, @RequestBody ZonalEducationOffice office) {
+        try {
+            return ResponseEntity.ok(
+                    new ResponseUtil(HttpStatus.OK, "Office updated successfully.", zmoeService.updateZMOE(id, office))
+            );
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            if (e.getMessage().equals("Office not found!"))
+                return ExceptionHandler.handleCustomException(HttpStatus.NOT_FOUND, e);
+            return ExceptionHandler.handleException(e);
+        }
+    }
+
+    @GetMapping("/admins")
     private ResponseEntity<ResponseUtil> findAll(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size

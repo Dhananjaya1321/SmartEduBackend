@@ -20,8 +20,6 @@ import java.util.List;
 public class Student {
     @Id
     private String id;
-    private String schoolId;
-    private String classId;
 
     // Basic Info
     private LocalDate entryDate;
@@ -38,7 +36,9 @@ public class Student {
 
     // Other Info
     private String registrationNumber;
-    private String grade;
+    private String gradeId;
+    private String schoolId;
+    private String classId;
 
     private List<Achievements> achievements = new ArrayList<>();
 }
