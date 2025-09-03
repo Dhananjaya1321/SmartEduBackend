@@ -232,7 +232,11 @@ public class SchoolService {
 
         List<String> olResults = new ArrayList<>();
 
-        NationalLevelExamsResults byIndexNumberAndExamNameAndYear = nationalLevelExamsResultsRepo.findByIndexNumberAndExamNameAndYear(request.getIndexNumber(), "G.C.E. (O/L) Examination", request.getYear());
+        NationalLevelExamsResults byIndexNumberAndExamNameAndYear = nationalLevelExamsResultsRepo.findByIndexNumberAndExamNameAndYear(
+                        request.getIndexNumber(),
+                        "G.C.E. (O/L) Examination",
+                        request.getYear()
+                );
         if (!byIndexNumberAndExamNameAndYear.getStudentId().equals(student.getId()))
             throw new RuntimeException("The index number don't match with your index number!");
 
