@@ -15,7 +15,7 @@ public interface SchoolRepo extends MongoRepository<School, String> {
 
     Page<School> findAllByStatus(Pageable pageable);
 
-    Optional<School> findByProvinceAndDistrictAndZonal(String province,String district,String zonal);
+    List<School> findByProvinceAndDistrictAndZonal(String province,String district,String zonal);
 
     @Query("{ 'province': ?1, 'schoolName': { $regex: ?0, $options: 'i' } }")
     List<School> findBySchoolNameAndProvince(String schoolName,String province);

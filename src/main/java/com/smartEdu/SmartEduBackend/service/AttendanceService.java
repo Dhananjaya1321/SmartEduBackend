@@ -184,10 +184,10 @@ public class AttendanceService {
             attendanceResponses.add(AttendanceResponse.builder()
                     .studentId(s.getId())
                     .studentName(s.getFullNameWithInitials())
-                    .totalDays(totalDays)
+                    .totalDays((totalAbsent+totalAttended))
                     .totalAttended(totalAttended)
                     .totalAbsent(totalAbsent)
-                    .attendedRate(((double) totalAttended / totalDays) * 100)
+                    .attendedRate(((double) totalAttended / (totalAbsent+totalAttended)) * 100)
                     .build());
         }
 
