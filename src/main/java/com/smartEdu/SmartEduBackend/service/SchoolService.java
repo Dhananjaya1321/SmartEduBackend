@@ -191,7 +191,7 @@ public class SchoolService {
         return String.format("SCH-%05d", nextNumber);
     }
 
-    public Optional<School> getAllSchoolsByProvinceAndDistrictAndZonal(String province, String district, String zonal) {
+    public List<School> getAllSchoolsByProvinceAndDistrictAndZonal(String province, String district, String zonal) {
         return schoolRepo.findByProvinceAndDistrictAndZonal(province, district, zonal);
     }
 
@@ -233,10 +233,10 @@ public class SchoolService {
         List<String> olResults = new ArrayList<>();
 
         NationalLevelExamsResults byIndexNumberAndExamNameAndYear = nationalLevelExamsResultsRepo.findByIndexNumberAndExamNameAndYear(
-                        request.getIndexNumber(),
-                        "G.C.E. (O/L) Examination",
-                        request.getYear()
-                );
+                request.getIndexNumber(),
+                "G.C.E. (O/L) Examination",
+                request.getYear()
+        );
         if (!byIndexNumberAndExamNameAndYear.getStudentId().equals(student.getId()))
             throw new RuntimeException("The index number don't match with your index number!");
 
@@ -322,7 +322,28 @@ public class SchoolService {
 
         Parent parent = parentRepo.findById(profileId).get();
         Student student = studentRepo.findById(parent.getStudentIds().getFirst()).get();
-        return alAdmissionRepo.findByStudentId(student.getId());
+        List<ALAdmission> byStudentId = alAdmissionRepo.findByStudentId(student.getId());
+        int cutoffScore = 0;
+        for (ALAdmission a : byStudentId) {
+            String schoolId = a.getSchoolId();
+            List<ALAdmission> schoolIdAndStatusAndYear = alAdmissionRepo.findBySchoolIdAndStatusAndYear(
+                    schoolId,
+                    ALAdmissionStatus.SCHOOL_ACCEPTED,
+                    a.getYear()
+            );
+            for (int i = 0; i < schoolIdAndStatusAndYear.size(); i++) {
+                int totalScore = schoolIdAndStatusAndYear.get(i).getTotalScore();
+                if (cutoffScore != 0) {
+                    if (totalScore < cutoffScore) {
+                        cutoffScore = totalScore;
+                    }
+                } else {
+                    cutoffScore=totalScore;
+                }
+            }
+            a.setCutOffScore(cutoffScore);
+        }
+        return byStudentId;
     }
 
     public List<ALAdmission> getAllALAdmissionsToSchools(String token) {
@@ -364,7 +385,7 @@ public class SchoolService {
     public ALAdmission acceptTheALApplicationStudent(String id) {
         ALAdmission alAdmission = alAdmissionRepo.findById(id).get();
         List<ALAdmission> byStudentId = alAdmissionRepo.findByStudentId(alAdmission.getStudentId());
-        for (ALAdmission a :byStudentId){
+        for (ALAdmission a : byStudentId) {
             if (a.getStatus().equals(ALAdmissionStatus.STUDENT_ACCEPTED)) {
                 throw new RuntimeException("You already accept the school");
             }
